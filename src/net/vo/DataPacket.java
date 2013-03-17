@@ -1,6 +1,6 @@
 package net.vo;
 
-// ·¢ËÍµÄÊı¾İ±¨
+// æ•°æ®åŒ…
 public class DataPacket {
 	private String ip;
 	private String port;
