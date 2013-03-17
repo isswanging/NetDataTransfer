@@ -3,7 +3,10 @@ package net.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,44 +19,58 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import net.conf.SystemConf;
+import net.listen.GetBroadcastPacket;
 import net.util.NetDomain;
 import net.vo.Host;
 
-// �����棬�������
+// 程序入口
 public class MainWindow {
-	// �����б�
-	ArrayList<Host> hostList = new ArrayList<Host>();
-	// ������
 	int hostNumber = 1;
 
 	public MainWindow() {
-		// ���˿�
+		// 检查端口
 		preCheck();
-		// ���������߳�
+		// 建立监听
 		listen();
-		// ��¼ϵͳ
+		// 主机登录
 		login();
-		// ��ʼ������
+		// 建立界面
 		initUI();
 
 	}
 
 	private void listen() {
-
+		// 监听广播
+		new Thread(new GetBroadcastPacket()).start();
 	}
 
 	private void login() {
-		// 广播登录信息
 		Host host = NetDomain.getHost();
+		try {
+			// 广播登录信息
+			String message = host.getUserName() + "@" + host.getGroupName()
+					+ "@" + host.getHostName() + "@" + host.getIp();
+			byte[] info = message.getBytes();
+
+			DatagramSocket broadSocket = new DatagramSocket();// 用于广播信息
+			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
+					InetAddress.getByName(SystemConf.broadcastIP),
+					SystemConf.broadcastPort);
+
+			// 广播信息并且寻找上线主机交换信息
+			NetDomain.broadcast(broadSocket,broadPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void initUI() {
-		JFrame jf = new JFrame("�ɸ�");
-		jf.setSize(410, 360);
+		JFrame jf = new JFrame("飞鸽");
+		jf.setSize(410, 350);
 		jf.setVisible(true);
 		jf.setResizable(false);
 
-		// ������ʾ
+		// 居中
 		int wide = jf.getWidth();
 		int high = jf.getHeight();
 		Toolkit kit = Toolkit.getDefaultToolkit();
@@ -63,14 +80,14 @@ public class MainWindow {
 		jf.setLocation(screenWidth / 2 - wide / 2, screenHeight / 2 - high / 2);
 		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		// �ϲ����
+		// 上部
 		JPanel top = new JPanel();
 		JPanel count = new JPanel();
 		JPanel list = new JPanel();
 		JLabel number = new JLabel();
 
-		// �����û��б�
-		String[] columnNames = { "�û���", "������", "������", "IP��ַ" };
+		// 主机列表
+		String[] columnNames = { "用户名", "工作组", "主机名", "IP地址" };
 		Object[][] content = new Object[][] {};
 		JTable userList = new JTable(content, columnNames);
 		JScrollPane jsTable = new JScrollPane(userList);
@@ -79,11 +96,11 @@ public class MainWindow {
 		userList.setRequestFocusEnabled(false);
 		jsTable.setViewportView(userList);
 
-		// ͳ��
-		JLabel label = new JLabel("��������:", SwingConstants.CENTER);
+		// 统计部分
+		JLabel label = new JLabel("联机人数:", SwingConstants.CENTER);
 		number.setText(String.valueOf(hostNumber));
 		number.setHorizontalAlignment(JLabel.CENTER);
-		JButton refresh = new JButton("ˢ��");
+		JButton refresh = new JButton("刷新");
 
 		count.setLayout(new BorderLayout());
 		count.add(label, BorderLayout.NORTH);
@@ -93,7 +110,7 @@ public class MainWindow {
 		top.add(list);
 		top.add(count);
 
-		// �в������
+		// 中部的文本框
 		JPanel middle = new JPanel();
 		JTextArea text = new JTextArea(7, 35);
 		text.setLineWrap(true);
@@ -102,12 +119,12 @@ public class MainWindow {
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		middle.add(jsText, BorderLayout.CENTER);
 
-		// �²����
+		// 底部
 		JPanel bottom = new JPanel();
-		JButton send = new JButton("����");
+		JButton send = new JButton("发送");
 		bottom.add(send, BorderLayout.CENTER);
 
-		// ���岼��
+		// 总布局
 		jf.setLayout(new BorderLayout());
 		jf.add(top, BorderLayout.NORTH);
 		jf.add(middle, BorderLayout.CENTER);
@@ -115,13 +132,12 @@ public class MainWindow {
 	}
 
 	private void preCheck() {
-		// ���˿ڱ�ռ�����˳�
 		if (NetDomain.check().equals(SystemConf.ERROR)) {
-			System.out.println("ͨ�Ŷ˿ڱ�ռ��");
+			System.out.println("端口被占用。");
 			System.exit(0);
 		}
 		if (NetDomain.check().equals(SystemConf.FAIL)) {
-			System.out.println("�����������");
+			System.out.println("输入输出异常。");
 			System.exit(0);
 		}
 	}
