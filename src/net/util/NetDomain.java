@@ -1,6 +1,7 @@
 package net.util;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -45,7 +46,7 @@ public class NetDomain {
 			host.setHostName(hostName);
 			host.setIp(ip);
 			host.setUserName(userName);
-			
+
 			return host;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -53,4 +54,15 @@ public class NetDomain {
 		}
 
 	}
+
+	// 广播消息并且寻找线上主机交换消息
+	public static void broadcast(DatagramSocket broadSocket,
+			DatagramPacket broadPacket) {
+		try {
+			broadSocket.send(broadPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

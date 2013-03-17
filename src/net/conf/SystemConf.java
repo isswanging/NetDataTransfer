@@ -14,6 +14,12 @@ public class SystemConf {
 	public final static String SUCCESS = "success";
 
 	public final static String ERROR = "error";
-	
+
 	public final static String FAIL = "IOException";
+
+	// 广播IP
+	public static final String broadcastIP = "255.255.255.255";
+
+	// 广播端口
+	public static final int broadcastPort = 232;
 }
