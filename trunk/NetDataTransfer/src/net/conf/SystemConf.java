@@ -1,16 +1,16 @@
 package net.conf;
 
 public class SystemConf {
-	// ·¢ËÍÆÕÍ¨ÏûÏ¢ËùÓÃ¶Ë¿Ú
+	// å‘é€æ™®é€šä¿¡æ¯ç«¯å£
 	public final static int textPort = 80;
 
-	// ·¢ËÍÎÄ¼şËùÓÃ¶Ë¿Ú
+	// å‘é€æ–‡ä»¶ç«¯å£
 	public final static int filePort = 80;
 
-	// ·¢ËÍÎÄ¼ş¼ĞËùÓÃ¶Ë¿Ú
+	// å‘é€æ–‡ä»¶å¤¹ç«¯å£
 	public final static int folerPort = 800;
 
-	// ÏµÍ³ĞÅÏ¢
+	// ç³»ç»Ÿä¿¡æ¯æ ‡è¯†
 	public final static String SUCCESS = "success";
 
 	public final static String ERROR = "error";

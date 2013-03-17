@@ -3,6 +3,7 @@ package net.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,19 +17,23 @@ import javax.swing.WindowConstants;
 
 import net.conf.SystemConf;
 import net.util.NetDomain;
+import net.vo.Host;
 
-// Ö÷½çÃæ£¬³ÌĞòÈë¿Ú
+// ï¿½ï¿½ï¿½ï¿½ï¿½æ£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 public class MainWindow {
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
+	ArrayList<Host> hostList = new ArrayList<Host>();
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	int hostNumber = 1;
 
 	public MainWindow() {
-		// ¼ì²é¶Ë¿Ú
+		// ï¿½ï¿½ï¿½Ë¿ï¿½
 		preCheck();
-		// Æô¶¯¼àÌıÏß³Ì
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
 		listen();
-		// µÇÂ¼ÏµÍ³
+		// ï¿½ï¿½Â¼ÏµÍ³
 		login();
-		// ³õÊ¼»¯½çÃæ
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		initUI();
 
 	}
@@ -38,16 +43,17 @@ public class MainWindow {
 	}
 
 	private void login() {
-
+		// å¹¿æ’­ç™»å½•ä¿¡æ¯
+		Host host = NetDomain.getHost();
 	}
 
 	private void initUI() {
-		JFrame jf = new JFrame("·É¸ë");
+		JFrame jf = new JFrame("ï¿½É¸ï¿½");
 		jf.setSize(410, 360);
 		jf.setVisible(true);
 		jf.setResizable(false);
 
-		// ¾ÓÖĞÏÔÊ¾
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 		int wide = jf.getWidth();
 		int high = jf.getHeight();
 		Toolkit kit = Toolkit.getDefaultToolkit();
@@ -57,14 +63,14 @@ public class MainWindow {
 		jf.setLocation(screenWidth / 2 - wide / 2, screenHeight / 2 - high / 2);
 		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		// ÉÏ²¿Ãæ°å
+		// ï¿½Ï²ï¿½ï¿½ï¿½ï¿½
 		JPanel top = new JPanel();
 		JPanel count = new JPanel();
 		JPanel list = new JPanel();
 		JLabel number = new JLabel();
 
-		// Ö÷»úÓÃ»§ÁĞ±í
-		String[] columnNames = { "ÓÃ»§Ãû", "¹¤×÷×é", "Ö÷»úÃû", "IPµØÖ·" };
+		// ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ğ±ï¿½
+		String[] columnNames = { "ï¿½Ã»ï¿½ï¿½ï¿½", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", "IPï¿½ï¿½Ö·" };
 		Object[][] content = new Object[][] {};
 		JTable userList = new JTable(content, columnNames);
 		JScrollPane jsTable = new JScrollPane(userList);
@@ -73,11 +79,11 @@ public class MainWindow {
 		userList.setRequestFocusEnabled(false);
 		jsTable.setViewportView(userList);
 
-		// Í³¼Æ
-		JLabel label = new JLabel("Ö÷»úÊı:", SwingConstants.CENTER);
+		// Í³ï¿½ï¿½
+		JLabel label = new JLabel("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:", SwingConstants.CENTER);
 		number.setText(String.valueOf(hostNumber));
 		number.setHorizontalAlignment(JLabel.CENTER);
-		JButton refresh = new JButton("Ë¢ĞÂ");
+		JButton refresh = new JButton("Ë¢ï¿½ï¿½");
 
 		count.setLayout(new BorderLayout());
 		count.add(label, BorderLayout.NORTH);
@@ -87,7 +93,7 @@ public class MainWindow {
 		top.add(list);
 		top.add(count);
 
-		// ÖĞ²¿ÊäÈë¿ò
+		// ï¿½Ğ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		JPanel middle = new JPanel();
 		JTextArea text = new JTextArea(7, 35);
 		text.setLineWrap(true);
@@ -96,12 +102,12 @@ public class MainWindow {
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		middle.add(jsText, BorderLayout.CENTER);
 
-		// ÏÂ²¿Ãæ°å
+		// ï¿½Â²ï¿½ï¿½ï¿½ï¿½
 		JPanel bottom = new JPanel();
-		JButton send = new JButton("·¢ËÍ");
+		JButton send = new JButton("ï¿½ï¿½ï¿½ï¿½");
 		bottom.add(send, BorderLayout.CENTER);
 
-		// ÕûÌå²¼¾Ö
+		// ï¿½ï¿½ï¿½å²¼ï¿½ï¿½
 		jf.setLayout(new BorderLayout());
 		jf.add(top, BorderLayout.NORTH);
 		jf.add(middle, BorderLayout.CENTER);
@@ -109,13 +115,13 @@ public class MainWindow {
 	}
 
 	private void preCheck() {
-		// Èç¹û¶Ë¿Ú±»Õ¼ÓÃÔòÍË³ö
+		// ï¿½ï¿½ï¿½Ë¿Ú±ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½
 		if (NetDomain.check().equals(SystemConf.ERROR)) {
-			System.out.println("Í¨ĞÅ¶Ë¿Ú±»Õ¼ÓÃ");
+			System.out.println("Í¨ï¿½Å¶Ë¿Ú±ï¿½Õ¼ï¿½ï¿½");
 			System.exit(0);
 		}
 		if (NetDomain.check().equals(SystemConf.FAIL)) {
-			System.out.println("ÊäÈëÊä³ö´íÎó");
+			System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 			System.exit(0);
 		}
 	}

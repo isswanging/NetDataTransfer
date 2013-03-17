@@ -1,11 +1,11 @@
 package net.vo;
 
-// Ö÷»ú¶ÔÏó
+// ä¸»æœºå¯¹è±¡
 public class Host {
-	private String userName; // ÓÃ»§Ãû
-	private String groupName; // ¹¤×÷×éÃû
-	private String ip; // IPµØÖ·
-	private String hostName; // Ö÷»úÃû
+	private String userName; // ç”¨æˆ·å
+	private String groupName; // å·¥ä½œç»„
+	private String ip; // IPåœ°å€Ö·
+	private String hostName; // ä¸»æœºå
 
 	public String getUserName() {
 		return userName;
