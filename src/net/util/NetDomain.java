@@ -3,13 +3,11 @@ package net.util;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Map;
 
 import net.conf.SystemConf;
+import net.ui.MainWindow;
 import net.vo.Host;
 
 public class NetDomain {
@@ -31,28 +29,16 @@ public class NetDomain {
 	}
 
 	// 构造Host对象
-	public static Host getHost() {
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-			Host host = new Host();
-			String hostName = addr.getHostName();// 获取主机名
-			String ip = addr.getHostAddress();// 获取ip地址ַ
+	public static Host getHost(String message) {
+		Host host = new Host();
+		String[] info = message.split("@");
+		host.setUserName(info[0]);
+		host.setGroupName(info[1]);
+		host.setHostName(info[2]);
+		host.setIp(info[3]);
+		host.setState(0);
 
-			Map<String, String> map = System.getenv();
-			String userName = map.get("USERNAME");// 获取用户名
-			String userDomain = map.get("USERDOMAIN");// 获取计算机域
-
-			host.setGroupName(userDomain);
-			host.setHostName(hostName);
-			host.setIp(ip);
-			host.setUserName(userName);
-
-			return host;
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return null;
-		}
-
+		return host;
 	}
 
 	// 广播消息并且寻找线上主机交换消息
@@ -63,6 +49,30 @@ public class NetDomain {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	// 添加主机
+	public static synchronized boolean addHost(Host host) {
+		for (int i = 0; i < MainWindow.hostList.size(); i++) {
+			if (MainWindow.hostList.get(i).getIp().equals(host.getIp())) {
+				MainWindow.hostList.set(i, host);
+				return false;
+			}
+		}
+		MainWindow.hostList.add(host);
+		return true;
+	}
+
+	// 检查主机是否重复
+	public static synchronized boolean containHost(Host host) {
+		for (int i = 0; i < MainWindow.hostList.size(); i++) {
+			Host h = MainWindow.hostList.get(i);
+			if ((h.getIp().equals(host.getIp()))
+					&& (h.getState() == host.getState())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
