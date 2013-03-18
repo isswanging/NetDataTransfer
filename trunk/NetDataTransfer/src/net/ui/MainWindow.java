@@ -3,10 +3,14 @@ package net.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -17,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
 
 import net.conf.SystemConf;
 import net.listen.GetBroadcastPacket;
@@ -25,7 +30,11 @@ import net.vo.Host;
 
 // 程序入口
 public class MainWindow {
-	int hostNumber = 1;
+	// 在线主机列表
+	public static Vector<Host> hostList = new Vector<Host>();
+	JTable userList;
+	DefaultTableModel model;
+	JLabel number;
 
 	public MainWindow() {
 		// 检查端口
@@ -36,7 +45,7 @@ public class MainWindow {
 		login();
 		// 建立界面
 		initUI();
-
+		
 	}
 
 	private void listen() {
@@ -45,11 +54,21 @@ public class MainWindow {
 	}
 
 	private void login() {
-		Host host = NetDomain.getHost();
 		try {
+			InetAddress addr = InetAddress.getLocalHost();
+			String hostName = addr.getHostName();// 获取主机名
+			String ip = addr.getHostAddress();// 获取ip地址
+
+			Map<String, String> map = System.getenv();
+			String userName = map.get("USERNAME");// 获取用户名
+			String userDomain = map.get("USERDOMAIN");// 获取计算机域
+
+			// 加入在线列表
+			NetDomain.addHost(new Host(userName, userDomain, ip, hostName, 1));
+
 			// 广播登录信息
-			String message = host.getUserName() + "@" + host.getGroupName()
-					+ "@" + host.getHostName() + "@" + host.getIp();
+			String message = userName + "@" + userDomain + "@" + hostName + "@"
+					+ ip;
 			byte[] info = message.getBytes();
 
 			DatagramSocket broadSocket = new DatagramSocket();// 用于广播信息
@@ -58,12 +77,14 @@ public class MainWindow {
 					SystemConf.broadcastPort);
 
 			// 广播信息并且寻找上线主机交换信息
-			NetDomain.broadcast(broadSocket,broadPacket);
+			NetDomain.broadcast(broadSocket, broadPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	// 初始化界面
+	@SuppressWarnings("serial")
 	private void initUI() {
 		JFrame jf = new JFrame("飞鸽");
 		jf.setSize(410, 350);
@@ -84,12 +105,18 @@ public class MainWindow {
 		JPanel top = new JPanel();
 		JPanel count = new JPanel();
 		JPanel list = new JPanel();
-		JLabel number = new JLabel();
+		number = new JLabel();
 
-		// 主机列表
+		// 设置主机列表
 		String[] columnNames = { "用户名", "工作组", "主机名", "IP地址" };
 		Object[][] content = new Object[][] {};
-		JTable userList = new JTable(content, columnNames);
+		model = new DefaultTableModel(content, columnNames);
+		userList = new JTable(model) {
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+		updateHostList();
 		JScrollPane jsTable = new JScrollPane(userList);
 		userList.setPreferredScrollableViewportSize(new Dimension(320, 100));
 		userList.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -98,7 +125,7 @@ public class MainWindow {
 
 		// 统计部分
 		JLabel label = new JLabel("联机人数:", SwingConstants.CENTER);
-		number.setText(String.valueOf(hostNumber));
+		number.setText(String.valueOf(hostList.size()));
 		number.setHorizontalAlignment(JLabel.CENTER);
 		JButton refresh = new JButton("刷新");
 
@@ -129,8 +156,39 @@ public class MainWindow {
 		jf.add(top, BorderLayout.NORTH);
 		jf.add(middle, BorderLayout.CENTER);
 		jf.add(bottom, BorderLayout.SOUTH);
+
+		// 事件
+		refresh.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println("________________");
+				refresh();
+			}
+		});
 	}
 
+	private void refresh() {
+		// 清空列表
+		clearTable();
+		// 重新登录
+		login();
+		// 更新
+		updateHostList();
+	}
+
+	private void clearTable() {
+		
+		hostList = new Vector<Host>();
+		System.out.println(hostList.size());
+		
+		int rowCount = userList.getRowCount();
+		DefaultTableModel model = (DefaultTableModel) userList.getModel();
+		for (int i = 0; i < rowCount; i++) {
+			model.removeRow(0);
+		}
+	}
+
+	// 检查端口
 	private void preCheck() {
 		if (NetDomain.check().equals(SystemConf.ERROR)) {
 			System.out.println("端口被占用。");
@@ -139,6 +197,15 @@ public class MainWindow {
 		if (NetDomain.check().equals(SystemConf.FAIL)) {
 			System.out.println("输入输出异常。");
 			System.exit(0);
+		}
+	}
+
+	// 更新主机列表
+	public void updateHostList() {
+		number.setText(String.valueOf(hostList.size()));
+		for (Host host : hostList) {
+			model.addRow(new String[] { host.getUserName(),
+					host.getGroupName(), host.getHostName(), host.getIp() });
 		}
 	}
 
