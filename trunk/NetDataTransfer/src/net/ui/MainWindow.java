@@ -76,7 +76,7 @@ public class MainWindow {
 
 			// 广播登录信息
 			NetDomain.broadcast(host, SystemConf.broadcastIP);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -86,7 +86,7 @@ public class MainWindow {
 	@SuppressWarnings("serial")
 	private void initUI() {
 		JFrame jf = new JFrame("飞鸽");
-		jf.setSize(410, 350);
+		jf.setSize(450, 380);
 		jf.setVisible(true);
 		jf.setResizable(false);
 
@@ -117,7 +117,7 @@ public class MainWindow {
 		};
 		updateHostList();
 		JScrollPane jsTable = new JScrollPane(userList);
-		userList.setPreferredScrollableViewportSize(new Dimension(320, 100));
+		userList.setPreferredScrollableViewportSize(new Dimension(340, 120));
 		userList.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		userList.setRequestFocusEnabled(false);
 		jsTable.setViewportView(userList);
@@ -138,7 +138,7 @@ public class MainWindow {
 
 		// 中部的文本框
 		JPanel middle = new JPanel();
-		JTextArea text = new JTextArea(7, 35);
+		JTextArea text = new JTextArea(8, 37);
 		text.setLineWrap(true);
 		JScrollPane jsText = new JScrollPane(text,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,

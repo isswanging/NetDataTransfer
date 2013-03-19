@@ -13,15 +13,14 @@ import net.util.NetDomain;
 import net.vo.Host;
 
 public class GetBroadcastPacket implements Runnable {
+	DatagramSocket broadSocket = null;
 
-	@SuppressWarnings("resource")
 	@Override
 	public void run() {
 
 		try {
 			DatagramPacket broadPacket = new DatagramPacket(new byte[512], 512);
-			DatagramSocket broadSocket = new DatagramSocket(
-					SystemConf.broadcastPort);
+			broadSocket = new DatagramSocket(SystemConf.broadcastPort);
 			while (true) {
 				// 收到广播
 				broadSocket.receive(broadPacket);
@@ -34,7 +33,7 @@ public class GetBroadcastPacket implements Runnable {
 						byteArrayStram);
 				Host host = (Host) objectStream.readObject();
 				host.setState(0);
-				
+
 				objectStream.close();
 				byteArrayStram.close();
 
@@ -68,6 +67,8 @@ public class GetBroadcastPacket implements Runnable {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			broadSocket.close();
 		}
 	}
 }
