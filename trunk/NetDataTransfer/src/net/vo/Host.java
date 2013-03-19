@@ -1,7 +1,11 @@
 package net.vo;
 
+import java.io.Serializable;
+
 // 主机对象
-public class Host {
+public class Host implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private String userName; // 用户名
 	private String groupName; // 工作组
 	private String ip; // IP地址ַ

@@ -1,8 +1,11 @@
 package net.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 
@@ -27,27 +30,32 @@ public class NetDomain {
 
 	}
 
-	// 构造Host对象
-	public static Host getHost(String message) {
-		Host host = new Host();
-		String[] info = message.split("@");
-		host.setUserName(info[0]);
-		host.setGroupName(info[1]);
-		host.setHostName(info[2]);
-		host.setIp(info[3]);
-		host.setTag(Integer.valueOf(info[4]));
-		host.setState(0);
-
-		return host;
-	}
-
 	// 广播消息并且寻找线上主机交换消息
-	public static void broadcast(DatagramSocket broadSocket,
-			DatagramPacket broadPacket) {
+	public static void broadcast(Host host, String ip) {
+		ByteArrayOutputStream byteArrayStream = null;
+		ObjectOutputStream objectStream = null;
+		DatagramSocket broadSocket = null;
 		try {
+			byteArrayStream = new ByteArrayOutputStream();
+			objectStream = new ObjectOutputStream(byteArrayStream);
+			objectStream.writeObject(host);
+			byte[] info = byteArrayStream.toByteArray();
+
+			broadSocket = new DatagramSocket();
+			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
+					InetAddress.getByName(ip), SystemConf.broadcastPort);
 			broadSocket.send(broadPacket);
+
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				objectStream.close();
+				byteArrayStream.close();
+				broadSocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
