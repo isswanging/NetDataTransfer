@@ -30,31 +30,37 @@ public class GetBroadcastPacket implements Runnable {
 
 				Host host = NetDomain.getHost(loginMsg);
 
-				// 回应广播
-				if (!NetDomain.containHost(host)) {
-					// 发送本机信息去目标地址
-					host.setState(1);
-					NetDomain.addHost(host);
+				if (!host.getIp().equals(
+						InetAddress.getLocalHost().getHostAddress())) {
+					if (!NetDomain.containHost(host)) {
+						host.setState(1);
+						NetDomain.addHost(host);
+						System.out.println(SystemConf.hostList.size());
 
-					InetAddress addr = InetAddress.getLocalHost();
-					String hostName = addr.getHostName();// 获取主机名
-					String ip = addr.getHostAddress();// 获取ip地址
+						// 回应广播, 发送本机信息去目标地址
+						if (host.getTag() == 0) {
+							InetAddress addr = InetAddress.getLocalHost();
+							String hostName = addr.getHostName();// 获取主机名
+							String ip = addr.getHostAddress();// 获取ip地址
 
-					Map<String, String> map = System.getenv();
-					String userName = map.get("USERNAME");// 获取用户名
-					String userDomain = map.get("USERDOMAIN");// 获取计算机域
+							Map<String, String> map = System.getenv();
+							String userName = map.get("USERNAME");// 获取用户名
+							String userDomain = map.get("USERDOMAIN");// 获取计算机域
 
-					// 广播主机信息
-					String message = userName + "@" + userDomain + "@"
-							+ hostName + "@" + ip ;
-					byte[] info = message.getBytes();
+							// 广播主机信息
+							String message = userName + "@" + userDomain + "@"
+									+ hostName + "@" + ip + "@1";
+							byte[] info = message.getBytes();
 
-					DatagramSocket respondSocket = new DatagramSocket();
-					DatagramPacket respondPacket = new DatagramPacket(info,
-							info.length, InetAddress.getByName(host.getIp()),
-							SystemConf.broadcastPort);
+							DatagramSocket respondSocket = new DatagramSocket();
+							DatagramPacket respondPacket = new DatagramPacket(
+									info, info.length,
+									InetAddress.getByName(host.getIp()),
+									SystemConf.broadcastPort);
 
-					respondSocket.send(respondPacket);
+							respondSocket.send(respondPacket);
+						}
+					}
 				}
 			}
 		} catch (IOException e) {
