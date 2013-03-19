@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.SocketException;
 
 import net.conf.SystemConf;
-import net.ui.MainWindow;
 import net.vo.Host;
 
 public class NetDomain {
@@ -36,6 +35,7 @@ public class NetDomain {
 		host.setGroupName(info[1]);
 		host.setHostName(info[2]);
 		host.setIp(info[3]);
+		host.setTag(Integer.valueOf(info[4]));
 		host.setState(0);
 
 		return host;
@@ -53,20 +53,20 @@ public class NetDomain {
 
 	// 添加主机
 	public static synchronized boolean addHost(Host host) {
-		for (int i = 0; i < MainWindow.hostList.size(); i++) {
-			if (MainWindow.hostList.get(i).getIp().equals(host.getIp())) {
-				MainWindow.hostList.set(i, host);
+		for (int i = 0; i < SystemConf.hostList.size(); i++) {
+			if (SystemConf.hostList.get(i).getIp().equals(host.getIp())) {
+				SystemConf.hostList.set(i, host);
 				return false;
 			}
 		}
-		MainWindow.hostList.add(host);
+		SystemConf.hostList.add(host);
 		return true;
 	}
 
 	// 检查主机是否重复
 	public static synchronized boolean containHost(Host host) {
-		for (int i = 0; i < MainWindow.hostList.size(); i++) {
-			Host h = MainWindow.hostList.get(i);
+		for (int i = 0; i < SystemConf.hostList.size(); i++) {
+			Host h = SystemConf.hostList.get(i);
 			if ((h.getIp().equals(host.getIp()))
 					&& (h.getState() == host.getState())) {
 				return true;

@@ -10,7 +10,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -30,8 +29,6 @@ import net.vo.Host;
 
 // 程序入口
 public class MainWindow {
-	// 在线主机列表
-	public static Vector<Host> hostList = new Vector<Host>();
 	JTable userList;
 	DefaultTableModel model;
 	JLabel number;
@@ -45,7 +42,10 @@ public class MainWindow {
 		login();
 		// 建立界面
 		initUI();
+
+		refresh();
 		
+		System.out.println("************");
 	}
 
 	private void listen() {
@@ -64,11 +64,12 @@ public class MainWindow {
 			String userDomain = map.get("USERDOMAIN");// 获取计算机域
 
 			// 加入在线列表
-			NetDomain.addHost(new Host(userName, userDomain, ip, hostName, 1));
+			NetDomain
+					.addHost(new Host(userName, userDomain, ip, hostName, 1, 1));
 
 			// 广播登录信息
 			String message = userName + "@" + userDomain + "@" + hostName + "@"
-					+ ip;
+					+ ip + "@0";
 			byte[] info = message.getBytes();
 
 			DatagramSocket broadSocket = new DatagramSocket();// 用于广播信息
@@ -125,7 +126,7 @@ public class MainWindow {
 
 		// 统计部分
 		JLabel label = new JLabel("联机人数:", SwingConstants.CENTER);
-		number.setText(String.valueOf(hostList.size()));
+		number.setText(String.valueOf(SystemConf.hostList.size()));
 		number.setHorizontalAlignment(JLabel.CENTER);
 		JButton refresh = new JButton("刷新");
 
@@ -172,15 +173,20 @@ public class MainWindow {
 		clearTable();
 		// 重新登录
 		login();
-		// 更新
+		// 更新(延时一点，等待网络通信)
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		updateHostList();
 	}
 
 	private void clearTable() {
-		
-		hostList = new Vector<Host>();
-		System.out.println(hostList.size());
-		
+		System.out.println("before clear"+SystemConf.hostList.size());
+		SystemConf.hostList.clear();// = new Vector<Host>();
+		// System.out.println(SystemConf.hostList.size());
+
 		int rowCount = userList.getRowCount();
 		DefaultTableModel model = (DefaultTableModel) userList.getModel();
 		for (int i = 0; i < rowCount; i++) {
@@ -201,9 +207,10 @@ public class MainWindow {
 	}
 
 	// 更新主机列表
-	public void updateHostList() {
-		number.setText(String.valueOf(hostList.size()));
-		for (Host host : hostList) {
+	private void updateHostList() {
+		System.out.println("table size"+String.valueOf(SystemConf.hostList.size()));
+		number.setText(String.valueOf(SystemConf.hostList.size()));
+		for (Host host : SystemConf.hostList) {
 			model.addRow(new String[] { host.getUserName(),
 					host.getGroupName(), host.getHostName(), host.getIp() });
 		}

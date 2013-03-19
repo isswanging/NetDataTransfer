@@ -7,14 +7,24 @@ public class Host {
 	private String ip; // IP地址ַ
 	private String hostName; // 主机名
 	private int state;// 主机状态，0表示登录，1表示在线
+	private int tag;// 表示是否需要回应,0表示需要回答，1表示不需要回答
 
 	public Host(String userName, String groupName, String ip, String hostName,
-			int i) {
+			int i, int t) {
 		this.userName = userName;
 		this.groupName = groupName;
 		this.ip = ip;
 		this.hostName = hostName;
 		this.state = i;
+		this.tag = t;
+	}
+
+	public int getTag() {
+		return tag;
+	}
+
+	public void setTag(int tag) {
+		this.tag = tag;
 	}
 
 	public int getState() {

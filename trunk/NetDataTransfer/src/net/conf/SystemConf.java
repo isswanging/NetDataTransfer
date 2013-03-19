@@ -1,5 +1,9 @@
 package net.conf;
 
+import java.util.Vector;
+
+import net.vo.Host;
+
 public class SystemConf {
 	// 发送普通信息端口
 	public final static int textPort = 80;
@@ -22,5 +26,8 @@ public class SystemConf {
 
 	// 广播端口
 	public final static int broadcastPort = 232;
+
+	// 在线主机列表
+	public static Vector<Host> hostList = new Vector<Host>();
 
 }
