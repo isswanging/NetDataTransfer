@@ -7,8 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Vector;
@@ -54,8 +52,6 @@ public class MainWindow {
 		// 建立界面
 		initUI();
 
-		refresh();
-
 		System.out.println("************");
 	}
 
@@ -75,21 +71,12 @@ public class MainWindow {
 			userDomain = map.get("USERDOMAIN");// 获取计算机域
 
 			// 加入在线列表
-			NetDomain
-					.addHost(new Host(userName, userDomain, ip, hostName, 1, 1));
+			Host host = new Host(userName, userDomain, ip, hostName, 1, 0);
+			NetDomain.addHost(host);
 
 			// 广播登录信息
-			String message = userName + "@" + userDomain + "@" + hostName + "@"
-					+ ip + "@0";
-			byte[] info = message.getBytes();
-
-			DatagramSocket broadSocket = new DatagramSocket();// 用于广播信息
-			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
-					InetAddress.getByName(SystemConf.broadcastIP),
-					SystemConf.broadcastPort);
-
-			// 广播信息并且寻找上线主机交换信息
-			NetDomain.broadcast(broadSocket, broadPacket);
+			NetDomain.broadcast(host, SystemConf.broadcastIP);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

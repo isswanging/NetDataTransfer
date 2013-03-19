@@ -1,6 +1,8 @@
 package net.listen;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -26,9 +28,15 @@ public class GetBroadcastPacket implements Runnable {
 				// 整理信息
 				byte[] buf = new byte[broadPacket.getLength()];
 				System.arraycopy(broadPacket.getData(), 0, buf, 0, buf.length);
-				String loginMsg = new String(buf);
-
-				Host host = NetDomain.getHost(loginMsg);
+				ByteArrayInputStream byteArrayStram = new ByteArrayInputStream(
+						buf);
+				ObjectInputStream objectStream = new ObjectInputStream(
+						byteArrayStram);
+				Host host = (Host) objectStream.readObject();
+				host.setState(0);
+				
+				objectStream.close();
+				byteArrayStram.close();
 
 				if (!host.getIp().equals(
 						InetAddress.getLocalHost().getHostAddress())) {
@@ -48,24 +56,18 @@ public class GetBroadcastPacket implements Runnable {
 							String userDomain = map.get("USERDOMAIN");// 获取计算机域
 
 							// 广播主机信息
-							String message = userName + "@" + userDomain + "@"
-									+ hostName + "@" + ip + "@1";
-							byte[] info = message.getBytes();
+							Host res = new Host(userName, userDomain, ip,
+									hostName, 1, 1);
 
-							DatagramSocket respondSocket = new DatagramSocket();
-							DatagramPacket respondPacket = new DatagramPacket(
-									info, info.length,
-									InetAddress.getByName(host.getIp()),
-									SystemConf.broadcastPort);
-
-							respondSocket.send(respondPacket);
+							NetDomain.broadcast(res, host.getIp());
 						}
 					}
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
 		}
 	}
-
 }
