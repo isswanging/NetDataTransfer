@@ -5,21 +5,26 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.event.MouseInputListener;
 import javax.swing.table.DefaultTableModel;
 
 import net.conf.SystemConf;
@@ -31,7 +36,13 @@ import net.vo.Host;
 public class MainWindow {
 	JTable userList;
 	DefaultTableModel model;
+	JPopupMenu popup;
 	JLabel number;
+
+	String hostName;
+	String ip;
+	String userName;
+	String userDomain;
 
 	public MainWindow() {
 		// 检查端口
@@ -44,7 +55,7 @@ public class MainWindow {
 		initUI();
 
 		refresh();
-		
+
 		System.out.println("************");
 	}
 
@@ -56,12 +67,12 @@ public class MainWindow {
 	private void login() {
 		try {
 			InetAddress addr = InetAddress.getLocalHost();
-			String hostName = addr.getHostName();// 获取主机名
-			String ip = addr.getHostAddress();// 获取ip地址
+			hostName = addr.getHostName();// 获取主机名
+			ip = addr.getHostAddress();// 获取ip地址
 
 			Map<String, String> map = System.getenv();
-			String userName = map.get("USERNAME");// 获取用户名
-			String userDomain = map.get("USERDOMAIN");// 获取计算机域
+			userName = map.get("USERNAME");// 获取用户名
+			userDomain = map.get("USERDOMAIN");// 获取计算机域
 
 			// 加入在线列表
 			NetDomain
@@ -158,14 +169,124 @@ public class MainWindow {
 		jf.add(middle, BorderLayout.CENTER);
 		jf.add(bottom, BorderLayout.SOUTH);
 
-		// 事件
+		// 右键菜单
+		popup = new JPopupMenu();
+		JMenuItem sendFile = new JMenuItem("发送文件");
+		JMenuItem sendFolder = new JMenuItem("发送文件夹");
+		popup.add(sendFile);
+		popup.add(sendFolder);
+
+		// 刷新事件
 		refresh.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("________________");
+				System.out.println("refreshing......");
 				refresh();
 			}
 		});
+
+		// 发送文本
+		send.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int[] rowIndex = userList.getSelectedRows();
+				if (rowIndex.length == 0) {
+					System.out.println("请选择主机");
+				} else {
+					for (int i = 0; i < rowIndex.length; i++) {
+						Vector<?> row = (Vector<?>) model.getDataVector()
+								.get(i);
+						String name = (String) row.elementAt(2);
+						String ip = (String) row.elementAt(3);
+						System.out.println(name + " " + ip);
+
+						sendUdpText();
+					}
+				}
+			}
+		});
+
+		// JTable上的右键菜单
+		MouseInputListener mil = new MouseInputListener() {
+			public void mouseClicked(MouseEvent e) {
+				processEvent(e);
+			}
+
+			public void mousePressed(MouseEvent e) {
+				processEvent(e);
+			}
+
+			public void mouseReleased(MouseEvent e) {
+				processEvent(e);
+				if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0
+						&& !e.isControlDown() && !e.isShiftDown()) {
+					popup.show(userList, e.getX(), e.getY());
+				}
+			}
+
+			public void mouseEntered(MouseEvent e) {
+				processEvent(e);
+			}
+
+			public void mouseExited(MouseEvent e) {
+				processEvent(e);
+			}
+
+			public void mouseDragged(MouseEvent e) {
+				processEvent(e);
+			}
+
+			public void mouseMoved(MouseEvent e) {
+				processEvent(e);
+			}
+
+			private void processEvent(MouseEvent e) {
+				if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
+					int modifiers = e.getModifiers();
+					modifiers -= MouseEvent.BUTTON3_MASK;
+					modifiers |= MouseEvent.BUTTON1_MASK;
+					MouseEvent ne = new MouseEvent(e.getComponent(), e.getID(),
+							e.getWhen(), modifiers, e.getX(), e.getY(),
+							e.getClickCount(), false);
+					userList.dispatchEvent(ne);
+				}
+			}
+
+		};
+		userList.addMouseListener(mil);
+		userList.addMouseMotionListener(mil);
+
+		sendFile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int i = userList.getSelectedRow();
+				Vector<?> row = (Vector<?>) model.getDataVector().get(i);
+				String name = (String) row.elementAt(2);
+				String ip = (String) row.elementAt(3);
+				System.out.println(name + " " + ip);
+			}
+
+		});
+
+		sendFolder.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				int i = userList.getSelectedRow();
+				Vector<?> row = (Vector<?>) model.getDataVector().get(i);
+				String name = (String) row.elementAt(2);
+				String ip = (String) row.elementAt(3);
+				System.out.println(name + " " + ip);
+			}
+
+		});
+
+	}
+
+	// 发送UDP数据
+	private void sendUdpText() {
+
 	}
 
 	private void refresh() {
@@ -183,7 +304,7 @@ public class MainWindow {
 	}
 
 	private void clearTable() {
-		System.out.println("before clear"+SystemConf.hostList.size());
+		System.out.println("before clear" + SystemConf.hostList.size());
 		SystemConf.hostList.clear();// = new Vector<Host>();
 		// System.out.println(SystemConf.hostList.size());
 
@@ -208,7 +329,8 @@ public class MainWindow {
 
 	// 更新主机列表
 	private void updateHostList() {
-		System.out.println("table size"+String.valueOf(SystemConf.hostList.size()));
+		System.out.println("table size"
+				+ String.valueOf(SystemConf.hostList.size()));
 		number.setText(String.valueOf(SystemConf.hostList.size()));
 		for (Host host : SystemConf.hostList) {
 			model.addRow(new String[] { host.getUserName(),
