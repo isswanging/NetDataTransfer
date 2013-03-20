@@ -58,7 +58,7 @@ public class GetBroadcastPacket implements Runnable {
 							Host res = new Host(userName, userDomain, ip,
 									hostName, 1, 1);
 
-							NetDomain.broadcast(res, host.getIp());
+							NetDomain.sendMessage(res, host.getIp(),SystemConf.broadcastPort);
 						}
 					}
 				}

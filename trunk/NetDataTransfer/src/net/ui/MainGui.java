@@ -27,22 +27,26 @@ import javax.swing.table.DefaultTableModel;
 
 import net.conf.SystemConf;
 import net.listen.GetBroadcastPacket;
+import net.listen.TextMonitor;
 import net.util.NetDomain;
+import net.vo.DataPacket;
 import net.vo.Host;
 
 // 程序入口
-public class MainWindow {
+public class MainGui {
 	JTable userList;
 	DefaultTableModel model;
 	JPopupMenu popup;
 	JLabel number;
+	JTextArea text;
+	JFrame jf;
 
 	String hostName;
 	String ip;
 	String userName;
 	String userDomain;
 
-	public MainWindow() {
+	public MainGui() {
 		// 检查端口
 		preCheck();
 		// 建立监听
@@ -58,6 +62,7 @@ public class MainWindow {
 	private void listen() {
 		// 监听广播
 		new Thread(new GetBroadcastPacket()).start();
+		new Thread(new TextMonitor()).start();
 	}
 
 	private void login() {
@@ -75,7 +80,8 @@ public class MainWindow {
 			NetDomain.addHost(host);
 
 			// 广播登录信息
-			NetDomain.broadcast(host, SystemConf.broadcastIP);
+			NetDomain.sendMessage(host, SystemConf.broadcastIP,
+					SystemConf.broadcastPort);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -85,7 +91,7 @@ public class MainWindow {
 	// 初始化界面
 	@SuppressWarnings("serial")
 	private void initUI() {
-		JFrame jf = new JFrame("飞鸽");
+		jf = new JFrame("飞鸽");
 		jf.setSize(450, 380);
 		jf.setVisible(true);
 		jf.setResizable(false);
@@ -138,7 +144,7 @@ public class MainWindow {
 
 		// 中部的文本框
 		JPanel middle = new JPanel();
-		JTextArea text = new JTextArea(8, 37);
+		text = new JTextArea(8, 37);
 		text.setLineWrap(true);
 		JScrollPane jsText = new JScrollPane(text,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -169,27 +175,6 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent arg0) {
 				System.out.println("refreshing......");
 				refresh();
-			}
-		});
-
-		// 发送文本
-		send.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int[] rowIndex = userList.getSelectedRows();
-				if (rowIndex.length == 0) {
-					System.out.println("请选择主机");
-				} else {
-					for (int i = 0; i < rowIndex.length; i++) {
-						Vector<?> row = (Vector<?>) model.getDataVector()
-								.get(i);
-						String name = (String) row.elementAt(2);
-						String ip = (String) row.elementAt(3);
-						System.out.println(name + " " + ip);
-
-						sendUdpText();
-					}
-				}
 			}
 		});
 
@@ -243,6 +228,9 @@ public class MainWindow {
 		userList.addMouseListener(mil);
 		userList.addMouseMotionListener(mil);
 
+		// 发送文字
+		send.addActionListener(new SendMessage());
+
 		sendFile.addActionListener(new ActionListener() {
 
 			@Override
@@ -272,8 +260,10 @@ public class MainWindow {
 	}
 
 	// 发送UDP数据
-	private void sendUdpText() {
-
+	private void sendUdpText(String hostName, String ip, String targetIp,
+			String message) {
+		DataPacket dp = new DataPacket(ip, hostName, message);
+		NetDomain.sendMessage(dp, targetIp, SystemConf.textPort);
 	}
 
 	private void refresh() {
@@ -305,11 +295,11 @@ public class MainWindow {
 	// 检查端口
 	private void preCheck() {
 		if (NetDomain.check().equals(SystemConf.ERROR)) {
-			System.out.println("端口被占用。");
+			NoticeGui.errorNotice(jf, "端口被占用");
 			System.exit(0);
 		}
 		if (NetDomain.check().equals(SystemConf.FAIL)) {
-			System.out.println("输入输出异常。");
+			NoticeGui.errorNotice(jf, "IO异常");
 			System.exit(0);
 		}
 	}
@@ -326,7 +316,36 @@ public class MainWindow {
 	}
 
 	public static void main(String[] args) {
-		new MainWindow();
+		new MainGui();
+	}
+
+	private class SendMessage implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int[] rowIndex = userList.getSelectedRows();
+			if (rowIndex.length == 0) {
+				NoticeGui.warnNotice(jf, "请选择主机");
+			} else {
+				String message = text.getText();
+				if (message.equals("")) {
+					NoticeGui.warnNotice(jf, "请输入消息");
+				} else {
+					for (int i = 0; i < rowIndex.length; i++) {
+						Vector<?> row = (Vector<?>) model.getDataVector().get(
+								rowIndex[i]);
+						String name = (String) row.elementAt(2);
+						String targetIp = (String) row.elementAt(3);
+
+						System.out.println(name + " " + targetIp);
+
+						sendUdpText(hostName, ip, targetIp, message);
+					}
+				}
+			}
+
+		}
+
 	}
 
 }

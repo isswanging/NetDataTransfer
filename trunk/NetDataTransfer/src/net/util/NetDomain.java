@@ -31,7 +31,7 @@ public class NetDomain {
 	}
 
 	// 广播消息并且寻找线上主机交换消息
-	public static void broadcast(Host host, String ip) {
+/*	public static void broadcast(Host host, String ip) {
 		ByteArrayOutputStream byteArrayStream = null;
 		ObjectOutputStream objectStream = null;
 		DatagramSocket broadSocket = null;
@@ -57,7 +57,7 @@ public class NetDomain {
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 
 	// 添加主机
 	public static synchronized boolean addHost(Host host) {
@@ -81,6 +81,35 @@ public class NetDomain {
 			}
 		}
 		return false;
+	}
+
+	// 发送UDP消息
+	public static void sendMessage(Object obj, String targetIp,int port) {
+		ByteArrayOutputStream byteArrayStream = null;
+		ObjectOutputStream objectStream = null;
+		DatagramSocket broadSocket = null;
+		try {
+			byteArrayStream = new ByteArrayOutputStream();
+			objectStream = new ObjectOutputStream(byteArrayStream);
+			objectStream.writeObject(obj);
+			byte[] info = byteArrayStream.toByteArray();
+
+			broadSocket = new DatagramSocket();
+			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
+					InetAddress.getByName(targetIp), port);
+			broadSocket.send(broadPacket);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				objectStream.close();
+				byteArrayStream.close();
+				broadSocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }
