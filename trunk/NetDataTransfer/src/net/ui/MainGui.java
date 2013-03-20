@@ -7,7 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.Map;
 import java.util.Vector;
 
@@ -80,8 +82,8 @@ public class MainGui {
 			NetDomain.addHost(host);
 
 			// 广播登录信息
-			NetDomain.sendMessage(host, SystemConf.broadcastIP,
-					SystemConf.broadcastPort);
+			NetDomain.sendUdpData(new DatagramSocket(), host,
+					SystemConf.broadcastIP, SystemConf.broadcastPort);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -263,7 +265,12 @@ public class MainGui {
 	private void sendUdpText(String hostName, String ip, String targetIp,
 			String message) {
 		DataPacket dp = new DataPacket(ip, hostName, message);
-		NetDomain.sendMessage(dp, targetIp, SystemConf.textPort);
+		try {
+			NetDomain.sendUdpData(new DatagramSocket(), dp, targetIp,
+					SystemConf.textPort);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void refresh() {

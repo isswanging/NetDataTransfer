@@ -14,6 +14,8 @@ import net.vo.Host;
 
 public class GetBroadcastPacket implements Runnable {
 	DatagramSocket broadSocket = null;
+	ByteArrayInputStream byteArrayStram = null;
+	ObjectInputStream objectStream = null;
 
 	@Override
 	public void run() {
@@ -27,15 +29,10 @@ public class GetBroadcastPacket implements Runnable {
 				// 整理信息
 				byte[] buf = new byte[broadPacket.getLength()];
 				System.arraycopy(broadPacket.getData(), 0, buf, 0, buf.length);
-				ByteArrayInputStream byteArrayStram = new ByteArrayInputStream(
-						buf);
-				ObjectInputStream objectStream = new ObjectInputStream(
-						byteArrayStram);
+				byteArrayStram = new ByteArrayInputStream(buf);
+				objectStream = new ObjectInputStream(byteArrayStram);
 				Host host = (Host) objectStream.readObject();
 				host.setState(0);
-
-				objectStream.close();
-				byteArrayStram.close();
 
 				if (!host.getIp().equals(
 						InetAddress.getLocalHost().getHostAddress())) {
@@ -58,7 +55,8 @@ public class GetBroadcastPacket implements Runnable {
 							Host res = new Host(userName, userDomain, ip,
 									hostName, 1, 1);
 
-							NetDomain.sendMessage(res, host.getIp(),SystemConf.broadcastPort);
+							NetDomain.sendUdpData(broadSocket, res,
+									host.getIp(), SystemConf.broadcastPort);
 						}
 					}
 				}
@@ -68,7 +66,13 @@ public class GetBroadcastPacket implements Runnable {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
-			broadSocket.close();
+			try {
+				broadSocket.close();
+				objectStream.close();
+				byteArrayStram.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
