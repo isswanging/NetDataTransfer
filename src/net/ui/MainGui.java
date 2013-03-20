@@ -9,7 +9,9 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Vector;
 
@@ -28,6 +30,7 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.table.DefaultTableModel;
 
 import net.conf.SystemConf;
+import net.listen.FileMonitor;
 import net.listen.GetBroadcastPacket;
 import net.listen.TextMonitor;
 import net.util.NetDomain;
@@ -65,6 +68,7 @@ public class MainGui {
 		// 监听广播
 		new Thread(new GetBroadcastPacket()).start();
 		new Thread(new TextMonitor()).start();
+		new Thread(new FileMonitor()).start();
 	}
 
 	private void login() {
@@ -231,20 +235,10 @@ public class MainGui {
 		userList.addMouseMotionListener(mil);
 
 		// 发送文字
-		send.addActionListener(new SendMessage());
+		send.addActionListener(new SendText());
 
-		sendFile.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				int i = userList.getSelectedRow();
-				Vector<?> row = (Vector<?>) model.getDataVector().get(i);
-				String name = (String) row.elementAt(2);
-				String ip = (String) row.elementAt(3);
-				System.out.println(name + " " + ip);
-			}
-
-		});
+		// 发送文件
+		sendFile.addActionListener(new SendFile());
 
 		sendFolder.addActionListener(new ActionListener() {
 
@@ -326,7 +320,7 @@ public class MainGui {
 		new MainGui();
 	}
 
-	private class SendMessage implements ActionListener {
+	private class SendText implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -341,14 +335,37 @@ public class MainGui {
 					for (int i = 0; i < rowIndex.length; i++) {
 						Vector<?> row = (Vector<?>) model.getDataVector().get(
 								rowIndex[i]);
-						String name = (String) row.elementAt(2);
 						String targetIp = (String) row.elementAt(3);
-
-						System.out.println(name + " " + targetIp);
-
 						sendUdpText(hostName, ip, targetIp, message);
 					}
 				}
+			}
+
+		}
+
+	}
+
+	private class SendFile implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int i = userList.getSelectedRow();
+			Vector<?> row = (Vector<?>) model.getDataVector().get(i);
+			String ip = (String) row.elementAt(3);
+
+			// 发送确认消息
+			String tag = "file";
+			String confirm = ip + "@" + tag;
+
+			Socket msg;
+			try {
+				msg = new Socket(ip, SystemConf.filePort);
+				NetDomain.sendTcpData(msg, confirm);
+				
+			} catch (UnknownHostException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
 
 		}
