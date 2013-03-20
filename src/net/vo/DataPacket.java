@@ -1,11 +1,20 @@
 package net.vo;
 
+import java.io.Serializable;
+
 // 数据包
-public class DataPacket {
+public class DataPacket implements Serializable {
+	private static final long serialVersionUID = 8280888121375940006L;
+
 	private String ip;
-	private String port;
 	private String senderName;
 	private Object content;
+
+	public DataPacket(String ip, String senderName, Object content) {
+		this.ip = ip;
+		this.senderName = senderName;
+		this.content = content;
+	}
 
 	public String getIp() {
 		return ip;
@@ -13,14 +22,6 @@ public class DataPacket {
 
 	public void setIp(String ip) {
 		this.ip = ip;
-	}
-
-	public String getPort() {
-		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
 	}
 
 	public String getSenderName() {
