@@ -30,35 +30,6 @@ public class NetDomain {
 
 	}
 
-	// 广播消息并且寻找线上主机交换消息
-/*	public static void broadcast(Host host, String ip) {
-		ByteArrayOutputStream byteArrayStream = null;
-		ObjectOutputStream objectStream = null;
-		DatagramSocket broadSocket = null;
-		try {
-			byteArrayStream = new ByteArrayOutputStream();
-			objectStream = new ObjectOutputStream(byteArrayStream);
-			objectStream.writeObject(host);
-			byte[] info = byteArrayStream.toByteArray();
-
-			broadSocket = new DatagramSocket();
-			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
-					InetAddress.getByName(ip), SystemConf.broadcastPort);
-			broadSocket.send(broadPacket);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				objectStream.close();
-				byteArrayStream.close();
-				broadSocket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}*/
-
 	// 添加主机
 	public static synchronized boolean addHost(Host host) {
 		for (int i = 0; i < SystemConf.hostList.size(); i++) {
@@ -84,17 +55,16 @@ public class NetDomain {
 	}
 
 	// 发送UDP消息
-	public static void sendMessage(Object obj, String targetIp,int port) {
+	public static void sendUdpData(DatagramSocket broadSocket, Object obj,
+			String targetIp, int port) {
 		ByteArrayOutputStream byteArrayStream = null;
 		ObjectOutputStream objectStream = null;
-		DatagramSocket broadSocket = null;
 		try {
 			byteArrayStream = new ByteArrayOutputStream();
 			objectStream = new ObjectOutputStream(byteArrayStream);
 			objectStream.writeObject(obj);
 			byte[] info = byteArrayStream.toByteArray();
 
-			broadSocket = new DatagramSocket();
 			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
 					InetAddress.getByName(targetIp), port);
 			broadSocket.send(broadPacket);
@@ -103,12 +73,13 @@ public class NetDomain {
 			e.printStackTrace();
 		} finally {
 			try {
+				broadSocket.close();
 				objectStream.close();
 				byteArrayStream.close();
-				broadSocket.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+
 		}
 	}
 
