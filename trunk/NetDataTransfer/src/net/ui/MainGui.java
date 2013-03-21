@@ -9,13 +9,12 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -30,9 +29,9 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.table.DefaultTableModel;
 
 import net.conf.SystemConf;
+import net.listen.BroadcastMonitor;
 import net.listen.FileMonitor;
-import net.listen.GetBroadcastPacket;
-import net.listen.TextMonitor;
+import net.listen.UdpDataMonitor;
 import net.util.NetDomain;
 import net.vo.DataPacket;
 import net.vo.Host;
@@ -66,8 +65,8 @@ public class MainGui {
 
 	private void listen() {
 		// 监听广播
-		new Thread(new GetBroadcastPacket()).start();
-		new Thread(new TextMonitor()).start();
+		new Thread(new BroadcastMonitor()).start();
+		new Thread(new UdpDataMonitor()).start();
 		new Thread(new FileMonitor()).start();
 	}
 
@@ -256,14 +255,17 @@ public class MainGui {
 	}
 
 	// 发送UDP数据
-	private void sendUdpText(String hostName, String ip, String targetIp,
-			String message) {
-		DataPacket dp = new DataPacket(ip, hostName, message);
+	private void sendUdpData(String hostName, String ip, String targetIp,
+			String message, int tag, int port) {
+		DataPacket dp = new DataPacket(ip, hostName, message, tag);
+		DatagramSocket socket = null;
 		try {
-			NetDomain.sendUdpData(new DatagramSocket(), dp, targetIp,
-					SystemConf.textPort);
+			socket = new DatagramSocket();
+			NetDomain.sendUdpData(socket, dp, targetIp, port);
 		} catch (SocketException e) {
 			e.printStackTrace();
+		} finally {
+			socket.close();
 		}
 	}
 
@@ -336,7 +338,8 @@ public class MainGui {
 						Vector<?> row = (Vector<?>) model.getDataVector().get(
 								rowIndex[i]);
 						String targetIp = (String) row.elementAt(3);
-						sendUdpText(hostName, ip, targetIp, message);
+						sendUdpData(hostName, ip, targetIp, message, 0,
+								SystemConf.textPort);
 					}
 				}
 			}
@@ -351,21 +354,25 @@ public class MainGui {
 		public void actionPerformed(ActionEvent e) {
 			int i = userList.getSelectedRow();
 			Vector<?> row = (Vector<?>) model.getDataVector().get(i);
-			String ip = (String) row.elementAt(3);
+			String targetIp = (String) row.elementAt(3);
 
-			// 发送确认消息
-			String tag = "file";
-			String confirm = ip + "@" + tag;
+			if (targetIp.equals(MainGui.this.ip)) {
+				NoticeGui.warnNotice(jf, "不自己给自己发文件");
+			} else {
+				// 选择文件
+				JFileChooser jFileChooser = new JFileChooser();
+				jFileChooser.setMultiSelectionEnabled(true);
+				jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-			Socket msg;
-			try {
-				msg = new Socket(ip, SystemConf.filePort);
-				NetDomain.sendTcpData(msg, confirm);
-				
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
+				if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
+					String path = jFileChooser.getSelectedFile().getPath();
+					System.out.println(path);
+
+					// 发送确认消息
+					sendUdpData(hostName, ip, targetIp, path, 1,
+							SystemConf.textPort);
+
+				}
 			}
 
 		}

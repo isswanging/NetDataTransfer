@@ -16,8 +16,4 @@ public class NoticeGui {
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-	public static int confirmNotice(Component comp, String content) {
-		return JOptionPane.showConfirmDialog(comp, content, "请确认",
-				JOptionPane.YES_NO_OPTION);
-	}
 }
