@@ -1,15 +1,12 @@
 package net.util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
 
 import net.conf.SystemConf;
@@ -70,6 +67,7 @@ public class NetDomain {
 
 			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
 					InetAddress.getByName(targetIp), port);
+			
 			broadSocket.send(broadPacket);
 
 		} catch (IOException e) {
@@ -83,36 +81,6 @@ public class NetDomain {
 			}
 
 		}
-	}
-
-	// 传输TCP数据
-	public static void sendTcpData(Socket msg, String confirm) {
-		DataInputStream geter = null;
-		DataOutputStream sender = null;
-
-		try {
-			sender = new DataOutputStream(msg.getOutputStream());
-			geter = new DataInputStream(msg.getInputStream());
-
-			sender.writeUTF(confirm);
-			
-			String tag = geter.readUTF();
-			
-			if(tag.equals(0)){
-				System.out.println("文件发送中……");
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				geter.close();
-				sender.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 }

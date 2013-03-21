@@ -12,7 +12,7 @@ import net.conf.SystemConf;
 import net.util.NetDomain;
 import net.vo.Host;
 
-public class GetBroadcastPacket implements Runnable {
+public class BroadcastMonitor implements Runnable {
 	DatagramSocket broadSocket = null;
 	ByteArrayInputStream byteArrayStram = null;
 	ObjectInputStream objectStream = null;
@@ -55,8 +55,8 @@ public class GetBroadcastPacket implements Runnable {
 							Host res = new Host(userName, userDomain, ip,
 									hostName, 1, 1);
 
-							NetDomain.sendUdpData(broadSocket, res,
-									host.getIp(), SystemConf.broadcastPort);
+							NetDomain.sendUdpData(broadSocket, res, host.getIp(),
+									SystemConf.broadcastPort);
 						}
 					}
 				}

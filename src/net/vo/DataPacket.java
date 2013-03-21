@@ -8,11 +8,21 @@ public class DataPacket implements Serializable {
 
 	private String ip;
 	private String senderName;
-	private Object content;
+	private String content;
+	private int tag;
 
-	public DataPacket(String ip, String senderName, Object content) {
+	public DataPacket(String ip, String senderName, String content, int tag) {
 		this.ip = ip;
 		this.senderName = senderName;
+		this.content = content;
+		this.tag = tag;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
 		this.content = content;
 	}
 
@@ -32,12 +42,12 @@ public class DataPacket implements Serializable {
 		this.senderName = senderName;
 	}
 
-	public Object getContent() {
-		return content;
+	public int getTag() {
+		return tag;
 	}
 
-	public void setContent(Object content) {
-		this.content = content;
+	public void setTag(int tag) {
+		this.tag = tag;
 	}
 
 }
