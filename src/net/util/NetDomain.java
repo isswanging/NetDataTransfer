@@ -67,7 +67,7 @@ public class NetDomain {
 
 			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
 					InetAddress.getByName(targetIp), port);
-			
+
 			broadSocket.send(broadPacket);
 
 		} catch (IOException e) {

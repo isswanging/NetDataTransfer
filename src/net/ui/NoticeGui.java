@@ -16,4 +16,8 @@ public class NoticeGui {
 				JOptionPane.ERROR_MESSAGE);
 	}
 
+	public static void messageNotice(Component comp, String content) {
+		JOptionPane.showMessageDialog(comp, content, "消息",
+				JOptionPane.INFORMATION_MESSAGE);
+	}
 }

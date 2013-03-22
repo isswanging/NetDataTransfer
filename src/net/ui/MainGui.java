@@ -170,9 +170,9 @@ public class MainGui {
 		// 右键菜单
 		popup = new JPopupMenu();
 		JMenuItem sendFile = new JMenuItem("发送文件");
-		JMenuItem sendFolder = new JMenuItem("发送文件夹");
+		// JMenuItem sendFolder = new JMenuItem("发送文件夹");
 		popup.add(sendFile);
-		popup.add(sendFolder);
+		// popup.add(sendFolder);
 
 		// 刷新事件
 		refresh.addActionListener(new ActionListener() {
@@ -238,19 +238,6 @@ public class MainGui {
 
 		// 发送文件
 		sendFile.addActionListener(new SendFile());
-
-		sendFolder.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				int i = userList.getSelectedRow();
-				Vector<?> row = (Vector<?>) model.getDataVector().get(i);
-				String name = (String) row.elementAt(2);
-				String ip = (String) row.elementAt(3);
-				System.out.println(name + " " + ip);
-			}
-
-		});
 
 	}
 

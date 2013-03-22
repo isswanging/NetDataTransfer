@@ -31,11 +31,8 @@ public class SystemConf {
 	public static int text = 0;
 	public static int filePre = 1;
 	public static int fileConf = 2;
-	public static int fileTran = 3;
 
 	// 在线主机列表
 	public static Vector<Host> hostList = new Vector<Host>();
 
-	// 保存文件路径
-	public static String savePath = "";
 }
