@@ -59,6 +59,7 @@ public class MainGui {
 		login();
 		// 建立界面
 		initUI();
+		updateHostList();
 
 		System.out.println("************");
 	}
@@ -126,13 +127,13 @@ public class MainGui {
 				return false;
 			}
 		};
-		updateHostList();
+		
 		JScrollPane jsTable = new JScrollPane(userList);
 		userList.setPreferredScrollableViewportSize(new Dimension(340, 120));
 		userList.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		userList.setRequestFocusEnabled(false);
 		jsTable.setViewportView(userList);
-
+		
 		// 统计部分
 		JLabel label = new JLabel("联机人数:", SwingConstants.CENTER);
 		number.setText(String.valueOf(SystemConf.hostList.size()));
@@ -173,7 +174,7 @@ public class MainGui {
 		// JMenuItem sendFolder = new JMenuItem("发送文件夹");
 		popup.add(sendFile);
 		// popup.add(sendFolder);
-
+		
 		// 刷新事件
 		refresh.addActionListener(new ActionListener() {
 			@Override
@@ -232,7 +233,7 @@ public class MainGui {
 		};
 		userList.addMouseListener(mil);
 		userList.addMouseMotionListener(mil);
-
+		
 		// 发送文字
 		send.addActionListener(new SendText());
 
