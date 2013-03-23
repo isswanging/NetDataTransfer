@@ -59,7 +59,6 @@ public class MainGui {
 		login();
 		// 建立界面
 		initUI();
-		updateHostList();
 
 		System.out.println("************");
 	}
@@ -136,7 +135,7 @@ public class MainGui {
 		
 		// 统计部分
 		JLabel label = new JLabel("联机人数:", SwingConstants.CENTER);
-		number.setText(String.valueOf(SystemConf.hostList.size()));
+		// number.setText(String.valueOf(SystemConf.hostList.size()));
 		number.setHorizontalAlignment(JLabel.CENTER);
 		JButton refresh = new JButton("刷新");
 
@@ -150,7 +149,7 @@ public class MainGui {
 
 		// 中部的文本框
 		JPanel middle = new JPanel();
-		text = new JTextArea(8, 37);
+		text = new JTextArea(7, 37);
 		text.setLineWrap(true);
 		JScrollPane jsText = new JScrollPane(text,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -239,6 +238,9 @@ public class MainGui {
 
 		// 发送文件
 		sendFile.addActionListener(new SendFile());
+		
+		// 填充JTable
+		updateHostList();
 
 	}
 
