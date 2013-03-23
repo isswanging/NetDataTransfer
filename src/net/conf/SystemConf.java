@@ -6,13 +6,13 @@ import net.vo.Host;
 
 public class SystemConf {
 	// 发送普通信息端口
-	public final static int textPort = 80;
+	public final static int textPort = 2324;
 
 	// 发送文件端口
-	public final static int filePort = 80;
+	public final static int filePort = 2324;
 
 	// 发送文件夹端口
-	public final static int folerPort = 800;
+	// public final static int folerPort = 800;
 
 	// 系统信息标识
 	public final static String SUCCESS = "success";
