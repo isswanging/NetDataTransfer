@@ -25,7 +25,7 @@ public class SystemConf {
 	public final static String broadcastIP = "255.255.255.255";
 
 	// 广播端口
-	public final static int broadcastPort = 232;
+	public final static int broadcastPort = 2325;
 
 	// 信号
 	public static int text = 0;

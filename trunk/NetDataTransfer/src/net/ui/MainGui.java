@@ -33,6 +33,7 @@ import net.listen.BroadcastMonitor;
 import net.listen.FileMonitor;
 import net.listen.UdpDataMonitor;
 import net.util.NetDomain;
+import net.util.OSUtil;
 import net.vo.DataPacket;
 import net.vo.Host;
 
@@ -74,7 +75,7 @@ public class MainGui {
 		try {
 			InetAddress addr = InetAddress.getLocalHost();
 			hostName = addr.getHostName();// 获取主机名
-			ip = addr.getHostAddress();// 获取ip地址
+			ip = OSUtil.getLocalIP();// 获取ip地址
 
 			Map<String, String> map = System.getenv();
 			userName = map.get("USERNAME");// 获取用户名
@@ -347,7 +348,7 @@ public class MainGui {
 			String targetIp = (String) row.elementAt(3);
 
 			if (targetIp.equals(MainGui.this.ip)) {
-				NoticeGui.warnNotice(jf, "不自己给自己发文件");
+				NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
 			} else {
 				// 选择文件
 				JFileChooser jFileChooser = new JFileChooser();
