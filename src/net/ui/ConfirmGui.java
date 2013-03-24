@@ -55,9 +55,14 @@ public class ConfirmGui {
 
 					String path = jFileChooser.getSelectedFile().getPath();
 					System.out.println(dp.getContent());
-					String[] s = dp.getContent().split("\\\\");
+					// 获取文件名
+					String[] s = dp.getContent().replaceAll("\\\\", "/")
+							.split("/");
+					// 文件分隔符
+					String fs = System.getProperties().getProperty(
+							"file.separator");
 					// 保存文件路径
-					String savePath = path + "\\" + s[s.length - 1];
+					String savePath = path + fs + s[s.length - 1];
 					System.out.println(savePath);
 
 					new Thread(new Transfer(savePath, s[s.length - 1], dp))
