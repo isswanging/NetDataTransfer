@@ -2,6 +2,7 @@ package net.listen;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,6 +54,14 @@ public class FileMonitor implements Runnable {
 					BufferedInputStream bis = new BufferedInputStream(
 							new FileInputStream(new File(
 									(String) dp.getContent())));
+
+					// 文件大小
+					long total = bis.available();
+					DataOutputStream o = new DataOutputStream(
+							socket.getOutputStream());
+					o.writeLong(total);
+
+					// 发文件
 					int len = 0;
 					byte[] bytes = new byte[1024];
 					while ((len = bis.read(bytes)) != -1) {
