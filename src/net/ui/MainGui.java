@@ -167,6 +167,7 @@ public class MainGui {
 		jf.add(top, BorderLayout.NORTH);
 		jf.add(middle, BorderLayout.CENTER);
 		jf.add(bottom, BorderLayout.SOUTH);
+		jf.pack();
 
 		// 右键菜单
 		popup = new JPopupMenu();
