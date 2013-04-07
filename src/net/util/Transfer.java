@@ -68,7 +68,7 @@ public class Transfer implements Runnable {
 		try {
 			addr = InetAddress.getLocalHost();
 			String hostName = addr.getHostName();// 获取主机名
-			String ip = OSUtil.getLocalIP();// 获取ip地址
+			String ip = SystemConf.hostIP;// 获取ip地址
 
 			// 发送TCP消息建立文件传输连接
 			socket = new Socket(dp.getIp(), SystemConf.filePort);
