@@ -35,4 +35,7 @@ public class SystemConf {
 	// 在线主机列表
 	public static Vector<Host> hostList = new Vector<Host>();
 
+	// 本机ip
+	public static String hostIP = "";
+
 }

@@ -10,7 +10,6 @@ import java.util.Map;
 
 import net.conf.SystemConf;
 import net.util.NetDomain;
-import net.util.OSUtil;
 import net.vo.Host;
 
 public class BroadcastMonitor implements Runnable {
@@ -35,7 +34,7 @@ public class BroadcastMonitor implements Runnable {
 				Host host = (Host) objectStream.readObject();
 				host.setState(0);
 
-				if (!host.getIp().equals(OSUtil.getLocalIP())) {
+				if (!host.getIp().equals(SystemConf.hostIP)) {
 					if (!NetDomain.containHost(host)) {
 						host.setState(1);
 						NetDomain.addHost(host);
@@ -45,7 +44,7 @@ public class BroadcastMonitor implements Runnable {
 						if (host.getTag() == 0) {
 							InetAddress addr = InetAddress.getLocalHost();
 							String hostName = addr.getHostName();// 获取主机名
-							String ip = OSUtil.getLocalIP();// 获取ip地址
+							String ip = SystemConf.hostIP;// 获取ip地址
 
 							Map<String, String> map = System.getenv();
 							String userName = map.get("USERNAME");// 获取用户名

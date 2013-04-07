@@ -19,7 +19,6 @@ import javax.swing.WindowConstants;
 
 import net.conf.SystemConf;
 import net.util.NetDomain;
-import net.util.OSUtil;
 import net.vo.DataPacket;
 
 public class ChatGui {
@@ -89,7 +88,7 @@ public class ChatGui {
 					try {
 						InetAddress addr = InetAddress.getLocalHost();
 						String hostName = addr.getHostName();// 获取主机名
-						String ip = OSUtil.getLocalIP();// 获取ip地址
+						String ip = SystemConf.hostIP;// 获取ip地址
 						String message = output.getText();
 						NetDomain.sendUdpData(udpSocket, new DataPacket(ip,
 								hostName, message, SystemConf.text),
