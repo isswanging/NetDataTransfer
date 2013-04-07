@@ -297,6 +297,9 @@ public class MainGui {
 			NoticeGui.errorNotice(jf, "IO异常");
 			System.exit(0);
 		}
+
+		// 获取本机IP
+		SystemConf.hostIP = OSUtil.getLocalIP();
 	}
 
 	// 更新主机列表
