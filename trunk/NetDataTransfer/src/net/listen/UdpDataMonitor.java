@@ -6,9 +6,12 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
+import javax.swing.JPanel;
+
 import net.conf.SystemConf;
 import net.ui.ChatGui;
 import net.ui.ConfirmGui;
+import net.ui.NoticeGui;
 import net.vo.DataPacket;
 
 public class UdpDataMonitor implements Runnable {
@@ -40,6 +43,10 @@ public class UdpDataMonitor implements Runnable {
 				}
 				if (dp.getTag() == SystemConf.filePre) {
 					new ConfirmGui(dp, UdpSocket);
+				}
+				if (dp.getTag() == SystemConf.refuse) {
+					NoticeGui.messageNotice(new JPanel(), "传输被" + dp.getIp()
+							+ "拒绝");
 				}
 
 			}
