@@ -257,7 +257,8 @@ public class MainGui {
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} finally {
-			socket.close();
+			if (socket != null)
+				socket.close();
 		}
 	}
 

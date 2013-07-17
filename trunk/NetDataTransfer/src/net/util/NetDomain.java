@@ -74,8 +74,10 @@ public class NetDomain {
 			e.printStackTrace();
 		} finally {
 			try {
-				objectStream.close();
-				byteArrayStream.close();
+				if (objectStream != null)
+					objectStream.close();
+				if (byteArrayStream != null)
+					byteArrayStream.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
