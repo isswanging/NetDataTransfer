@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -12,6 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import net.conf.SystemConf;
+import net.util.NetDomain;
 import net.util.Transfer;
 import net.vo.DataPacket;
 
@@ -75,6 +78,13 @@ public class ConfirmGui {
 		n.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				try { 
+					NetDomain.sendUdpData(new DatagramSocket(), new DataPacket(
+							SystemConf.hostIP, null, null, SystemConf.refuse),
+							dp.getIp(), SystemConf.textPort);
+				} catch (SocketException e1) {
+					e1.printStackTrace();
+				}
 				fr.dispose();
 			}
 		});

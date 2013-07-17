@@ -31,6 +31,7 @@ public class SystemConf {
 	public static int text = 0;
 	public static int filePre = 1;
 	public static int fileConf = 2;
+	public static int refuse = 3;
 
 	// 在线主机列表
 	public static Vector<Host> hostList = new Vector<Host>();
