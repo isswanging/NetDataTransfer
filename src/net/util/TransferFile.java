@@ -22,7 +22,7 @@ import net.conf.SystemConf;
 import net.ui.NoticeGui;
 import net.vo.DataPacket;
 
-public class Transfer implements Runnable {
+public class TransferFile implements Runnable {
 	JProgressBar bar = new JProgressBar(JProgressBar.CENTER);
 	JFrame frame = new JFrame("发送进度");
 
@@ -31,7 +31,7 @@ public class Transfer implements Runnable {
 	String savePath = "";
 	String fileName = "";
 
-	public Transfer(String path, String name, DataPacket data) {
+	public TransferFile(String path, String name, DataPacket data) {
 		this.savePath = path;
 		this.dp = data;
 		this.fileName = name;

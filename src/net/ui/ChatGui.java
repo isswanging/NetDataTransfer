@@ -70,7 +70,6 @@ public class ChatGui {
 		fr.add(jp, BorderLayout.SOUTH);
 		fr.setResizable(false);
 		fr.setVisible(true);
-		fr.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		close.addActionListener(new ActionListener() {
 			@Override

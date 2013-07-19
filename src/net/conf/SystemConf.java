@@ -12,7 +12,7 @@ public class SystemConf {
 	public final static int filePort = 2324;
 
 	// 发送文件夹端口
-	// public final static int folerPort = 800;
+	public final static int folerPort = 2325;
 
 	// 系统信息标识
 	public final static String SUCCESS = "success";
@@ -28,10 +28,12 @@ public class SystemConf {
 	public final static int broadcastPort = 2325;
 
 	// 信号
-	public static int text = 0;
-	public static int filePre = 1;
-	public static int fileConf = 2;
-	public static int refuse = 3;
+	public final static int text = 0;
+	public final static int filePre = 1;
+	public final static int fileConf = 2;
+	public final static int refuse = 3;
+	public final static int folderPre = 4;
+	public final static int folderConf = 5;
 
 	// 在线主机列表
 	public static Vector<Host> hostList = new Vector<Host>();
