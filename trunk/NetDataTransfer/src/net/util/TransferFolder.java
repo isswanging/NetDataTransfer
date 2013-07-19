@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -22,19 +23,19 @@ import net.conf.SystemConf;
 import net.ui.NoticeGui;
 import net.vo.DataPacket;
 
-public class TransferFile implements Runnable {
+public class TransferFolder implements Runnable {
 	JProgressBar bar = new JProgressBar(JProgressBar.CENTER);
 	JFrame frame = new JFrame("发送进度");
+	ArrayList<String> files = new ArrayList<String>();
+	String name = "";
 
 	Socket socket = null;
 	DataPacket dp = null;
-	String savePath = "";
-	String fileName = "";
 
-	public TransferFile(String path, String name, DataPacket data) {
-		this.savePath = path;
-		this.dp = data;
-		this.fileName = name;
+	public TransferFolder(String name, ArrayList<String> files, DataPacket dp) {
+		this.dp = dp;
+		this.files = files;
+		this.name = name;
 
 		// 设置界面
 		JPanel p = new JPanel();
@@ -58,6 +59,7 @@ public class TransferFile implements Runnable {
 			}
 
 		});
+
 	}
 
 	@Override
@@ -70,22 +72,23 @@ public class TransferFile implements Runnable {
 			String hostName = addr.getHostName();// 获取主机名
 			String ip = SystemConf.hostIP;// 获取ip地址
 
-			// 发送TCP消息建立文件传输连接
-			socket = new Socket(dp.getIp(), SystemConf.filePort);
+			socket = new Socket(dp.getIp(), SystemConf.folderPort);
+
+			// 把要传输的文件的路径发过去
 			ObjectOutputStream toServer = new ObjectOutputStream(
 					socket.getOutputStream());
 			toServer.writeObject(new DataPacket(ip, hostName, dp.getContent(),
-					SystemConf.fileConf));
+					SystemConf.folderConf));
 
-			// 设置文件大小
+			// 收到文件大小
 			DataInputStream in = new DataInputStream(socket.getInputStream());
 			long total = in.readLong();
 
 			// 接收文件
 			BufferedInputStream bis = new BufferedInputStream(
 					socket.getInputStream());
-			BufferedOutputStream bos = new BufferedOutputStream(
-					new FileOutputStream(new File(savePath)));
+			BufferedOutputStream bos = null;
+			byte[] bytes = new byte[1024];
 
 			// 设置进度条和读文件
 			bar.setMinimum(0);
@@ -93,18 +96,20 @@ public class TransferFile implements Runnable {
 			int len = 0;
 			long byteRead = 0;
 
-			byte[] bytes = new byte[1024];
-			System.out.println("Server begin to reaceive!");
-			while ((len = bis.read(bytes)) != -1) {
-				bos.write(bytes, 0, len);
-				// System.out.println("Server writing!");
-				byteRead += len;
-				bar.setValue((int) (byteRead * 100 / total));
+			for (String savePath : files) {
+				bos = new BufferedOutputStream(new FileOutputStream(new File(
+						savePath)));
+				while ((len = bis.read(bytes)) != -1) {
+					bos.write(bytes, 0, len);
+					// System.out.println("Server writing!");
+					byteRead += len;
+					bar.setValue((int) (byteRead * 100 / total));
+				}
 			}
 
 			System.out.println("get whole file");
 			frame.dispose();
-			NoticeGui.messageNotice(new JPanel(), "文件：" + fileName
+			NoticeGui.messageNotice(new JPanel(), "文件夹：" + name
 					+ "\n       接收完毕");
 
 			in.close();

@@ -12,7 +12,7 @@ public class SystemConf {
 	public final static int filePort = 2324;
 
 	// 发送文件夹端口
-	public final static int folerPort = 2325;
+	public final static int folderPort = 2325;
 
 	// 系统信息标识
 	public final static String SUCCESS = "success";

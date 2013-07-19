@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 // 数据包
 public class DataPacket implements Serializable {
-	private static final long serialVersionUID = 8280888121375940006L;
-
+	private static final long serialVersionUID = -4196219561242601831L;
+	
 	private String ip;
 	private String senderName;
 	private String content;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class BuildFolder {
 	ArrayList<String> folders = new ArrayList<String>();
 	ArrayList<String> files = new ArrayList<String>();
+	String name;
 
 	public BuildFolder(String root, String content) {
 		// 解析目录结构
@@ -33,6 +34,7 @@ public class BuildFolder {
 
 		// 拼接文件夹地址
 		String[] folderPaths = text.split("\\|");
+		this.setName(folderPaths[0]);
 
 		// 判断是否包含文件
 		if (folderPaths[folderPaths.length - 1].contains("*")) {
@@ -74,4 +76,11 @@ public class BuildFolder {
 		return files;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

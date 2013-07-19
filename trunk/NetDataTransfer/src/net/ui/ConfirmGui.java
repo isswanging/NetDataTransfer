@@ -17,6 +17,7 @@ import net.conf.SystemConf;
 import net.util.BuildFolder;
 import net.util.NetDomain;
 import net.util.TransferFile;
+import net.util.TransferFolder;
 import net.vo.DataPacket;
 
 public class ConfirmGui {
@@ -111,10 +112,17 @@ public class ConfirmGui {
 				String path = jFileChooser.getSelectedFile().getPath();
 				String content = dp.getContent();
 
+				// 建立本地存放的目录
 				BuildFolder bf = new BuildFolder(path, content);
 
 				if (bf.getFiles().size() == 0) {
+					// 如果是空文件夹，传输就就结束了
 					NoticeGui.messageNotice(new JPanel(), "传送完毕");
+				} else {
+					// 把需要传输的文件的路径发过去即可
+					String[] paths = content.split("\\|");
+					dp.setContent(paths[paths.length - 1]);
+					new Thread(new TransferFolder(bf.getName(),bf.getFiles(), dp)).start();
 				}
 
 			}
