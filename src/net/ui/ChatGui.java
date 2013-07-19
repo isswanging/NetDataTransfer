@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,7 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.WindowConstants;
 
 import net.conf.SystemConf;
 import net.util.NetDomain;
@@ -70,6 +71,13 @@ public class ChatGui {
 		fr.add(jp, BorderLayout.SOUTH);
 		fr.setResizable(false);
 		fr.setVisible(true);
+
+		fr.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				fr.dispose();
+			}
+		});
 
 		close.addActionListener(new ActionListener() {
 			@Override

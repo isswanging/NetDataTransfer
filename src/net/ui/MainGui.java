@@ -32,6 +32,7 @@ import javax.swing.table.DefaultTableModel;
 import net.conf.SystemConf;
 import net.listen.BroadcastMonitor;
 import net.listen.FileMonitor;
+import net.listen.FolderMonitor;
 import net.listen.UdpDataMonitor;
 import net.util.FolderPath;
 import net.util.NetDomain;
@@ -71,6 +72,7 @@ public class MainGui {
 		new Thread(new BroadcastMonitor()).start();
 		new Thread(new UdpDataMonitor()).start();
 		new Thread(new FileMonitor()).start();
+		new Thread(new FolderMonitor()).start();
 	}
 
 	private void login() {
