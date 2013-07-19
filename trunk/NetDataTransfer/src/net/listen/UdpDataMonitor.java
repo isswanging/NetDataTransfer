@@ -41,7 +41,8 @@ public class UdpDataMonitor implements Runnable {
 				if (dp.getTag() == SystemConf.text) {
 					new ChatGui(dp, UdpSocket);
 				}
-				if (dp.getTag() == SystemConf.filePre) {
+				if (dp.getTag() == SystemConf.filePre
+						|| dp.getTag() == SystemConf.folderPre) {
 					new ConfirmGui(dp, UdpSocket);
 				}
 				if (dp.getTag() == SystemConf.refuse) {

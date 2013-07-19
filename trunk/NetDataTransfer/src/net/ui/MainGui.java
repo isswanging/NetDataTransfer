@@ -6,6 +6,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -32,6 +33,7 @@ import net.conf.SystemConf;
 import net.listen.BroadcastMonitor;
 import net.listen.FileMonitor;
 import net.listen.UdpDataMonitor;
+import net.util.FolderPath;
 import net.util.NetDomain;
 import net.util.OSUtil;
 import net.vo.DataPacket;
@@ -172,9 +174,9 @@ public class MainGui {
 		// 右键菜单
 		popup = new JPopupMenu();
 		JMenuItem sendFile = new JMenuItem("发送文件");
-		// JMenuItem sendFolder = new JMenuItem("发送文件夹");
+		JMenuItem sendFolder = new JMenuItem("发送文件夹");
 		popup.add(sendFile);
-		// popup.add(sendFolder);
+		popup.add(sendFolder);
 
 		// 填充JTable
 		updateHostList();
@@ -243,6 +245,9 @@ public class MainGui {
 
 		// 发送文件
 		sendFile.addActionListener(new SendFile());
+
+		// 发送文件夹
+		sendFolder.addActionListener(new SendFolder());
 
 	}
 
@@ -352,9 +357,9 @@ public class MainGui {
 			Vector<?> row = (Vector<?>) model.getDataVector().get(i);
 			String targetIp = (String) row.elementAt(3);
 
-//			if (targetIp.equals(MainGui.this.ip)) {
-//				NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
-//			} else {
+			if (targetIp.equals(MainGui.this.ip)) {
+				NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+			} else {
 				// 选择文件
 				JFileChooser jFileChooser = new JFileChooser();
 				jFileChooser.setMultiSelectionEnabled(true);
@@ -365,13 +370,52 @@ public class MainGui {
 					System.out.println(path);
 
 					// 发送确认消息
-					sendUdpData(hostName, ip, targetIp, path, 1,
-							SystemConf.textPort);
+					sendUdpData(hostName, ip, targetIp, path,
+							SystemConf.filePre, SystemConf.textPort);
 
 				}
 			}
 
-		//}
+		}
+
+	}
+
+	private class SendFolder implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int i = userList.getSelectedRow();
+			Vector<?> row = (Vector<?>) model.getDataVector().get(i);
+			String targetIp = (String) row.elementAt(3);
+
+			// if (targetIp.equals(MainGui.this.ip)) {
+			// NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+			// } else {
+			// 选择文件夹
+			JFileChooser jFileChooser = new JFileChooser();
+			jFileChooser.setMultiSelectionEnabled(true);
+			jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+			if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
+				String p = jFileChooser.getSelectedFile().getPath();
+				FolderPath fpath = new FolderPath(p);
+				StringBuilder path = new StringBuilder(p).append("|");
+
+				for (File f : fpath.getFolders()) {
+					path.append(f.getPath() + "|");
+				}
+
+				for (File f : fpath.getFiles()) {
+					path.append(f.getPath() + "*");
+				}
+
+				System.out.println(path.toString());
+
+				sendUdpData(hostName, ip, targetIp, path.toString(),
+						SystemConf.folderPre, SystemConf.textPort);
+			}
+			// }
+		}
 
 	}
 
