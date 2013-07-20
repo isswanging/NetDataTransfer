@@ -32,9 +32,7 @@ public class UdpDataMonitor implements Runnable {
 				UdpSocket.receive(UdpPacket);
 
 				// 解析处理并显示
-				byte[] buf = new byte[UdpPacket.getLength()];
-				System.arraycopy(UdpPacket.getData(), 0, buf, 0, buf.length);
-				byteArrayStram = new ByteArrayInputStream(buf);
+				byteArrayStram = new ByteArrayInputStream(UdpPacket.getData());
 				objectStream = new ObjectInputStream(byteArrayStram);
 				dp = (DataPacket) objectStream.readObject();
 

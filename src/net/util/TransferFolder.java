@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -82,6 +83,8 @@ public class TransferFolder implements Runnable {
 
 			// 收到文件大小
 			DataInputStream in = new DataInputStream(socket.getInputStream());
+			DataOutputStream out = new DataOutputStream(
+					socket.getOutputStream());
 			long total = in.readLong();
 
 			// 接收文件
@@ -96,15 +99,20 @@ public class TransferFolder implements Runnable {
 			int len = 0;
 			long byteRead = 0;
 
-			for (String savePath : files) {
+			for (int i = 0; i < files.size(); i++) {
+				out.writeInt(i);
+				out.flush();
+
 				bos = new BufferedOutputStream(new FileOutputStream(new File(
-						savePath)));
+						files.get(i))));
 				while ((len = bis.read(bytes)) != -1) {
 					bos.write(bytes, 0, len);
-					// System.out.println("Server writing!");
+					bos.flush();
 					byteRead += len;
 					bar.setValue((int) (byteRead * 100 / total));
 				}
+				
+				System.out.println("get one file-----------------");
 			}
 
 			System.out.println("get whole file");
@@ -116,6 +124,7 @@ public class TransferFolder implements Runnable {
 			toServer.close();
 			bos.close();
 			bis.close();
+			out.close();
 			socket.close();
 
 		} catch (UnknownHostException e) {
