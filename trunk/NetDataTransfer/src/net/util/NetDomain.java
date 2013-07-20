@@ -19,7 +19,7 @@ public class NetDomain {
 		try {
 			new DatagramSocket(SystemConf.textPort).close();
 			new ServerSocket(SystemConf.filePort).close();
-			// new ServerSocket(SystemConf.folerPort).close();
+			new ServerSocket(SystemConf.folderPort).close();
 
 			return SystemConf.SUCCESS;
 		} catch (SocketException e) {

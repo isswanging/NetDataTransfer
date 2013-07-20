@@ -97,6 +97,7 @@ public class TransferFile implements Runnable {
 			System.out.println("Server begin to reaceive!");
 			while ((len = bis.read(bytes)) != -1) {
 				bos.write(bytes, 0, len);
+				bos.flush();
 				// System.out.println("Server writing!");
 				byteRead += len;
 				bar.setValue((int) (byteRead * 100 / total));

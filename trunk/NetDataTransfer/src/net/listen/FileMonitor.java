@@ -66,6 +66,7 @@ public class FileMonitor implements Runnable {
 					byte[] bytes = new byte[1024];
 					while ((len = bis.read(bytes)) != -1) {
 						bos.write(bytes, 0, len);
+						bos.flush();
 					}
 					bis.close();
 					bos.close();
