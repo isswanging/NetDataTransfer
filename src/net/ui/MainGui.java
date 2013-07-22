@@ -40,6 +40,8 @@ import net.util.OSUtil;
 import net.vo.DataPacket;
 import net.vo.Host;
 
+import org.apache.log4j.Logger;
+
 // 程序入口
 public class MainGui {
 	JTable userList;
@@ -54,6 +56,8 @@ public class MainGui {
 	String userName;
 	String userDomain;
 
+	private final Logger logger = Logger.getLogger(this.getClass());
+
 	public MainGui() {
 		// 检查端口
 		preCheck();
@@ -63,8 +67,6 @@ public class MainGui {
 		login();
 		// 建立界面
 		initUI();
-
-		System.out.println("************");
 	}
 
 	private void listen() {
@@ -88,6 +90,8 @@ public class MainGui {
 			// 加入在线列表
 			Host host = new Host(userName, userDomain, ip, hostName, 1, 0);
 			NetDomain.addHost(host);
+
+			logger.info("主机" + ip + "登录成功");
 
 			// 广播登录信息
 			NetDomain.sendUdpData(new DatagramSocket(), host,
@@ -187,7 +191,7 @@ public class MainGui {
 		refresh.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				System.out.println("refreshing......");
+				logger.info("refreshing......");
 				refresh();
 			}
 		});
@@ -284,9 +288,7 @@ public class MainGui {
 	}
 
 	private void clearTable() {
-		System.out.println("before clear" + SystemConf.hostList.size());
 		SystemConf.hostList.clear();// = new Vector<Host>();
-		// System.out.println(SystemConf.hostList.size());
 
 		int rowCount = userList.getRowCount();
 		DefaultTableModel model = (DefaultTableModel) userList.getModel();
@@ -299,21 +301,23 @@ public class MainGui {
 	private void preCheck() {
 		if (NetDomain.check().equals(SystemConf.ERROR)) {
 			NoticeGui.errorNotice(jf, "端口被占用");
+			logger.error("端口被占用");
 			System.exit(0);
 		}
 		if (NetDomain.check().equals(SystemConf.FAIL)) {
 			NoticeGui.errorNotice(jf, "IO异常");
+			logger.error("IO异常！");
 			System.exit(0);
 		}
 
 		// 获取本机IP
+		logger.info("端口正常！");
 		SystemConf.hostIP = OSUtil.getLocalIP();
 	}
 
 	// 更新主机列表
 	private void updateHostList() {
-		System.out.println("table size"
-				+ String.valueOf(SystemConf.hostList.size()));
+		logger.debug("table size:" + String.valueOf(SystemConf.hostList.size()));
 		number.setText(String.valueOf(SystemConf.hostList.size()));
 		for (Host host : SystemConf.hostList) {
 			model.addRow(new String[] { host.getUserName(),
@@ -369,7 +373,7 @@ public class MainGui {
 
 				if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
 					String path = jFileChooser.getSelectedFile().getPath();
-					System.out.println(path);
+					logger.debug(path);
 
 					// 发送确认消息
 					sendUdpData(hostName, ip, targetIp, path,
