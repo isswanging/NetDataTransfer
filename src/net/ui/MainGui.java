@@ -40,7 +40,8 @@ import net.util.OSUtil;
 import net.vo.DataPacket;
 import net.vo.Host;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 // 程序入口
 public class MainGui {
@@ -56,7 +57,7 @@ public class MainGui {
 	String userName;
 	String userDomain;
 
-	private final Logger logger = Logger.getLogger(this.getClass());
+	private final Log logger = LogFactory.getLog(this.getClass());
 
 	public MainGui() {
 		// 检查端口
