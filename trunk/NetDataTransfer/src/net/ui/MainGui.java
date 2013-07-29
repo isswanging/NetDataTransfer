@@ -1,11 +1,19 @@
 package net.ui;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
 import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -14,6 +22,7 @@ import java.net.SocketException;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -25,7 +34,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
 import javax.swing.event.MouseInputListener;
 import javax.swing.table.DefaultTableModel;
 
@@ -51,6 +59,8 @@ public class MainGui {
 	JLabel number;
 	JTextArea text;
 	JFrame jf;
+	TrayIcon trayIcon; // 托盘图标
+	SystemTray tray; // 本操作系统托盘的实例
 
 	String hostName;
 	String ip;
@@ -119,7 +129,7 @@ public class MainGui {
 		int screenWidth = screenSize.width;
 		int screenHeight = screenSize.height;
 		jf.setLocation(screenWidth / 2 - wide / 2, screenHeight / 2 - high / 2);
-		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		// jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		// 上部
 		JPanel top = new JPanel();
@@ -145,7 +155,6 @@ public class MainGui {
 
 		// 统计部分
 		JLabel label = new JLabel("联机人数:", SwingConstants.CENTER);
-		// number.setText(String.valueOf(SystemConf.hostList.size()));
 		number.setHorizontalAlignment(JLabel.CENTER);
 		JButton refresh = new JButton("刷新");
 
@@ -256,6 +265,60 @@ public class MainGui {
 		// 发送文件夹
 		sendFolder.addActionListener(new SendFolder());
 
+		// 系统托盘
+		if (SystemTray.isSupported()) {
+			tray = SystemTray.getSystemTray(); // 获得本操作系统托盘的实例
+			ImageIcon icon = new ImageIcon("./src/hat.png"); // 将要显示到托盘中的图标
+			PopupMenu pop = new PopupMenu(); // 构造一个右键弹出式菜单
+			final MenuItem show = new MenuItem("open");
+			final MenuItem exit = new MenuItem("exit");
+			pop.add(show);
+			pop.add(exit);
+			trayIcon = new TrayIcon(icon.getImage(), "飞鸽", pop);// 实例化托盘图标
+			trayIcon.setImageAutoSize(true);
+			
+			try {
+				tray.add(trayIcon); // 将托盘图标添加到系统的托盘实例中
+			} catch (AWTException ex) {
+				ex.printStackTrace();
+			}
+			
+			// 托盘图标操作
+			trayIcon.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if (e.getClickCount() == 2)// 鼠标双击图标
+					{
+						jf.setExtendedState(JFrame.NORMAL);// 设置状态为正常
+						jf.setVisible(true);// 显示主窗体
+					}
+				}
+			});
+
+			// 托盘选项注册事件
+			ActionListener trayAction = new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// 退出程序
+					if (e.getSource() == exit) {
+						System.exit(0);// 退出程序
+					}
+					// 打开程序
+					if (e.getSource() == show) {
+						jf.setExtendedState(JFrame.NORMAL);// 设置状态为正常
+						jf.setVisible(true);
+					}
+				}
+			};
+			show.addActionListener(trayAction);
+			exit.addActionListener(trayAction);
+
+			// 窗体最小化事件
+			jf.addWindowListener(new WindowAdapter() {
+				public void windowIconified(WindowEvent e) {
+					jf.setVisible(false);// 使窗口不可视
+					jf.dispose();// 释放当前窗体资源
+				}
+			});
+		}
 	}
 
 	// 发送UDP数据
@@ -351,9 +414,7 @@ public class MainGui {
 					}
 				}
 			}
-
 		}
-
 	}
 
 	private class SendFile implements ActionListener {
@@ -379,12 +440,9 @@ public class MainGui {
 					// 发送确认消息
 					sendUdpData(hostName, ip, targetIp, path,
 							SystemConf.filePre, SystemConf.textPort);
-
 				}
 			}
-
 		}
-
 	}
 
 	private class SendFolder implements ActionListener {
@@ -412,12 +470,9 @@ public class MainGui {
 					for (File f : fpath.getFolders()) {
 						path.append(f.getPath() + "|");
 					}
-
 					for (File f : fpath.getFiles()) {
 						path.append(f.getPath() + "*");
 					}
-
-					System.out.println(path.toString());
 
 					sendUdpData(hostName, ip, targetIp, path.toString(),
 							SystemConf.folderPre, SystemConf.textPort);
