@@ -268,7 +268,7 @@ public class MainGui {
 		// 系统托盘
 		if (SystemTray.isSupported()) {
 			tray = SystemTray.getSystemTray(); // 获得本操作系统托盘的实例
-			ImageIcon icon = new ImageIcon("./src/hat.png"); // 将要显示到托盘中的图标
+			ImageIcon icon = new ImageIcon("./src/owl.png"); // 将要显示到托盘中的图标
 			PopupMenu pop = new PopupMenu(); // 构造一个右键弹出式菜单
 			final MenuItem show = new MenuItem("open");
 			final MenuItem exit = new MenuItem("exit");
@@ -276,13 +276,13 @@ public class MainGui {
 			pop.add(exit);
 			trayIcon = new TrayIcon(icon.getImage(), "飞鸽", pop);// 实例化托盘图标
 			trayIcon.setImageAutoSize(true);
-			
+
 			try {
 				tray.add(trayIcon); // 将托盘图标添加到系统的托盘实例中
 			} catch (AWTException ex) {
 				ex.printStackTrace();
 			}
-			
+
 			// 托盘图标操作
 			trayIcon.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
@@ -318,6 +318,8 @@ public class MainGui {
 					jf.dispose();// 释放当前窗体资源
 				}
 			});
+		} else {
+			jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		}
 	}
 
