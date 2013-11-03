@@ -1,7 +1,5 @@
 package net.listen;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -10,6 +8,8 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import net.conf.SystemConf;
 import net.vo.DataPacket;
@@ -41,7 +41,6 @@ public class FolderMonitor implements Runnable {
 
 		public SendFiles(Socket socket) {
 			this.socket = socket;
-
 		}
 
 		@Override
@@ -67,45 +66,14 @@ public class FolderMonitor implements Runnable {
 							socket.getInputStream());
 					out.writeLong(total);
 					out.flush();
+					String taskId = in.readUTF();
 
 					// 开始一个个的发送文件
-					BufferedOutputStream bos = new BufferedOutputStream(
-							socket.getOutputStream());
-					BufferedInputStream bis = null;
-					byte[] bytes = new byte[1024];
-					int i = 0;
-					// int tag = 0;
-
-					// 发送
-					while (true) {
-						// while (true) {
-						// i = in.readInt();
-						// if (i == tag || tag == filesPath.length) {
-						// break;
-						// }
-						// }
-						i = in.readInt();
-						if (i == filesPath.length) {
-							break;
-						} else {
-							// 传数据
-							bis = new BufferedInputStream(new FileInputStream(
-									filesPath[i]));
-							int len = 0;
-							while ((len = bis.read(bytes)) != -1) {
-								bos.write(bytes, 0, len);
-								bos.flush();
-							}
-
-							// tag++;
-							System.out.println("next************");
-
-						}
+					ExecutorService executorService = Executors
+							.newCachedThreadPool();
+					for (int i = 0; i < filesPath.length; i++) {
+						executorService.execute(sendFile(taskId,filesPath, i,socket));
 					}
-
-					bis.close();
-					bos.close();
-
 				}
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -115,4 +83,17 @@ public class FolderMonitor implements Runnable {
 
 		}
 	}
+
+	public Runnable sendFile(String taskId, String[] filesPath, int i,
+			Socket socket) {
+		return new Runnable(){
+
+			@Override
+			public void run() {
+				
+			}
+			
+		};
+	}
+
 }

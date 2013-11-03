@@ -1,5 +1,7 @@
 package net.conf;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
 import net.vo.Host;
@@ -41,4 +43,9 @@ public class SystemConf {
 	// 本机ip
 	public static String hostIP = "";
 
+	// 传输文件夹任务列表
+	public static HashMap<String, ArrayList<String>> taskList = new HashMap<String, ArrayList<String>>();
+
+	// 记录进度
+	public static HashMap<String, Long> progress = new HashMap<String, Long>();
 }

@@ -12,6 +12,7 @@ import net.conf.SystemConf;
 import net.ui.ChatGui;
 import net.ui.ConfirmGui;
 import net.ui.NoticeGui;
+import net.util.SendFolder;
 import net.vo.DataPacket;
 
 public class UdpDataMonitor implements Runnable {
@@ -37,15 +38,18 @@ public class UdpDataMonitor implements Runnable {
 				dp = (DataPacket) objectStream.readObject();
 
 				if (dp.getTag() == SystemConf.text) {
-					new ChatGui(dp, UdpSocket);
+					new ChatGui(dp);
 				}
 				if (dp.getTag() == SystemConf.filePre
 						|| dp.getTag() == SystemConf.folderPre) {
-					new ConfirmGui(dp, UdpSocket);
+					new ConfirmGui(dp);
 				}
 				if (dp.getTag() == SystemConf.refuse) {
 					NoticeGui.messageNotice(new JPanel(), "传输被" + dp.getIp()
 							+ "拒绝");
+				}
+				if(dp.getTag() == SystemConf.folderConf){
+					new SendFolder(dp);
 				}
 
 			}

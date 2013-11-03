@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -16,8 +18,8 @@ import javax.swing.SwingConstants;
 import net.conf.SystemConf;
 import net.util.BuildFolder;
 import net.util.NetDomain;
+import net.util.OSUtil;
 import net.util.TransferFile;
-import net.util.TransferFolder;
 import net.vo.DataPacket;
 
 public class ConfirmGui {
@@ -25,9 +27,8 @@ public class ConfirmGui {
 	DatagramSocket udpSocket = null;
 	DataPacket dp = null;
 
-	public ConfirmGui(DataPacket dp2, DatagramSocket udp) {
+	public ConfirmGui(DataPacket dp2) {
 		this.dp = dp2;
-		this.udpSocket = udp;
 
 		// 构造用户界面
 		fr = new JFrame("消息");
@@ -112,8 +113,15 @@ public class ConfirmGui {
 				String path = jFileChooser.getSelectedFile().getPath();
 				String content = dp.getContent();
 
+				// 获取当前时间作为任务id
+				String timeId = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+						.format(new Date());
 				// 建立本地存放的目录
 				BuildFolder bf = new BuildFolder(path, content);
+				// 存放
+				SystemConf.taskList.put(timeId, bf.getFiles());
+				SystemConf.progress.put(timeId,
+						Long.valueOf(dp.getSenderName()));
 
 				if (bf.getFiles().size() == 0) {
 					// 如果是空文件夹，传输就就结束了
@@ -122,11 +130,18 @@ public class ConfirmGui {
 					// 把需要传输的文件的路径发过去即可
 					String[] paths = content.split("\\|");
 					dp.setContent(paths[paths.length - 1]);
-					new Thread(new TransferFolder(bf.getName(),bf.getFiles(), dp)).start();
+					dp.setTag(SystemConf.folderConf);
+					dp.setSenderName(timeId);
+					String targetIp = dp.getIp();
+					dp.setIp(OSUtil.getLocalIP());
+					try {
+						NetDomain.sendUdpData(new DatagramSocket(), dp,
+								targetIp, SystemConf.textPort);
+					} catch (SocketException e1) {
+						e1.printStackTrace();
+					}
 				}
-
 			}
 		}
-
 	}
 }
