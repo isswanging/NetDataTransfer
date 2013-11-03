@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -455,31 +456,40 @@ public class MainGui {
 			Vector<?> row = (Vector<?>) model.getDataVector().get(i);
 			String targetIp = (String) row.elementAt(3);
 
-			if (targetIp.equals(MainGui.this.ip)) {
-				NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
-			} else {
-				// 选择文件夹
-				JFileChooser jFileChooser = new JFileChooser();
-				jFileChooser.setMultiSelectionEnabled(true);
-				jFileChooser
-						.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			// if (targetIp.equals(MainGui.this.ip)) {
+			// NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+			// } else {
+			// 选择文件夹
+			JFileChooser jFileChooser = new JFileChooser();
+			jFileChooser.setMultiSelectionEnabled(true);
+			jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-				if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
-					String p = jFileChooser.getSelectedFile().getPath();
-					FolderPath fpath = new FolderPath(p);
-					StringBuilder path = new StringBuilder(p).append("|");
+			if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
+				String p = jFileChooser.getSelectedFile().getPath();
+				FolderPath fpath = new FolderPath(p);
+				StringBuilder path = new StringBuilder(p).append("|");
 
-					for (File f : fpath.getFolders()) {
-						path.append(f.getPath() + "|");
-					}
+				for (File f : fpath.getFolders()) {
+					path.append(f.getPath() + "|");
+				}
+
+				// 记录文件总的大小
+				long total = 0;
+				FileInputStream fis = null;
+				try {
 					for (File f : fpath.getFiles()) {
 						path.append(f.getPath() + "*");
+						fis = new FileInputStream(f.getPath());
+						total += fis.available();
 					}
-
-					sendUdpData(hostName, ip, targetIp, path.toString(),
-							SystemConf.folderPre, SystemConf.textPort);
+				} catch (IOException ex) {
+					ex.printStackTrace();
 				}
+
+				sendUdpData(String.valueOf(total), ip, targetIp, path.toString(),
+						SystemConf.folderPre, SystemConf.textPort);
 			}
+			// }
 		}
 	}
 

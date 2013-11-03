@@ -11,7 +11,6 @@ public class FolderPath {
 	public FolderPath(String path) {
 		this.root = path;
 		init(root);
-
 	}
 
 	public ArrayList<File> getFolders() {
