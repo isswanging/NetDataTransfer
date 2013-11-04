@@ -128,6 +128,7 @@ public class ConfirmGui {
 					String targetIp = dp.getIp();
 					dp.setIp(OSUtil.getLocalIP());
 					try {
+						new ProgressBar(timeId);
 						NetDomain.sendUdpData(new DatagramSocket(), dp,
 								targetIp, SystemConf.textPort);
 					} catch (SocketException e1) {
