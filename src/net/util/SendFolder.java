@@ -11,71 +11,71 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SendFolder {
-	private final Log logger = LogFactory.getLog(this.getClass());
+    private final Log logger = LogFactory.getLog(this.getClass());
 
-	public SendFolder(DataPacket dp) {
-		ExecutorService executorService = Executors.newCachedThreadPool();
-		String[] filesPath = dp.getContent().split("\\*");
+    public SendFolder(DataPacket dp) {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        String[] filesPath = dp.getContent().split("\\*");
 
-		for (int i = 0; i < filesPath.length; i++) {
-			executorService.execute(sendFile(dp.getIp(), filesPath[i], i,
-					dp.getSenderName()));
-		}
-	}
+        for (int i = 0; i < filesPath.length; i++) {
+            executorService.execute(sendFile(dp.getIp(), filesPath[i], i,
+                    dp.getSenderName()));
+        }
+    }
 
-	private Runnable sendFile(final String Ip, final String filePath,
-			final int i, final String taskId) {
-		return new Runnable() {
-			private Socket socket = null;
-			private String ip = Ip;
-			private int port = SystemConf.folderPort;
+    private Runnable sendFile(final String Ip, final String filePath,
+                              final int i, final String taskId) {
+        return new Runnable() {
+            private Socket socket = null;
+            private String ip = Ip;
+            private int port = SystemConf.folderPort;
 
-			@Override
-			public void run() {
-				try {
-					// 建立TCP连接
-					if (connect()) {
-						BufferedInputStream bis = new BufferedInputStream(
-								new FileInputStream(new File(filePath)));
-						DataOutputStream dos = new DataOutputStream(
-								socket.getOutputStream());
+            @Override
+            public void run() {
+                try {
+                    // 建立TCP连接
+                    if (connect()) {
+                        BufferedInputStream bis = new BufferedInputStream(
+                                new FileInputStream(new File(filePath)));
+                        DataOutputStream dos = new DataOutputStream(
+                                socket.getOutputStream());
 
-						// 发送任务id和文件路径
-						dos.writeUTF(taskId);
-						dos.flush();
-						dos.writeInt(i);
-						dos.flush();
+                        // 发送任务id和文件路径
+                        dos.writeUTF(taskId);
+                        dos.flush();
+                        dos.writeInt(i);
+                        dos.flush();
 
-						// 发文件
-						int len;
-						byte[] bytes = new byte[1024];
-						while ((len = bis.read(bytes)) != -1) {
-							dos.write(bytes, 0, len);
-							dos.flush();
-						}
-						dos.flush();
-						bis.close();
-						dos.close();
-						socket.close();
-						logger.info(filePath + " 发送完成");
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+                        // 发文件
+                        int len;
+                        byte[] bytes = new byte[1024];
+                        while ((len = bis.read(bytes)) != -1) {
+                            dos.write(bytes, 0, len);
+                            dos.flush();
+                        }
+                        dos.flush();
+                        bis.close();
+                        dos.close();
+                        socket.close();
+                        logger.info(filePath + " 发送完成");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-			}
+            }
 
-			protected boolean connect() {
-				try {
-					socket = new Socket(ip, port);
-					logger.info("TCP连接成功！");
-					return true;
-				} catch (Exception e) {
-					logger.error("TCP连接失败！");
-					return false;
-				}
-			}
-		};
-	}
+            protected boolean connect() {
+                try {
+                    socket = new Socket(ip, port);
+                    logger.info("TCP连接成功！");
+                    return true;
+                } catch (Exception e) {
+                    logger.error("TCP连接失败！");
+                    return false;
+                }
+            }
+        };
+    }
 
 }
