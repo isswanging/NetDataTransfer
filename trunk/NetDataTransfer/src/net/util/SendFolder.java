@@ -68,16 +68,14 @@ public class SendFolder {
 			protected boolean connect() {
 				try {
 					socket = new Socket(ip, port);
-					logger.info("连接服务器成功！");
+					logger.info("TCP连接成功！");
 					return true;
 				} catch (Exception e) {
-					logger.error("连接服务器失败！");
+					logger.error("TCP连接失败！");
 					return false;
 				}
 			}
-
 		};
-
 	}
 
 }
