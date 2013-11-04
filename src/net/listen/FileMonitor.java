@@ -1,18 +1,12 @@
 package net.listen;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import net.conf.SystemConf;
+import net.vo.DataPacket;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-
-import net.conf.SystemConf;
-import net.vo.DataPacket;
 
 public class FileMonitor implements Runnable {
 	ServerSocket server = null;
@@ -51,7 +45,7 @@ public class FileMonitor implements Runnable {
 				if (dp.getTag() == SystemConf.fileConf) {
 					BufferedInputStream bis = new BufferedInputStream(
 							new FileInputStream(new File(
-									(String) dp.getContent())));
+									 dp.getContent())));
 
 					// 文件大小
 					long total = bis.available();
@@ -62,7 +56,7 @@ public class FileMonitor implements Runnable {
 					// 发文件
 					BufferedOutputStream bos = new BufferedOutputStream(
 							socket.getOutputStream());
-					int len = 0;
+					int len;
 					byte[] bytes = new byte[1024];
 					while ((len = bis.read(bytes)) != -1) {
 						bos.write(bytes, 0, len);

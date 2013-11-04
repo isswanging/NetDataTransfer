@@ -1,20 +1,5 @@
 package net.ui;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
 import net.conf.SystemConf;
 import net.util.BuildFolder;
 import net.util.NetDomain;
@@ -22,9 +7,17 @@ import net.util.OSUtil;
 import net.util.TransferFile;
 import net.vo.DataPacket;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ConfirmGui {
 	JFrame fr;
-	DatagramSocket udpSocket = null;
 	DataPacket dp = null;
 
 	public ConfirmGui(DataPacket dp2) {

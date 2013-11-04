@@ -1,13 +1,5 @@
 package net.listen;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-
-import javax.swing.JPanel;
-
 import net.conf.SystemConf;
 import net.ui.ChatGui;
 import net.ui.ConfirmGui;
@@ -15,12 +7,19 @@ import net.ui.NoticeGui;
 import net.util.SendFolder;
 import net.vo.DataPacket;
 
+import javax.swing.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+
 public class UdpDataMonitor implements Runnable {
 	DatagramSocket UdpSocket = null;
 	DatagramPacket UdpPacket = null;
 	DataPacket dp = null;
 	ObjectInputStream objectStream = null;
-	ByteArrayInputStream byteArrayStram = null;
+	ByteArrayInputStream byteArrayStream = null;
 
 	@Override
 	public void run() {
@@ -33,8 +32,8 @@ public class UdpDataMonitor implements Runnable {
 				UdpSocket.receive(UdpPacket);
 
 				// 解析处理并显示
-				byteArrayStram = new ByteArrayInputStream(UdpPacket.getData());
-				objectStream = new ObjectInputStream(byteArrayStram);
+				byteArrayStream = new ByteArrayInputStream(UdpPacket.getData());
+				objectStream = new ObjectInputStream(byteArrayStream);
 				dp = (DataPacket) objectStream.readObject();
 
 				if (dp.getTag() == SystemConf.text) {
@@ -61,7 +60,7 @@ public class UdpDataMonitor implements Runnable {
 			try {
 				UdpSocket.close();
 				objectStream.close();
-				byteArrayStram.close();
+				byteArrayStream.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

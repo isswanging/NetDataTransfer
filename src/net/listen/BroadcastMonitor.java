@@ -1,5 +1,9 @@
 package net.listen;
 
+import net.conf.SystemConf;
+import net.util.NetDomain;
+import net.vo.Host;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -7,10 +11,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
-
-import net.conf.SystemConf;
-import net.util.NetDomain;
-import net.vo.Host;
 
 public class BroadcastMonitor implements Runnable {
 	DatagramSocket broadSocket = null;

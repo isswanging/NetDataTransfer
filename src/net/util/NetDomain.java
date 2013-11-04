@@ -1,16 +1,12 @@
 package net.util;
 
+import net.conf.SystemConf;
+import net.vo.Host;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.SocketException;
-
-import net.conf.SystemConf;
-import net.vo.Host;
+import java.net.*;
 
 public class NetDomain {
 
