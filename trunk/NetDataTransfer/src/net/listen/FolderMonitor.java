@@ -1,20 +1,23 @@
 package net.listen;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import net.conf.SystemConf;
-import net.vo.DataPacket;
 
 public class FolderMonitor implements Runnable {
+	private final Log logger = LogFactory.getLog(this.getClass());
 	ServerSocket server = null;
 
 	@Override
@@ -45,54 +48,51 @@ public class FolderMonitor implements Runnable {
 
 		@Override
 		public void run() {
+			DataInputStream dis = null;
+			DataOutputStream dos = null;
+
 			try {
-				geter = new ObjectInputStream(socket.getInputStream());
-				DataPacket dp = (DataPacket) geter.readObject();
+				dis = new DataInputStream(new BufferedInputStream(
+						socket.getInputStream()));
+				String taskId = dis.readUTF();
+				int i = dis.readInt();
+				String filePath = SystemConf.taskList.get(taskId).get(i);
+				dos = new DataOutputStream(new BufferedOutputStream(
+						new FileOutputStream(filePath)));
 
-				if (dp.getTag() == SystemConf.folderConf) {
-					// 计算总大小
-					FileInputStream fis = null;
-					String[] filesPath = dp.getContent().split("\\*");
-					long total = 0;
-
-					for (int i = 0; i < filesPath.length; i++) {
-						fis = new FileInputStream(filesPath[i]);
-						total += fis.available();
-					}
-					System.out.println(total);
-					DataOutputStream out = new DataOutputStream(
-							socket.getOutputStream());
-					DataInputStream in = new DataInputStream(
-							socket.getInputStream());
-					out.writeLong(total);
-					out.flush();
-					String taskId = in.readUTF();
-
-					// 开始一个个的发送文件
-					ExecutorService executorService = Executors
-							.newCachedThreadPool();
-					for (int i = 0; i < filesPath.length; i++) {
-						executorService.execute(sendFile(taskId,filesPath, i,socket));
-					}
+				int read = 0;
+				byte[] bytes = new byte[1024];
+				while ((read = dis.read(bytes)) != -1) {
+					dos.write(bytes, 0, read);
+					dos.flush();
 				}
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				logger.info(filePath + " 接收完成");
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					if (dos != null) {
+						dos.close();
+					}
+					if (dis != null) {
+						dis.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-
 		}
 	}
 
 	public Runnable sendFile(String taskId, String[] filesPath, int i,
 			Socket socket) {
-		return new Runnable(){
+		return new Runnable() {
 
 			@Override
 			public void run() {
-				
+
 			}
-			
+
 		};
 	}
 
