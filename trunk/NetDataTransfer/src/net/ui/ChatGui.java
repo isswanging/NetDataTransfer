@@ -1,8 +1,11 @@
 package net.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import net.conf.SystemConf;
+import net.util.NetDomain;
+import net.vo.DataPacket;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -10,17 +13,6 @@ import java.awt.event.WindowEvent;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-
-import net.conf.SystemConf;
-import net.util.NetDomain;
-import net.vo.DataPacket;
 
 public class ChatGui {
 	DataPacket dp = null;
@@ -45,7 +37,7 @@ public class ChatGui {
 		fr.setLayout(new BorderLayout());
 
 		JTextArea input = new JTextArea(5, 2);
-		input.setText((String) dp.getContent());
+		input.setText(dp.getContent());
 		final JTextArea output = new JTextArea(5, 2);
 
 		JScrollPane js1 = new JScrollPane(input,

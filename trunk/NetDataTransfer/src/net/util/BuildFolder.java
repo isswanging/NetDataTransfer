@@ -68,16 +68,8 @@ public class BuildFolder {
 		files.add(filePath);
 	}
 
-	public ArrayList<String> getFolders() {
-		return folders;
-	}
-
 	public ArrayList<String> getFiles() {
 		return files;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 	public void setName(String name) {

@@ -17,16 +17,8 @@ public class FolderPath {
 		return folders;
 	}
 
-	public void setFolders(ArrayList<File> folders) {
-		this.folders = folders;
-	}
-
 	public ArrayList<File> getFiles() {
 		return files;
-	}
-
-	public void setFiles(ArrayList<File> files) {
-		this.files = files;
 	}
 
 	public void init(String root) {

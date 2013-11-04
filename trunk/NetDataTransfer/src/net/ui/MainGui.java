@@ -1,43 +1,5 @@
 package net.ui;
 
-import java.awt.AWTException;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
-import javax.swing.event.MouseInputListener;
-import javax.swing.table.DefaultTableModel;
-
 import net.conf.SystemConf;
 import net.listen.BroadcastMonitor;
 import net.listen.FileMonitor;
@@ -48,9 +10,22 @@ import net.util.NetDomain;
 import net.util.OSUtil;
 import net.vo.DataPacket;
 import net.vo.Host;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.swing.*;
+import javax.swing.event.MouseInputListener;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.Map;
+import java.util.Vector;
 
 // 程序入口
 public class MainGui {
@@ -320,7 +295,7 @@ public class MainGui {
 				}
 			});
 		} else {
-			jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		}
 	}
 
@@ -466,18 +441,18 @@ public class MainGui {
 
 			if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
 				String p = jFileChooser.getSelectedFile().getPath();
-				FolderPath fpath = new FolderPath(p);
+				FolderPath fPath = new FolderPath(p);
 				StringBuilder path = new StringBuilder(p).append("|");
 
-				for (File f : fpath.getFolders()) {
+				for (File f : fPath.getFolders()) {
 					path.append(f.getPath() + "|");
 				}
 
 				// 记录文件总的大小
 				long total = 0;
-				FileInputStream fis = null;
+				FileInputStream fis;
 				try {
-					for (File f : fpath.getFiles()) {
+					for (File f : fPath.getFiles()) {
 						path.append(f.getPath() + "*");
 						fis = new FileInputStream(f.getPath());
 						total += fis.available();

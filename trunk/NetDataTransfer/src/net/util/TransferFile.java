@@ -1,26 +1,17 @@
 package net.util;
 
-import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-
 import net.conf.SystemConf;
 import net.ui.NoticeGui;
 import net.vo.DataPacket;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class TransferFile implements Runnable {
 	JProgressBar bar = new JProgressBar(JProgressBar.CENTER);
@@ -90,15 +81,13 @@ public class TransferFile implements Runnable {
 			// 设置进度条和读文件
 			bar.setMinimum(0);
 			bar.setMaximum(100);
-			int len = 0;
+			int len;
 			long byteRead = 0;
 
 			byte[] bytes = new byte[1024];
-			System.out.println("Server begin to reaceive!");
 			while ((len = bis.read(bytes)) != -1) {
 				bos.write(bytes, 0, len);
 				bos.flush();
-				// System.out.println("Server writing!");
 				byteRead += len;
 				bar.setValue((int) (byteRead * 100 / total));
 			}

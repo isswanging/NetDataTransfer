@@ -1,20 +1,13 @@
 package net.listen;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-
+import net.conf.SystemConf;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import net.conf.SystemConf;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 
 public class FolderMonitor implements Runnable {
 	private final Log logger = LogFactory.getLog(this.getClass());
@@ -40,7 +33,6 @@ public class FolderMonitor implements Runnable {
 
 	public class SendFiles implements Runnable {
 		Socket socket = null;
-		ObjectInputStream geter = null;
 
 		public SendFiles(Socket socket) {
 			this.socket = socket;
@@ -60,7 +52,7 @@ public class FolderMonitor implements Runnable {
 				dos = new DataOutputStream(new BufferedOutputStream(
 						new FileOutputStream(filePath)));
 
-				int read = 0;
+				int read;
 				byte[] bytes = new byte[1024];
 				while ((read = dis.read(bytes)) != -1) {
 					dos.write(bytes, 0, read);
@@ -82,18 +74,6 @@ public class FolderMonitor implements Runnable {
 				}
 			}
 		}
-	}
-
-	public Runnable sendFile(String taskId, String[] filesPath, int i,
-			Socket socket) {
-		return new Runnable() {
-
-			@Override
-			public void run() {
-
-			}
-
-		};
 	}
 
 }

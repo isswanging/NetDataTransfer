@@ -1,19 +1,14 @@
 package net.util;
 
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import net.conf.SystemConf;
+import net.vo.DataPacket;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import net.conf.SystemConf;
-import net.vo.DataPacket;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class SendFolder {
 	private final Log logger = LogFactory.getLog(this.getClass());
@@ -52,7 +47,7 @@ public class SendFolder {
 						dos.flush();
 
 						// 发文件
-						int len = 0;
+						int len;
 						byte[] bytes = new byte[1024];
 						while ((len = bis.read(bytes)) != -1) {
 							dos.write(bytes, 0, len);
