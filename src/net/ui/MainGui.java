@@ -244,13 +244,13 @@ public class MainGui {
         // 系统托盘
         if (SystemTray.isSupported()) {
             tray = SystemTray.getSystemTray(); // 获得本操作系统托盘的实例
-            ImageIcon icon = new ImageIcon("./src/owl.png"); // 将要显示到托盘中的图标
+            ImageIcon icon = new ImageIcon(this.getClass().getResource("owl.png")); // 将要显示到托盘中的图标
             PopupMenu pop = new PopupMenu(); // 构造一个右键弹出式菜单
             final MenuItem show = new MenuItem("open");
             final MenuItem exit = new MenuItem("exit");
             pop.add(show);
             pop.add(exit);
-            trayIcon = new TrayIcon(icon.getImage(), "飞鸽", pop);// 实例化托盘图标
+            trayIcon = new TrayIcon(icon.getImage(), "飞鸽Java", pop);// 实例化托盘图标
             trayIcon.setImageAutoSize(true);
 
             try {
