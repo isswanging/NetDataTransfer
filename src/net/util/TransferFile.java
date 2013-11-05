@@ -55,10 +55,10 @@ public class TransferFile implements Runnable {
     public void run() {
         bar.setStringPainted(true);// 设置在进度条中绘制完成百分比
 
-        InetAddress addr;
+        InetAddress address;
         try {
-            addr = InetAddress.getLocalHost();
-            String hostName = addr.getHostName();// 获取主机名
+            address = InetAddress.getLocalHost();
+            String hostName = address.getHostName();// 获取主机名
             String ip = SystemConf.hostIP;// 获取ip地址
 
             // 发送TCP消息建立文件传输连接
