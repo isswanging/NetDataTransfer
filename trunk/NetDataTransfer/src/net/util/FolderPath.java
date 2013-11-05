@@ -24,12 +24,12 @@ public class FolderPath {
     public void init(String root) {
         File f = new File(root);
         File[] fileList = f.listFiles();
-        for (int i = 0; i < fileList.length; i++) {
-            if (fileList[i].isDirectory()) {
-                folders.add(fileList[i]);
-                init(fileList[i].getPath());
+        for (File file : fileList) {
+            if (file.isDirectory()) {
+                folders.add(file);
+                init(file.getPath());
             } else {
-                files.add(fileList[i]);
+                files.add(file);
             }
         }
     }

@@ -383,7 +383,7 @@ public class MainGui {
                 if (message.equals("")) {
                     NoticeGui.warnNotice(jf, "请输入消息");
                 } else {
-                    for (int i = 0; i < rowIndex.length; i++) {
+                    for (int i : rowIndex) {
                         Vector<?> row = (Vector<?>) model.getDataVector().get(
                                 rowIndex[i]);
                         String targetIp = (String) row.elementAt(3);
@@ -431,39 +431,39 @@ public class MainGui {
             Vector<?> row = (Vector<?>) model.getDataVector().get(i);
             String targetIp = (String) row.elementAt(3);
 
-            if (targetIp.equals(MainGui.this.ip)) {
-                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
-            } else {
-                //选择文件夹
-                JFileChooser jFileChooser = new JFileChooser();
-                jFileChooser.setMultiSelectionEnabled(true);
-                jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//            if (targetIp.equals(MainGui.this.ip)) {
+//                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+//            } else {
+            //选择文件夹
+            JFileChooser jFileChooser = new JFileChooser();
+            jFileChooser.setMultiSelectionEnabled(true);
+            jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-                if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
-                    String p = jFileChooser.getSelectedFile().getPath();
-                    FolderPath fPath = new FolderPath(p);
-                    StringBuilder path = new StringBuilder(p).append("|");
+            if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
+                String p = jFileChooser.getSelectedFile().getPath();
+                FolderPath fPath = new FolderPath(p);
+                StringBuilder path = new StringBuilder(p).append("|");
 
-                    for (File f : fPath.getFolders()) {
-                        path.append(f.getPath() + "|");
-                    }
-
-                    // 记录文件总的大小
-                    long total = 0;
-                    FileInputStream fis;
-                    try {
-                        for (File f : fPath.getFiles()) {
-                            path.append(f.getPath() + "*");
-                            fis = new FileInputStream(f.getPath());
-                            total += fis.available();
-                        }
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-
-                    sendUdpData(String.valueOf(total), ip, targetIp, path.toString(),
-                            SystemConf.folderPre, SystemConf.textPort);
+                for (File f : fPath.getFolders()) {
+                    path.append(f.getPath()).append("|");
                 }
+
+                // 记录文件总的大小
+                long total = 0;
+                FileInputStream fis;
+                try {
+                    for (File f : fPath.getFiles()) {
+                        path.append(f.getPath()).append("*");
+                        fis = new FileInputStream(f.getPath());
+                        total += fis.available();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
+                sendUdpData(String.valueOf(total), ip, targetIp, path.toString(),
+                        SystemConf.folderPre, SystemConf.textPort);
+                // }
             }
         }
     }

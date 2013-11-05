@@ -46,13 +46,13 @@ public class BuildFolder {
             // 建立文件路径
             String[] filePaths = folderPaths[folderPaths.length - 1]
                     .split("\\*");
-            for (int i = 0; i < filePaths.length; i++) {
-                setFiles(root, filePaths[i]);
+            for (String filePath : filePaths) {
+                setFiles(root, filePath);
             }
         } else {
             // 建立文件夹路径
-            for (int i = 0; i < folderPaths.length; i++) {
-                setFolders(root, folderPaths[i]);
+            for (String folderPath : folderPaths) {
+                setFolders(root, folderPath);
             }
         }
 

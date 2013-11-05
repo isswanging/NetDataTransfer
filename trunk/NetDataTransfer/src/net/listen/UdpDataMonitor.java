@@ -38,16 +38,13 @@ public class UdpDataMonitor implements Runnable {
 
                 if (dp.getTag() == SystemConf.text) {
                     new ChatGui(dp);
-                }
-                if (dp.getTag() == SystemConf.filePre
+                } else if (dp.getTag() == SystemConf.filePre
                         || dp.getTag() == SystemConf.folderPre) {
                     new ConfirmGui(dp);
-                }
-                if (dp.getTag() == SystemConf.refuse) {
+                } else if (dp.getTag() == SystemConf.refuse) {
                     NoticeGui.messageNotice(new JPanel(), "传输被" + dp.getIp()
                             + "拒绝");
-                }
-                if (dp.getTag() == SystemConf.folderConf) {
+                } else if (dp.getTag() == SystemConf.folderConf) {
                     new SendFolder(dp);
                 }
 
