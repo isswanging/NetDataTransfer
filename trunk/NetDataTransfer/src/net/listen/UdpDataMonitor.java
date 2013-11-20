@@ -37,7 +37,7 @@ public class UdpDataMonitor implements Runnable {
                 dp = (DataPacket) objectStream.readObject();
 
                 if (dp.getTag() == SystemConf.text) {
-                    new ChatGui(dp);
+                    new ChatGui(dp,UdpSocket);
                 } else if (dp.getTag() == SystemConf.filePre
                         || dp.getTag() == SystemConf.folderPre) {
                     new ConfirmGui(dp);
