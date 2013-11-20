@@ -19,8 +19,9 @@ public class ChatGui {
     DatagramSocket udpSocket = null;
     JFrame fr;
 
-    public ChatGui(DataPacket dp1) {
+    public ChatGui(DataPacket dp1,DatagramSocket udp) {
         this.dp = dp1;
+        this.udpSocket = udp;
 
         // 建立界面
         fr = new JFrame("消息");
