@@ -3,6 +3,7 @@ package net.ui;
 import net.conf.SystemConf;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -43,6 +44,8 @@ public class ProgressBar {
 
             if (byteRead == 0) {
                 sf.cancel(true);
+                frame.dispose();
+                NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");
             }
         }
     }
