@@ -59,12 +59,12 @@ public class BuildFolder {
     }
 
     public void setFolders(String root, String path) {
-        String folderPath = root + path;
+        String folderPath = root +"\\"+ path;
         folders.add(folderPath);
     }
 
     public void setFiles(String root, String path) {
-        String filePath = root + path;
+        String filePath = root +"\\"+ path;
         files.add(filePath);
     }
 
