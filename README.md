@@ -9,6 +9,8 @@ TCP主要传输文件或文件夹
 
 目前主要功能完成。
 
+![image](https://github.com/isswanging/NetDataTransfer/blob/master/img-folder/%E7%95%8C%E9%9D%A2.png)
+
 -----------------------------
 
 主要存在一个bug：
