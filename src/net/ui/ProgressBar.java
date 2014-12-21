@@ -45,6 +45,8 @@ public class ProgressBar {
             if (byteRead == 0) {
                 sf.cancel(true);
                 frame.dispose();
+                SystemConf.savePathList.remove(taskId);
+                SystemConf.taskList.remove(taskId);
                 NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");
             }
         }

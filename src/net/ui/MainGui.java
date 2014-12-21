@@ -1,31 +1,60 @@
 package net.ui;
 
-import net.conf.SystemConf;
-import net.listen.BroadcastMonitor;
-import net.listen.FileMonitor;
-import net.listen.FolderMonitor;
-import net.listen.UdpDataMonitor;
-import net.util.FolderPath;
-import net.util.NetDomain;
-import net.util.OSUtil;
-import net.vo.DataPacket;
-import net.vo.Host;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.swing.*;
-import javax.swing.event.MouseInputListener;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AWTException;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Vector;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.event.MouseInputListener;
+import javax.swing.table.DefaultTableModel;
+
+import net.conf.SystemConf;
+import net.listener.BroadcastMonitor;
+import net.listener.FileMonitor;
+import net.listener.FolderMonitor;
+import net.listener.FolderPathMonitor;
+import net.listener.UdpDataMonitor;
+import net.util.FolderPath;
+import net.util.NetDomain;
+import net.util.OSUtil;
+import net.vo.DataPacket;
+import net.vo.Host;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 // 程序入口
 public class MainGui {
@@ -62,6 +91,7 @@ public class MainGui {
         new Thread(new UdpDataMonitor()).start();
         new Thread(new FileMonitor()).start();
         new Thread(new FolderMonitor()).start();
+        new Thread(new FolderPathMonitor()).start();
     }
 
     private void login() {
@@ -114,8 +144,8 @@ public class MainGui {
         number = new JLabel();
 
         // 设置主机列表
-        String[] columnNames = {"用户名", "工作组", "主机名", "IP地址"};
-        Object[][] content = new Object[][]{};
+        String[] columnNames = { "用户名", "工作组", "主机名", "IP地址" };
+        Object[][] content = new Object[][] {};
         model = new DefaultTableModel(content, columnNames);
         userList = new JTable(model) {
             public boolean isCellEditable(int row, int column) {
@@ -244,7 +274,8 @@ public class MainGui {
         // 系统托盘
         if (SystemTray.isSupported()) {
             tray = SystemTray.getSystemTray(); // 获得本操作系统托盘的实例
-            ImageIcon icon = new ImageIcon(this.getClass().getResource("owl.png")); // 将要显示到托盘中的图标
+            ImageIcon icon = new ImageIcon(this.getClass().getResource(
+                    "owl.png")); // 将要显示到托盘中的图标
             PopupMenu pop = new PopupMenu(); // 构造一个右键弹出式菜单
             final MenuItem show = new MenuItem("open");
             final MenuItem exit = new MenuItem("exit");
@@ -299,22 +330,6 @@ public class MainGui {
         }
     }
 
-    // 发送UDP数据
-    private void sendUdpData(String hostName, String ip, String targetIp,
-                             String message, int tag, int port) {
-        DataPacket dp = new DataPacket(ip, hostName, message, tag);
-        DatagramSocket socket = null;
-        try {
-            socket = new DatagramSocket();
-            NetDomain.sendUdpData(socket, dp, targetIp, port);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } finally {
-            if (socket != null)
-                socket.close();
-        }
-    }
-
     private void refresh() {
         // 清空列表
         clearTable();
@@ -362,8 +377,8 @@ public class MainGui {
         logger.debug("table size:" + String.valueOf(SystemConf.hostList.size()));
         number.setText(String.valueOf(SystemConf.hostList.size()));
         for (Host host : SystemConf.hostList) {
-            model.addRow(new String[]{host.getUserName(),
-                    host.getGroupName(), host.getHostName(), host.getIp()});
+            model.addRow(new String[] { host.getUserName(),
+                    host.getGroupName(), host.getHostName(), host.getIp() });
         }
     }
 
@@ -403,9 +418,9 @@ public class MainGui {
             Vector<?> row = (Vector<?>) model.getDataVector().get(i);
             String targetIp = (String) row.elementAt(3);
 
-            if (targetIp.equals(MainGui.this.ip)) {
-                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
-            } else {
+//            if (targetIp.equals(MainGui.this.ip)) {
+//                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+//            } else {
                 // 选择文件
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setMultiSelectionEnabled(true);
@@ -418,7 +433,7 @@ public class MainGui {
                     // 发送确认消息
                     sendUdpData(hostName, ip, targetIp, path,
                             SystemConf.filePre, SystemConf.textPort);
-                }
+                //}
             }
         }
     }
@@ -431,13 +446,15 @@ public class MainGui {
             Vector<?> row = (Vector<?>) model.getDataVector().get(i);
             String targetIp = (String) row.elementAt(3);
 
-            if (targetIp.equals(MainGui.this.ip)) {
-                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
-            } else {
-                //选择文件夹
+//            if (targetIp.equals(MainGui.this.ip)) {
+//                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+//            } else {
+
+                // 选择文件夹
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setMultiSelectionEnabled(true);
-                jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                jFileChooser
+                        .setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
                 if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
                     String p = jFileChooser.getSelectedFile().getPath();
@@ -461,11 +478,49 @@ public class MainGui {
                         ex.printStackTrace();
                     }
 
-                    sendUdpData(String.valueOf(total), ip, targetIp, path.toString(),
-                            SystemConf.folderPre, SystemConf.textPort);
+                    sendTcpData(String.valueOf(total), ip, targetIp,
+                            path.toString(), SystemConf.folderPre,
+                            SystemConf.textPort);
                 }
             }
+        //}
+    }
+
+    /** 
+     * 发送UDP数据
+     * 
+     * @param hostName  主机名
+     * @param ip        自己的ip
+     * @param targetIp  对方的ip
+     * @param message   发送的内容
+     * @param tag       标识通信的阶段
+     * @param port      端口
+     */
+    private void sendUdpData(String hostName, String ip, String targetIp,
+            String message, int tag, int port) {
+        DataPacket dp = new DataPacket(ip, hostName, message, tag);
+        DatagramSocket socket = null;
+        try {
+            socket = new DatagramSocket();
+            NetDomain.sendUdpData(socket, dp, targetIp, port);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } finally {
+            if (socket != null)
+                socket.close();
         }
+    }
+
+    private void sendTcpData(String total, String ip, String targetIp,
+            String path, int folderpre, int textport) {
+        // 获取当前时间作为任务id
+        String timeId = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                .format(new Date());
+        sendUdpData(hostName, ip, targetIp, timeId, SystemConf.folderPre,
+                SystemConf.textPort);
+
+        SystemConf.sendPathList.put(timeId, String.valueOf(total) + "!" + path);
+
     }
 
 }

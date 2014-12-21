@@ -1,18 +1,19 @@
-package net.listen;
+package net.listener;
 
-import net.conf.SystemConf;
-import net.ui.ChatGui;
-import net.ui.ConfirmGui;
-import net.ui.NoticeGui;
-import net.util.SendFolder;
-import net.vo.DataPacket;
-
-import javax.swing.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+
+import javax.swing.JPanel;
+
+import net.conf.SystemConf;
+import net.ui.ChatGui;
+import net.ui.ConfirmGui;
+import net.ui.NoticeGui;
+import net.util.SendPath;
+import net.vo.DataPacket;
 
 public class UdpDataMonitor implements Runnable {
     DatagramSocket UdpSocket = null;
@@ -37,7 +38,7 @@ public class UdpDataMonitor implements Runnable {
                 dp = (DataPacket) objectStream.readObject();
 
                 if (dp.getTag() == SystemConf.text) {
-                    new ChatGui(dp,UdpSocket);
+                    new ChatGui(dp, UdpSocket);
                 } else if (dp.getTag() == SystemConf.filePre
                         || dp.getTag() == SystemConf.folderPre) {
                     new ConfirmGui(dp);
@@ -45,7 +46,7 @@ public class UdpDataMonitor implements Runnable {
                     NoticeGui.messageNotice(new JPanel(), "传输被" + dp.getIp()
                             + "拒绝");
                 } else if (dp.getTag() == SystemConf.folderConf) {
-                    new SendFolder(dp);
+                    new SendPath(dp);
                 }
 
             }
@@ -63,4 +64,5 @@ public class UdpDataMonitor implements Runnable {
             }
         }
     }
+
 }

@@ -1,4 +1,4 @@
-package net.listen;
+package net.listener;
 
 import net.conf.SystemConf;
 import org.apache.commons.logging.Log;
@@ -52,13 +52,14 @@ public class FolderMonitor implements Runnable {
                 dos = new DataOutputStream(new BufferedOutputStream(
                         new FileOutputStream(filePath)));
 
-                int read;
+                int len;
                 byte[] bytes = new byte[1024];
-                while ((read = dis.read(bytes)) != -1) {
-                    dos.write(bytes, 0, read);
+                while ((len = dis.read(bytes)) != -1) {
+                    dos.write(bytes, 0, len);
                     synchronized (this) {
                         Long temp = SystemConf.progress.get(taskId);
-                        temp = temp - read;
+                        temp = temp - len;
+
                         SystemConf.progress.put(taskId, temp);
                     }
                     dos.flush();

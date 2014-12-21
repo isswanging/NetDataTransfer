@@ -92,9 +92,8 @@ public class TransferFile implements Runnable {
                 bar.setValue((int) (byteRead * 100 / total));
             }
 
-            System.out.println("get whole file");
             frame.dispose();
-            NoticeGui.messageNotice(new JPanel(), "文件：" + fileName
+            NoticeGui.messageNotice(new JPanel(), "   文件：" + fileName
                     + "\n       接收完毕");
 
             in.close();
