@@ -1,30 +1,36 @@
 package net.util;
 
-import net.conf.SystemConf;
-import net.vo.DataPacket;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import net.conf.SystemConf;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class SendFolder {
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    public SendFolder(DataPacket dp) {
+    public SendFolder(String id, String ip) {
         ExecutorService executorService = Executors.newCachedThreadPool();
-        String[] filesPath = dp.getContent().split("\\*");
+        String[] path = SystemConf.sendPathList.get(id).split("\\|");
+        String[] filesPath = path[path.length - 1].split("\\*");
+
+        logger.info("需要发送的文件总数为：" + filesPath.length);
 
         for (int i = 0; i < filesPath.length; i++) {
-            executorService.execute(sendFile(dp.getIp(), filesPath[i], i,
-                    dp.getSenderName()));
+            executorService.execute(sendFile(ip, filesPath[i], i, id));
         }
     }
 
     private Runnable sendFile(final String Ip, final String filePath,
-                              final int i, final String taskId) {
+            final int i, final String taskId) {
         return new Runnable() {
             private Socket socket = null;
             private String ip = Ip;
@@ -32,6 +38,7 @@ public class SendFolder {
 
             @Override
             public void run() {
+                logger.info(filePath);
                 try {
                     // 建立TCP连接
                     if (connect()) {
@@ -39,6 +46,9 @@ public class SendFolder {
                                 new FileInputStream(new File(filePath)));
                         DataOutputStream dos = new DataOutputStream(
                                 socket.getOutputStream());
+
+                        logger.info("任务id：" + taskId + "文件编号：" + i + "路径："
+                                + filePath);
 
                         // 发送任务id和文件路径
                         dos.writeUTF(taskId);

@@ -6,10 +6,10 @@ import java.io.Serializable;
 public class DataPacket implements Serializable {
     private static final long serialVersionUID = -4196219561242601831L;
 
-    private String ip;
-    private String senderName;
-    private String content;
-    private int tag;
+    private String ip; // 自己的ip
+    private String senderName; // 自己的主机名
+    private String content; // 发送内容
+    private int tag; // 标识发送的阶段
 
     public DataPacket(String ip, String senderName, String content, int tag) {
         this.ip = ip;
