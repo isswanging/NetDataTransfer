@@ -26,7 +26,6 @@ public class FolderPathMonitor implements Runnable {
             while (true) {
                 Socket socket = server.accept();
                 new Thread(new GetFilesPath(socket)).start();
-
             }
         } catch (SocketException e) {
             e.printStackTrace();

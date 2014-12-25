@@ -28,7 +28,6 @@ public class FolderMonitor implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public class SendFiles implements Runnable {

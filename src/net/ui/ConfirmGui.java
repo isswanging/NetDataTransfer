@@ -110,7 +110,6 @@ public class ConfirmGui {
                 fr.dispose();
 
                 String path = jFileChooser.getSelectedFile().getPath();
-
                 SystemConf.savePathList.put(dp.getContent(), path);
 
                 // 告诉对方把文件路径发过来

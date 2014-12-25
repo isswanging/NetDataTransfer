@@ -21,6 +21,7 @@ public class SendFolder {
         ExecutorService executorService = Executors.newCachedThreadPool();
         String[] path = SystemConf.sendPathList.get(id).split("\\|");
         String[] filesPath = path[path.length - 1].split("\\*");
+        
         logger.info("需要发送的文件总数为：" + filesPath.length);
 
         for (int i = 0; i < filesPath.length; i++) {
