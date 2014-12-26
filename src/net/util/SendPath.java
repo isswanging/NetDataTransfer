@@ -1,17 +1,16 @@
 package net.util;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.conf.SystemConf;
 import net.vo.DataPacket;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class SendPath {
     Socket socket = null;
@@ -25,23 +24,38 @@ public class SendPath {
         try {
             socket = new Socket(dp.getIp(), SystemConf.pathPort);
             String path = SystemConf.sendPathList.get(dp.getContent());
-            String content = dp.getContent() + "!" + path;
+            String content = dp.getContent() + ">" + path;
             logger.info("路径即将发送：" + content);
 
             DataInputStream fromeServer = new DataInputStream(
                     socket.getInputStream());
-            BufferedOutputStream toServer = new BufferedOutputStream(
+            DataOutputStream toServer = new DataOutputStream(
                     socket.getOutputStream());
-            ByteArrayInputStream byteIn = new ByteArrayInputStream(
-                    content.getBytes());
 
-            byte[] bytes = new byte[1024];
-            int len;
-            while ((len = byteIn.read(bytes)) != -1) {
-                toServer.write(bytes, 0, len);
-                toServer.flush();
+            int len = content.length();
+            // 循环次数
+            int loop;
+            // 最后一次发送的长度
+            int last = len % SystemConf.buffer;
+
+            if (last == 0) {
+                loop = len / SystemConf.buffer;
+            } else {
+                loop = len / SystemConf.buffer + 1;
             }
-            toServer.flush();
+            logger.info("loop:" + loop + "  last:" + last);
+
+            // 循环发送
+            toServer.writeInt(loop);
+            for (int i = 1; i <= loop; i++) {
+                if (i == loop) {
+                    toServer.writeUTF(content
+                            .substring(len - last, len));
+                } else {
+                    toServer.writeUTF(content.substring((i - 1)
+                            * SystemConf.buffer, i * SystemConf.buffer));
+                }
+            }
 
             logger.info("路径发送完成");
             String id = fromeServer.readUTF();
@@ -50,7 +64,6 @@ public class SendPath {
 
             toServer.close();
             fromeServer.close();
-            byteIn.close();
             socket.close();
 
             new SendFolder(id, dp.getIp());
@@ -61,5 +74,4 @@ public class SendPath {
             e.printStackTrace();
         }
     }
-
 }

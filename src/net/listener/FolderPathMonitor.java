@@ -1,18 +1,17 @@
 package net.listener;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.conf.SystemConf;
 import net.util.BuildFolder;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class FolderPathMonitor implements Runnable {
     ServerSocket server = null;
@@ -46,30 +45,25 @@ public class FolderPathMonitor implements Runnable {
             try {
                 DataOutputStream toClient = new DataOutputStream(
                         socket.getOutputStream());
-                BufferedInputStream fromeClient = new BufferedInputStream(
+                DataInputStream fromeClient = new DataInputStream(
                         socket.getInputStream());
-                ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+                StringBuilder path = new StringBuilder();
 
-                logger.info("即将接收文件路径");
-                byte[] bytes = new byte[1024];
-                int len;
-                while ((len = fromeClient.read(bytes)) != -1) {
-                    byteOut.write(bytes, 0, len);
-                    byteOut.flush();
-
-                    if (len < 1024)
-                        break;
-
+                int loop = fromeClient.readInt();
+                for (int i = 1; i <= loop; i++) {
+                    path.append(fromeClient.readUTF());
                 }
-                logger.info("接收完成，路径信息：" + byteOut.toString());
+
+                logger.info("接收完成，路径信息：" + path.toString() + " 长度:"
+                        + path.toString().length());
 
                 // 这里的格式是格式是：
-                // id！总大小！路径，因此用！切分
-                String[] msg = byteOut.toString().split("!");
-
+                // id>总大小>路径，因此用>切分
+                String[] msg = path.toString().split(">");
                 String timeId = msg[0];
 
                 // 建立本地存放的目录
+                logger.info("path length:::" + msg[2].length());
                 BuildFolder bf = new BuildFolder(
                         SystemConf.savePathList.get(timeId), msg[2]);
 
