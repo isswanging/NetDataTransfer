@@ -1,24 +1,31 @@
 package net.ui;
 
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
 import net.conf.SystemConf;
-import net.util.BuildFolder;
 import net.util.NetDomain;
 import net.util.OSUtil;
 import net.util.TransferFile;
 import net.vo.DataPacket;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ConfirmGui {
     JFrame fr;
     DataPacket dp = null;
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     public ConfirmGui(DataPacket dp2) {
         this.dp = dp2;
@@ -84,7 +91,6 @@ public class ConfirmGui {
                         .getProperty("file.separator");
                 // 保存文件路径
                 String savePath = path + fs + s[s.length - 1];
-                System.out.println(savePath);
 
                 new Thread(new TransferFile(savePath, s[s.length - 1], dp))
                         .start();
@@ -104,36 +110,19 @@ public class ConfirmGui {
                 fr.dispose();
 
                 String path = jFileChooser.getSelectedFile().getPath();
-                String content = dp.getContent();
+                SystemConf.savePathList.put(dp.getContent(), path);
 
-                // 获取当前时间作为任务id
-                String timeId = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(new Date());
-                // 建立本地存放的目录
-                BuildFolder bf = new BuildFolder(path, content);
-                // 存放
-                SystemConf.taskList.put(timeId, bf.getFiles());
-                SystemConf.progress.put(timeId,
-                        Long.valueOf(dp.getSenderName()));
+                // 告诉对方把文件路径发过来
+                dp.setTag(SystemConf.folderConf);
+                String targetIp = dp.getIp();
+                dp.setIp(OSUtil.getLocalIP());
+                logger.info("路径发送请求：" + dp.getContent());
+                try {
+                    NetDomain.sendUdpData(new DatagramSocket(), dp, targetIp,
+                            SystemConf.textPort);
 
-                if (bf.getFiles().size() == 0) {
-                    // 如果是空文件夹，传输就就结束了
-                    NoticeGui.messageNotice(new JPanel(), "传送完毕");
-                } else {
-                    // 把需要传输的文件的路径发过去即可
-                    String[] paths = content.split("\\|");
-                    dp.setContent(paths[paths.length - 1]);
-                    dp.setTag(SystemConf.folderConf);
-                    dp.setSenderName(timeId);
-                    String targetIp = dp.getIp();
-                    dp.setIp(OSUtil.getLocalIP());
-                    try {
-                        new ProgressBar(timeId);
-                        NetDomain.sendUdpData(new DatagramSocket(), dp,
-                                targetIp, SystemConf.textPort);
-                    } catch (SocketException e1) {
-                        e1.printStackTrace();
-                    }
+                } catch (SocketException e1) {
+                    e1.printStackTrace();
                 }
             }
         }

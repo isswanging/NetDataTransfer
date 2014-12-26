@@ -3,16 +3,25 @@ package net.util;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class BuildFolder {
     ArrayList<String> folders = new ArrayList<String>();
     ArrayList<String> files = new ArrayList<String>();
     String name;
+
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     public BuildFolder(String root, String content) {
         // 解析目录结构
         analyse(root, content);
         // 构造目录
         structure();
+
+        logger.info("文件夹数量:" + folders.size());
+        logger.info("文件数量:" + files.size());
+
     }
 
     private void structure() {
@@ -59,12 +68,12 @@ public class BuildFolder {
     }
 
     public void setFolders(String root, String path) {
-        String folderPath = root +"\\"+ path;
+        String folderPath = root + "\\" + path;
         folders.add(folderPath);
     }
 
     public void setFiles(String root, String path) {
-        String filePath = root +"\\"+ path;
+        String filePath = root + "\\" + path;
         files.add(filePath);
     }
 
