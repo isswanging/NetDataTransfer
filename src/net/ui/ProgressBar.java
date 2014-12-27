@@ -1,7 +1,7 @@
 package net.ui;
 
 import java.awt.BorderLayout;
-import java.awt.event.WindowEvent;
+
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +56,8 @@ public class ProgressBar {
             if (num == 100) {
                 logger.info("get all...");
                 sf.cancel(true);
-                frame.dispose();;
+                frame.dispose();
+                ;
                 SystemConf.savePathList.remove(taskId);
                 SystemConf.taskList.remove(taskId);
                 NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");
