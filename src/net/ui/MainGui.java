@@ -421,19 +421,19 @@ public class MainGui {
             if (targetIp.equals(MainGui.this.ip)) {
                 NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
             } else {
-            // 选择文件
-            JFileChooser jFileChooser = new JFileChooser();
-            jFileChooser.setMultiSelectionEnabled(true);
-            jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                // 选择文件
+                JFileChooser jFileChooser = new JFileChooser();
+                jFileChooser.setMultiSelectionEnabled(true);
+                jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-            if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
-                String path = jFileChooser.getSelectedFile().getPath();
-                logger.debug(path);
+                if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
+                    String path = jFileChooser.getSelectedFile().getPath();
+                    logger.debug(path);
 
-                // 发送确认消息
-                sendUdpData(hostName, ip, targetIp, path, SystemConf.filePre,
-                        SystemConf.textPort);
-                 }
+                    // 发送确认消息
+                    sendUdpData(hostName, ip, targetIp, path,
+                            SystemConf.filePre, SystemConf.textPort);
+                }
             }
         }
     }
@@ -449,39 +449,40 @@ public class MainGui {
             if (targetIp.equals(MainGui.this.ip)) {
                 NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
             } else {
-            // 选择文件夹
-            JFileChooser jFileChooser = new JFileChooser();
-            jFileChooser.setMultiSelectionEnabled(true);
-            jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                // 选择文件夹
+                JFileChooser jFileChooser = new JFileChooser();
+                jFileChooser.setMultiSelectionEnabled(true);
+                jFileChooser
+                        .setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-            if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
-                String p = jFileChooser.getSelectedFile().getPath();
-                FolderPath fPath = new FolderPath(p);
-                StringBuilder path = new StringBuilder(p).append("|");
+                if (jFileChooser.showOpenDialog(jFileChooser) == JFileChooser.APPROVE_OPTION) {
+                    String p = jFileChooser.getSelectedFile().getPath();
+                    FolderPath fPath = new FolderPath(p);
+                    StringBuilder path = new StringBuilder(p).append("|");
 
-                for (File f : fPath.getFolders()) {
-                    path.append(f.getPath()).append("|");
-                }
-
-                // 记录文件总的大小
-                long total = 0;
-                FileInputStream fis;
-                try {
-                    for (File f : fPath.getFiles()) {
-                        path.append(f.getPath()).append("*");
-                        fis = new FileInputStream(f.getPath());
-                        total += fis.available();
+                    for (File f : fPath.getFolders()) {
+                        path.append(f.getPath()).append("|");
                     }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
 
-                sendTcpData(String.valueOf(total), ip, targetIp,
-                        path.toString(), SystemConf.folderPre,
-                        SystemConf.textPort);
+                    // 记录文件总的大小
+                    long total = 0;
+                    FileInputStream fis;
+                    try {
+                        for (File f : fPath.getFiles()) {
+                            path.append(f.getPath()).append("*");
+                            fis = new FileInputStream(f.getPath());
+                            total += fis.available();
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    sendTcpData(String.valueOf(total), ip, targetIp,
+                            path.toString(), SystemConf.folderPre,
+                            SystemConf.textPort);
+                }
             }
         }
-         }
     }
 
     /**

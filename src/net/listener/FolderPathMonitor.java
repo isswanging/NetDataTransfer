@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import net.conf.SystemConf;
+import net.ui.ProgressBar;
 import net.util.BuildFolder;
 
 import org.apache.commons.logging.Log;
@@ -75,9 +76,10 @@ public class FolderPathMonitor implements Runnable {
                 logger.info("告诉需要发送的文件夹id");
                 toClient.writeUTF(msg[0]);
 
+                // 发送进度
+                new ProgressBar(msg[0]);
             } catch (IOException e) {
                 logger.error(e.toString());
-
             }
         }
     }
