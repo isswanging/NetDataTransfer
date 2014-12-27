@@ -3,6 +3,7 @@ package net.conf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.vo.Host;
 
@@ -59,6 +60,6 @@ public class SystemConf {
     public static HashMap<String, String> savePathList = new HashMap<String, String>();
 
     // 记录进度
-    public static HashMap<String, Long> progress = new HashMap<String, Long>();
+    public static ConcurrentHashMap<String, Long> progress = new ConcurrentHashMap<String, Long>();
 
 }

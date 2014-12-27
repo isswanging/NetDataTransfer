@@ -1,19 +1,29 @@
 package net.ui;
 
-import net.conf.SystemConf;
-
-import javax.swing.*;
-
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+
+import net.conf.SystemConf;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ProgressBar {
     JProgressBar bar = new JProgressBar(JProgressBar.CENTER);
     JFrame frame = new JFrame("发送进度");
     String taskId;
     Long total;
+    Long byteRead;
+    int size;
+    private final Log logger = LogFactory.getLog(this.getClass());
+
     public ScheduledThreadPoolExecutor se = new ScheduledThreadPoolExecutor(1);
     ScheduledFuture<?> sf;
 
@@ -39,12 +49,14 @@ public class ProgressBar {
 
     class FixedSchedule implements Runnable {
         public void run() {
-            Long byteRead = SystemConf.progress.get(taskId);
-            bar.setValue((int) (100 - byteRead * 100 / total));
+            byteRead = SystemConf.progress.get(taskId);
+            int num = (int) (100 - byteRead * 100 / total);
+            bar.setValue(num);
 
-            if (byteRead == 0) {
+            if (num == 100) {
+                logger.info("get all...");
                 sf.cancel(true);
-                frame.dispose();
+                frame.dispose();;
                 SystemConf.savePathList.remove(taskId);
                 SystemConf.taskList.remove(taskId);
                 NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");

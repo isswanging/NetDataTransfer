@@ -55,12 +55,9 @@ public class FolderMonitor implements Runnable {
                 byte[] bytes = new byte[1024];
                 while ((len = dis.read(bytes)) != -1) {
                     dos.write(bytes, 0, len);
-                    synchronized (this) {
-                        Long temp = SystemConf.progress.get(taskId);
-                        temp = temp - len;
-
-                        SystemConf.progress.put(taskId, temp);
-                    }
+                    // Long temp = SystemConf.progress.get(taskId);
+                    // temp = temp - len;
+                    SystemConf.progress.put(taskId, SystemConf.progress.get(taskId)-len);
                     dos.flush();
                 }
                 logger.info(filePath + " 接收完成");
