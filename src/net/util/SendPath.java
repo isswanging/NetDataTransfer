@@ -1,7 +1,8 @@
 package net.util;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -29,33 +30,18 @@ public class SendPath {
 
             DataInputStream fromeServer = new DataInputStream(
                     socket.getInputStream());
-            DataOutputStream toServer = new DataOutputStream(
+            BufferedOutputStream toServer = new BufferedOutputStream(
                     socket.getOutputStream());
+            ByteArrayInputStream byteIn = new ByteArrayInputStream(
+                    content.getBytes());
 
-            int len = content.length();
-            // 循环次数
-            int loop;
-            // 最后一次发送的长度
-            int last = len % SystemConf.buffer;
-
-            if (last == 0) {
-                loop = len / SystemConf.buffer;
-            } else {
-                loop = len / SystemConf.buffer + 1;
+            byte[] bytes = new byte[1024];
+            int len;
+            while ((len = byteIn.read(bytes)) != -1) {
+                toServer.write(bytes, 0, len);
+                toServer.flush();
             }
-            logger.info("loop:" + loop + "  last:" + last);
-
-            // 循环发送
-            toServer.writeInt(loop);
-            for (int i = 1; i <= loop; i++) {
-                if (i == loop) {
-                    toServer.writeUTF(content
-                            .substring(len - last, len));
-                } else {
-                    toServer.writeUTF(content.substring((i - 1)
-                            * SystemConf.buffer, i * SystemConf.buffer));
-                }
-            }
+            toServer.flush();
 
             logger.info("路径发送完成");
             String id = fromeServer.readUTF();
@@ -64,6 +50,7 @@ public class SendPath {
 
             toServer.close();
             fromeServer.close();
+            byteIn.close();
             socket.close();
 
             new SendFolder(id, dp.getIp());
