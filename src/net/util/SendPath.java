@@ -13,12 +13,13 @@ import net.vo.DataPacket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SendPath {
+public class SendPath implements Runnable{
     Socket socket = null;
+    DataPacket dp = null;
     private final Log logger = LogFactory.getLog(this.getClass());
 
     public SendPath(DataPacket dp) {
-        sendpath(dp);
+        this.dp = dp;
     }
 
     private void sendpath(DataPacket dp) {
@@ -60,5 +61,10 @@ public class SendPath {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void run() {
+        sendpath(dp);
     }
 }

@@ -1,7 +1,6 @@
 package net.ui;
 
 import java.awt.BorderLayout;
-
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +26,7 @@ public class ProgressBar {
     public ScheduledThreadPoolExecutor se = new ScheduledThreadPoolExecutor(1);
     ScheduledFuture<?> sf;
 
-    public ProgressBar(String timeId) {
+    public ProgressBar(String timeId, long total) {
         // 设置界面
         JPanel p = new JPanel();
         p.add(bar);
@@ -41,7 +40,7 @@ public class ProgressBar {
         bar.setMinimum(0);
         bar.setMaximum(100);
         taskId = timeId;
-        total = SystemConf.progress.get(taskId);
+        this.total = total;
         // 定时任务，绘制进度条
         sf = se.scheduleAtFixedRate(new FixedSchedule(), 0, 10,
                 TimeUnit.MILLISECONDS);
@@ -50,16 +49,17 @@ public class ProgressBar {
     class FixedSchedule implements Runnable {
         public void run() {
             byteRead = SystemConf.progress.get(taskId);
+            logger.info("record progress::" + byteRead + " all::" + total);
             int num = (int) (100 - byteRead * 100 / total);
             bar.setValue(num);
 
             if (num == 100) {
                 logger.info("get all...");
                 sf.cancel(true);
-                frame.dispose();
-                ;
+
                 SystemConf.savePathList.remove(taskId);
                 SystemConf.taskList.remove(taskId);
+                frame.dispose();
                 NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");
             }
         }

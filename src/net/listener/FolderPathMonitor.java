@@ -81,16 +81,17 @@ public class FolderPathMonitor implements Runnable {
                         SystemConf.savePathList.get(timeId), msg[2]);
 
                 if (bf.getFiles().size() != 0) {
+                    long total = Long.valueOf(msg[1]);
                     // 存放任务
                     SystemConf.taskList.put(timeId, bf.getFiles());
-                    SystemConf.progress.put(timeId, Long.valueOf(msg[1]));
+                    SystemConf.progress.put(timeId, total);
 
                     // 告诉要发送哪些文件
                     logger.info("告诉需要发送的文件夹id");
                     toClient.writeUTF(msg[0]);
 
                     // 发送进度
-                    new ProgressBar(msg[0]);
+                    new ProgressBar(msg[0], total);
                 } else {
                     NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");
                 }
