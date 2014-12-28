@@ -46,7 +46,7 @@ public class UdpDataMonitor implements Runnable {
                     NoticeGui.messageNotice(new JPanel(), "传输被" + dp.getIp()
                             + "拒绝");
                 } else if (dp.getTag() == SystemConf.folderConf) {
-                    new SendPath(dp);
+                    new Thread(new SendPath(dp)).start();
                 }
 
             }
