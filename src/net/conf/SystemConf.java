@@ -40,10 +40,11 @@ public class SystemConf {
     public final static int refuse = 3;
     public final static int folderPre = 4;
     public final static int folderConf = 5;
-    
+    public final static int end = 6;
+
     // 数组buffer
     public final static int buffer = 10000;
-    
+
     // 在线主机列表
     public static Vector<Host> hostList = new Vector<Host>();
 

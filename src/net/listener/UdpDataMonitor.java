@@ -37,16 +37,31 @@ public class UdpDataMonitor implements Runnable {
                 objectStream = new ObjectInputStream(byteArrayStream);
                 dp = (DataPacket) objectStream.readObject();
 
-                if (dp.getTag() == SystemConf.text) {
+                switch (dp.getTag()) {
+                case SystemConf.text:
                     new ChatGui(dp, UdpSocket);
-                } else if (dp.getTag() == SystemConf.filePre
-                        || dp.getTag() == SystemConf.folderPre) {
+                    break;
+
+                case SystemConf.folderPre:
+                case SystemConf.filePre:
                     new ConfirmGui(dp);
-                } else if (dp.getTag() == SystemConf.refuse) {
+                    break;
+
+                case SystemConf.refuse:
                     NoticeGui.messageNotice(new JPanel(), "传输被" + dp.getIp()
                             + "拒绝");
-                } else if (dp.getTag() == SystemConf.folderConf) {
+                    break;
+
+                case SystemConf.folderConf:
                     new Thread(new SendPath(dp)).start();
+                    break;
+
+                case SystemConf.end:
+                    SystemConf.sendPathList.remove(dp.getContent());
+                    break;
+
+                default:
+                    break;
                 }
 
             }
