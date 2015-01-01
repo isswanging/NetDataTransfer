@@ -91,7 +91,8 @@ public class FolderPathMonitor implements Runnable {
                     toClient.writeUTF(msg[0]);
 
                     // 发送进度
-                    new ProgressBar(msg[0], total);
+                    new ProgressBar(msg[0], total, socket.getInetAddress()
+                            .toString());
                 } else {
                     NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");
                 }
