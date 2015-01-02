@@ -45,21 +45,21 @@ public class SendPath implements Runnable{
             toServer.flush();
 
             logger.info("路径发送完成");
-            String id = fromeServer.readUTF();
+            String taskId = fromeServer.readUTF();
             fromeServer.close();
-            logger.info("文件夹即将发送，任务id：" + id);
+            logger.info("文件夹即将发送，任务id：" + taskId);
 
             toServer.close();
             fromeServer.close();
             byteIn.close();
             socket.close();
 
-            new SendFolder(id, dp.getIp());
+            new SendFolder(taskId, dp.getIp());
 
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
     }
 

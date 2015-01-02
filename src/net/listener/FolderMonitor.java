@@ -24,9 +24,9 @@ public class FolderMonitor implements Runnable {
 
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
     }
 
@@ -62,7 +62,7 @@ public class FolderMonitor implements Runnable {
                 }
                 logger.info(filePath + " 接收完成");
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("exception: " + e);
             } finally {
                 try {
                     if (dos != null) {
@@ -72,7 +72,7 @@ public class FolderMonitor implements Runnable {
                         dis.close();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("exception: " + e);
                 }
             }
         }

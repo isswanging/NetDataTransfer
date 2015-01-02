@@ -8,8 +8,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class FileMonitor implements Runnable {
     ServerSocket server = null;
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     @Override
     public void run() {
@@ -22,9 +26,9 @@ public class FileMonitor implements Runnable {
 
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
     }
 
@@ -67,9 +71,9 @@ public class FileMonitor implements Runnable {
                 }
 
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                logger.error("exception: " + e);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("exception: " + e);
             }
         }
 

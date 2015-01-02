@@ -115,7 +115,7 @@ public class MainGui {
                     SystemConf.broadcastIP, SystemConf.broadcastPort);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
     }
 
@@ -339,7 +339,7 @@ public class MainGui {
         try {
             Thread.sleep(300);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
         updateHostList();
     }
@@ -446,9 +446,9 @@ public class MainGui {
             Vector<?> row = (Vector<?>) model.getDataVector().get(i);
             String targetIp = (String) row.elementAt(3);
 
-//            if (targetIp.equals(MainGui.this.ip)) {
-//                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
-//            } else {
+            if (targetIp.equals(MainGui.this.ip)) {
+                NoticeGui.warnNotice(jf, "不需要自己给自己发文件");
+            } else {
                 // 选择文件夹
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setMultiSelectionEnabled(true);
@@ -481,7 +481,7 @@ public class MainGui {
                             path.toString(), SystemConf.folderPre,
                             SystemConf.textPort);
                 }
-           // }
+            }
         }
     }
 
@@ -509,7 +509,7 @@ public class MainGui {
             socket = new DatagramSocket();
             NetDomain.sendUdpData(socket, dp, targetIp, port);
         } catch (SocketException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } finally {
             if (socket != null)
                 socket.close();

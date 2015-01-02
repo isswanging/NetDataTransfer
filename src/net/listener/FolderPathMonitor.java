@@ -32,9 +32,9 @@ public class FolderPathMonitor implements Runnable {
                 new Thread(new GetFilesPath(socket)).start();
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
     }
 
@@ -73,18 +73,18 @@ public class FolderPathMonitor implements Runnable {
                 // 这里的格式是格式是：
                 // id>总大小>路径，因此用>切分
                 String[] msg = path.toString().split(">");
-                String timeId = msg[0];
+                String taskId = msg[0];
 
                 // 建立本地存放的目录
                 logger.info("path length:::" + msg[2].length());
                 BuildFolder bf = new BuildFolder(
-                        SystemConf.savePathList.get(timeId), msg[2]);
+                        SystemConf.savePathList.get(taskId), msg[2]);
 
                 if (bf.getFiles().size() != 0) {
                     long total = Long.valueOf(msg[1]);
                     // 存放任务
-                    SystemConf.taskList.put(timeId, bf.getFiles());
-                    SystemConf.progress.put(timeId, total);
+                    SystemConf.taskList.put(taskId, bf.getFiles());
+                    SystemConf.progress.put(taskId, total);
 
                     // 告诉要发送哪些文件
                     logger.info("告诉需要发送的文件夹id");
@@ -98,7 +98,7 @@ public class FolderPathMonitor implements Runnable {
                 }
 
             } catch (IOException e) {
-                logger.error(e.toString());
+                logger.error("exception: " + e);
             }
         }
     }

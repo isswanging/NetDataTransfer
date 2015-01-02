@@ -4,7 +4,11 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class OSUtil {
+    private final static Log logger = LogFactory.getLog(OSUtil.class);
 
     /**
      * 判断当前操作是否Windows.
@@ -59,7 +63,7 @@ public class OSUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
 
         if (null != ip) {

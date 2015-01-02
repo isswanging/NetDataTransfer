@@ -71,7 +71,7 @@ public class ProgressBar {
                             "", taskId, SystemConf.end), targetIp,
                             SystemConf.textPort);
                 } catch (SocketException e) {
-                    e.printStackTrace();
+                    logger.error("exception: " + e);
                 }
                 frame.dispose();
                 NoticeGui.messageNotice(new JPanel(), "文件夹接收完毕");

@@ -8,7 +8,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class NetDomain {
+    private final static Log logger = LogFactory.getLog(NetDomain.class);
 
     // 检查端口
     public static String check() {
@@ -52,7 +56,7 @@ public class NetDomain {
 
     // 发送UDP消息
     public static void sendUdpData(DatagramSocket broadSocket, Object obj,
-                                   String targetIp, int port) {
+            String targetIp, int port) {
         ByteArrayOutputStream byteArrayStream = null;
         ObjectOutputStream objectStream = null;
         try {
@@ -67,7 +71,7 @@ public class NetDomain {
             broadSocket.send(broadPacket);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } finally {
             try {
                 if (objectStream != null)
@@ -75,7 +79,7 @@ public class NetDomain {
                 if (byteArrayStream != null)
                     byteArrayStream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("exception: " + e);
             }
 
         }

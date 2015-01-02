@@ -5,6 +5,10 @@ import net.ui.NoticeGui;
 import net.vo.DataPacket;
 
 import javax.swing.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -21,6 +25,8 @@ public class TransferFile implements Runnable {
     DataPacket dp = null;
     String savePath = "";
     String fileName = "";
+    
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     public TransferFile(String path, String name, DataPacket data) {
         this.savePath = path;
@@ -44,7 +50,7 @@ public class TransferFile implements Runnable {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("exception: " + e);
                 }
             }
 
@@ -103,9 +109,9 @@ public class TransferFile implements Runnable {
             socket.close();
 
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         }
     }
 }

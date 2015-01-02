@@ -12,10 +12,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class BroadcastMonitor implements Runnable {
     DatagramSocket broadSocket = null;
     ByteArrayInputStream byteArrayStram = null;
     ObjectInputStream objectStream = null;
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     @Override
     public void run() {
@@ -61,16 +65,16 @@ public class BroadcastMonitor implements Runnable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } finally {
             try {
                 broadSocket.close();
                 objectStream.close();
                 byteArrayStram.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("exception: " + e);
             }
         }
     }

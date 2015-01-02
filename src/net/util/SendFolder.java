@@ -19,16 +19,16 @@ import org.apache.commons.logging.LogFactory;
 public class SendFolder {
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    public SendFolder(String id, String ip) {
+    public SendFolder(String taskId, String ip) {
         ExecutorService executorService = new ThreadPoolExecutor(8, 16, 600,
                 TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-        String[] path = SystemConf.sendPathList.get(id).split("\\|");
+        String[] path = SystemConf.sendPathList.get(taskId).split("\\|");
         String[] filesPath = path[path.length - 1].split("\\*");
 
         logger.info("需要发送的文件总数为：" + filesPath.length);
 
         for (int i = 0; i < filesPath.length; i++) {
-            executorService.execute(sendFile(ip, filesPath[i], i, id));
+            executorService.execute(sendFile(ip, filesPath[i], i, taskId));
         }
     }
 
@@ -73,7 +73,7 @@ public class SendFolder {
                         logger.info(filePath + " 发送完成");
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("exception: " + e);
                 }
 
             }

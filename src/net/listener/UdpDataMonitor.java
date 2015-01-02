@@ -8,6 +8,9 @@ import java.net.DatagramSocket;
 
 import javax.swing.JPanel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.conf.SystemConf;
 import net.ui.ChatGui;
 import net.ui.ConfirmGui;
@@ -22,6 +25,8 @@ public class UdpDataMonitor implements Runnable {
     ObjectInputStream objectStream = null;
     ByteArrayInputStream byteArrayStream = null;
 
+    private final Log logger = LogFactory.getLog(this.getClass());
+    
     @Override
     public void run() {
         try {
@@ -66,16 +71,16 @@ public class UdpDataMonitor implements Runnable {
 
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error("exception: " + e);
         } finally {
             try {
                 UdpSocket.close();
                 objectStream.close();
                 byteArrayStream.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("exception: " + e);
             }
         }
     }
