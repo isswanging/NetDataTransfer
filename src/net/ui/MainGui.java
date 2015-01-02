@@ -519,12 +519,12 @@ public class MainGui {
     private void sendTcpData(String total, String ip, String targetIp,
             String path, int folderpre, int textport) {
         // 获取当前时间作为任务id
-        String timeId = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        String taskId = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 .format(new Date());
-        sendUdpData(hostName, ip, targetIp, timeId, SystemConf.folderPre,
+        sendUdpData(hostName, ip, targetIp, taskId, SystemConf.folderPre,
                 SystemConf.textPort);
 
-        SystemConf.sendPathList.put(timeId, String.valueOf(total) + ">" + path);
+        SystemConf.sendPathList.put(taskId, String.valueOf(total) + ">" + path);
         logger.info("path length:::" + path.length());
 
     }
