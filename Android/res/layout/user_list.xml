@@ -24,11 +24,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/more_right"
             android:text="@string/more"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/title_text_size" />
 
     </RelativeLayout>
+
+    <ListView
+        android:id="@+id/userList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
 
 </LinearLayout>

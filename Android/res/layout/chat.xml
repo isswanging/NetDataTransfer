@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/userTitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/title_height"
+        android:layout_alignParentTop="true"
+        android:background="#0080FF" >
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/titleName"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/title_text_size" />
+
+        <TextView
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/back_left"
+            android:text="@string/back"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/back_text_size" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/charContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/userTitle" >
+    </ListView>
+
+    <RelativeLayout
+        android:id="@+id/chat"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_height"
+        android:layout_alignParentBottom="true"
+        android:background="#0080FF" >
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="@dimen/editText_width"
+            android:layout_height="@dimen/editText_height"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/editText_left"
+            android:background="#FFFFFF"
+            android:singleLine="false"
+            android:textColor="#000000"
+            android:hint="@string/editText_hint" >
+
+            <requestFocus />
+        </EditText>
+
+        <TextView
+            android:id="@+id/send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/sendText_left"
+            android:layout_toRightOf="@id/editText"
+            android:text="@string/sendText"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/sendText_text_size" />
+
+        <TextView
+            android:id="@+id/sendMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/sendMore_right"
+            android:text="@string/sendMore"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/sendMore_text_size" />
+    </RelativeLayout>
+
+</RelativeLayout>
