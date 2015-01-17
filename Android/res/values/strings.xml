@@ -4,7 +4,7 @@
     <string name="app_name">NetDataTransfer</string>
     <string name="exit">退出</string>
     <string name="titleName">用户列表</string>
-	<string name="more">…</string>
+	<string name="more">┆</string>
 	<string name="back">&#060;</string>
 	<string name="sendMore">+</string>
 	<string name="sendText">发送</string>

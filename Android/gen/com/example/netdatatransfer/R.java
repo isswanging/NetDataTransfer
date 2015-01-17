@@ -26,6 +26,12 @@ public final class R {
         public static final int editText_height=0x7f04000b;
         public static final int editText_left=0x7f040009;
         public static final int editText_width=0x7f04000a;
+        public static final int head_height=0x7f040010;
+        public static final int head_margin=0x7f040011;
+        public static final int head_width=0x7f04000f;
+        public static final int ip_size=0x7f040016;
+        public static final int list_divide=0x7f040014;
+        public static final int list_padding=0x7f040015;
         public static final int more_right=0x7f040004;
         public static final int sendMore_right=0x7f040007;
         public static final int sendMore_text_size=0x7f040008;
@@ -33,21 +39,26 @@ public final class R {
         public static final int sendText_text_size=0x7f04000c;
         public static final int title_height=0x7f040002;
         public static final int title_text_size=0x7f040003;
+        public static final int userName_size=0x7f040013;
+        public static final int user_marginLeft=0x7f040012;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int head=0x7f020000;
+        public static final int ic_launcher=0x7f020001;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000c;
+        public static final int action_settings=0x7f08000e;
         public static final int back=0x7f080002;
         public static final int charContent=0x7f080003;
         public static final int chat=0x7f080004;
         public static final int editText=0x7f080005;
+        public static final int head=0x7f08000c;
         public static final int more=0x7f08000a;
         public static final int send=0x7f080006;
         public static final int sendMore=0x7f080007;
         public static final int title=0x7f080008;
         public static final int titleName=0x7f080009;
+        public static final int userIP=0x7f08000d;
         public static final int userList=0x7f08000b;
         public static final int userName=0x7f080001;
         public static final int userTitle=0x7f080000;
@@ -55,6 +66,7 @@ public final class R {
     public static final class layout {
         public static final int chat=0x7f030000;
         public static final int user_list=0x7f030001;
+        public static final int user_list_item=0x7f030002;
     }
     public static final class menu {
         public static final int menu=0x7f070000;
