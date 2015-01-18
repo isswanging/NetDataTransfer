@@ -20,6 +20,7 @@ public class NetDomain {
             new DatagramSocket(SystemConf.textPort).close();
             new ServerSocket(SystemConf.filePort).close();
             new ServerSocket(SystemConf.folderPort).close();
+            new ServerSocket(SystemConf.pathPort).close();
 
             return SystemConf.SUCCESS;
         } catch (SocketException e) {

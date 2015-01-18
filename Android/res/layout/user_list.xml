@@ -31,14 +31,19 @@
             android:textSize="@dimen/title_text_size" />
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/userList"
+    <LinearLayout
+        android:id="@+id/listContent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:dividerHeight="@dimen/list_divide"
-        android:paddingLeft="@dimen/list_padding"
-        android:paddingRight="@dimen/list_padding"
-        android:scrollbarStyle="outsideOverlay" >
-    </ListView>
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/wait"
+            android:layout_width="@dimen/wait_length"
+            android:layout_height="@dimen/wait_length"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/wait_top"
+            android:src="@drawable/wait" />
+    </LinearLayout>
 
 </LinearLayout>

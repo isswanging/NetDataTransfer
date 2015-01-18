@@ -23,5 +23,7 @@
 	<dimen name="list_divide">1dp</dimen>
 	<dimen name="list_padding">10dp</dimen>
 	<dimen name="ip_size">20dp</dimen>
+	<dimen name="wait_length">50dp</dimen>
+	<dimen name="wait_top">50dp</dimen>
     
 </resources>

@@ -65,17 +65,9 @@ public class BroadcastMonitor implements Runnable {
                 }
             }
         } catch (IOException e) {
-            
+
         } catch (ClassNotFoundException e) {
             logger.error("exception: " + e);
-        } finally {
-            try {
-                broadSocket.close();
-                objectStream.close();
-                byteArrayStram.close();
-            } catch (IOException e) {
-                logger.error("exception: " + e);
-            }
         }
     }
 }
