@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.conf.SystemConf;
 import net.service.BroadcastMonitorService;
 import net.util.NetDomain;
@@ -15,6 +16,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,16 +24,20 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
 	String hostName;
 	String userName;
 	String userDomain;
+	ImageView waitGif;
 	List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+	AnimationDrawable anim;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -44,6 +50,14 @@ public class UserListActivity extends Activity {
 	protected void onDestroy() {
 		stopService(new Intent(this, BroadcastMonitorService.class));
 		super.onDestroy();
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		waitGif.setBackgroundResource(R.anim.frame);
+		anim = (AnimationDrawable) waitGif.getBackground();
+		anim.start();
 	}
 
 	@Override
@@ -65,6 +79,7 @@ public class UserListActivity extends Activity {
 		// 隐藏标题栏
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.user_list);
+		waitGif = (ImageView) findViewById(R.id.wait);
 
 		// 延迟一点加载列表
 		final Handler handler = new ListHandler();
@@ -73,7 +88,7 @@ public class UserListActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					Thread.sleep(500);
+					Thread.sleep(800);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -156,6 +171,8 @@ public class UserListActivity extends Activity {
 			super.handleMessage(msg);
 			if (msg.what == 0) {
 				// 更新UI
+				if (anim.isRunning())
+					anim.stop();
 				LinearLayout listConent = (LinearLayout) findViewById(R.id.listContent);
 				LayoutInflater layoutInflater = getLayoutInflater();
 				listConent.removeView(findViewById(R.id.wait));

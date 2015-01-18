@@ -35,6 +35,7 @@
         android:id="@+id/listContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#FFFFFF"
         android:orientation="vertical" >
 
         <ImageView
@@ -42,8 +43,7 @@
             android:layout_width="@dimen/wait_length"
             android:layout_height="@dimen/wait_length"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/wait_top"
-            android:src="@drawable/wait" />
+            android:layout_marginTop="@dimen/wait_top" />
     </LinearLayout>
 
 </LinearLayout>
