@@ -1,12 +1,12 @@
 package net.ui;
 
+import java.lang.ref.WeakReference;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.conf.SystemConf;
 import net.service.BroadcastMonitorService;
 import net.util.NetDomain;
@@ -28,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
@@ -82,22 +81,18 @@ public class UserListActivity extends Activity {
 		waitGif = (ImageView) findViewById(R.id.wait);
 
 		// 延迟一点加载列表
-		final Handler handler = new ListHandler();
-		new Thread(new Runnable() {
+		if (SystemConf.wifi == 1) {
+			final Handler handler = new ListHandler(this);
+			new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(800);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				@Override
+				public void run() {
+					Message msg = handler.obtainMessage();
+					msg.what = 0;
+					handler.sendMessageDelayed(msg, 800);
 				}
-				Message msg = handler.obtainMessage();
-				msg.what = 0;
-				msg.sendToTarget();
-			}
-		}).start();
-
+			}).start();
+		}
 	}
 
 	private void login() {
@@ -130,13 +125,13 @@ public class UserListActivity extends Activity {
 	}
 
 	private void preCheck() {
-		if (NetDomain.check().endsWith(SystemConf.SUCCESS)) {
+		if (NetDomain.check(this).endsWith(SystemConf.SUCCESS)) {
 			SystemConf.hostIP = NetDomain.getHostIp(this);// 获取ip地址
 		} else {
 			// 弹出警告框并退出
 			new AlertDialog.Builder(this)
 					.setTitle("错误")
-					.setMessage("端口异常，启动失败")
+					.setMessage("wifi未连接或端口异常，启动失败")
 					.setPositiveButton("确定",
 							new DialogInterface.OnClickListener() {
 
@@ -163,28 +158,34 @@ public class UserListActivity extends Activity {
 		return userList;
 	}
 
-	class ListHandler extends Handler {
-		@SuppressLint("InflateParams")
+	static class ListHandler extends Handler {
+		WeakReference<UserListActivity> refActvity;
+
+		ListHandler(UserListActivity activity) {
+			refActvity = new WeakReference<UserListActivity>(activity);
+		}
+
 		@Override
 		public void handleMessage(Message msg) {
-
-			super.handleMessage(msg);
-			if (msg.what == 0) {
-				// 更新UI
-				if (anim.isRunning())
-					anim.stop();
-				LinearLayout listConent = (LinearLayout) findViewById(R.id.listContent);
-				LayoutInflater layoutInflater = getLayoutInflater();
-				listConent.removeView(findViewById(R.id.wait));
-				ListView userList = (ListView) layoutInflater.inflate(
-						R.layout.list_user, null);
-				listConent.addView(userList);
-				SimpleAdapter adapter = new SimpleAdapter(
-						UserListActivity.this, getData(),
-						R.layout.user_list_item, new String[] { "name", "ip",
-								"img" }, new int[] { R.id.userName,
-								R.id.userIP, R.id.head });
-				userList.setAdapter(adapter);
+			final UserListActivity act = refActvity.get();
+			if (act != null) {
+				if (msg.what == 0) {
+					// 更新UI
+					if (act.anim.isRunning())
+						act.anim.stop();
+					LinearLayout listConent = (LinearLayout) act
+							.findViewById(R.id.listContent);
+					LayoutInflater layoutInflater = act.getLayoutInflater();
+					listConent.removeView(act.findViewById(R.id.wait));
+					ListView userList = (ListView) layoutInflater.inflate(
+							R.layout.users, null);
+					listConent.addView(userList);
+					SimpleAdapter adapter = new SimpleAdapter(act,
+							act.getData(), R.layout.user_list_item,
+							new String[] { "name", "ip", "img" }, new int[] {
+									R.id.userName, R.id.userIP, R.id.head });
+					userList.setAdapter(adapter);
+				}
 			}
 		}
 	}

@@ -18,19 +18,28 @@ import android.net.wifi.WifiManager;
 public class NetDomain {
 
 	// 检查端口
-	public static String check() {
-		try {
-			new DatagramSocket(SystemConf.textPort).close();
-			new ServerSocket(SystemConf.filePort).close();
-			new ServerSocket(SystemConf.folderPort).close();
-			new ServerSocket(SystemConf.pathPort).close();
+	public static String check(Context userListActivity) {
+		// 获取wifi服务
+		WifiManager wifiManager = (WifiManager) userListActivity
+				.getSystemService(Context.WIFI_SERVICE);
+		if (wifiManager.isWifiEnabled()) {
+			SystemConf.wifi = 1;
+			try {
+				new DatagramSocket(SystemConf.textPort).close();
+				new ServerSocket(SystemConf.filePort).close();
+				new ServerSocket(SystemConf.folderPort).close();
+				new ServerSocket(SystemConf.pathPort).close();
 
-			return SystemConf.SUCCESS;
-		} catch (SocketException e) {
+				return SystemConf.SUCCESS;
+			} catch (SocketException e) {
+				return SystemConf.ERROR;
+			} catch (IOException e) {
+				return SystemConf.FAIL;
+			}
+		} else
+			SystemConf.wifi = 0;
 			return SystemConf.ERROR;
-		} catch (IOException e) {
-			return SystemConf.FAIL;
-		}
+
 	}
 
 	// 添加主机

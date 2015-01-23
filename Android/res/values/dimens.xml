@@ -25,5 +25,5 @@
 	<dimen name="ip_size">20dp</dimen>
 	<dimen name="wait_length">50dp</dimen>
 	<dimen name="wait_top">50dp</dimen>
-    
+    <dimen name="refresh_height">30dp</dimen>
 </resources>

@@ -8,7 +8,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/title_height"
-        android:background="#0080FF" >
+        android:background="#00EC00" >
 
         <TextView
             android:id="@+id/titleName"
@@ -37,6 +37,23 @@
         android:layout_height="match_parent"
         android:background="#FFFFFF"
         android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/refresh"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/refresh_height"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" 
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/refreshText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" 
+                android:text="hhhhhhhhhh"
+                android:textSize="20dp" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/wait"
