@@ -12,11 +12,10 @@
         android:background="#00EC00" >
 
         <TextView
-            android:id="@+id/userName"
+            android:id="@+id/titleName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/titleName"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/title_text_size" />
 

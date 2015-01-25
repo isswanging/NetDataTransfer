@@ -15,13 +15,20 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="net.ui.UserListActivity"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/titleName" >
+            android:label="@string/titleName"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="net.ui.ChatActivity" >
+            <intent-filter>
+                <action android:name="net.ui.chat" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 

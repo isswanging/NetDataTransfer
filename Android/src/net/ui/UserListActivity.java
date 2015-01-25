@@ -26,11 +26,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.example.netdatatransfer.R;
 
@@ -101,6 +104,7 @@ public class UserListActivity extends Activity {
 	}
 
 	private void initUI() {
+		// 显示menu
 		forceShowOverflowMenu();
 		setContentView(R.layout.user_list);
 		waitGif = (ImageView) findViewById(R.id.wait);
@@ -215,6 +219,27 @@ public class UserListActivity extends Activity {
 
 					act.pullRefreshListView.getListView().setAdapter(
 							act.adapter);
+					act.pullRefreshListView.getListView()
+							.setOnItemClickListener(new OnItemClickListener() {
+								@Override
+								public void onItemClick(AdapterView<?> parent,
+										View view, int position, long id) {
+									TextView name = (TextView) view
+											.findViewById(R.id.userName);
+									TextView ip = (TextView) view
+											.findViewById(R.id.userIP);
+									Bundle bundle = new Bundle();
+									bundle.putString("name", name.getText()
+											.toString());
+									bundle.putString("ip", ip.getText()
+											.toString());
+									Intent intent = new Intent(act,
+											ChatActivity.class);
+									intent.putExtras(bundle);
+									act.startActivity(intent);
+								}
+							});
+
 					act.pullRefreshListView
 							.setPullListener(new PullToRefreshListener() {
 

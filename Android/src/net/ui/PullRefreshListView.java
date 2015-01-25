@@ -97,7 +97,7 @@ public class PullRefreshListView extends LinearLayout implements
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				yDown = event.getRawY();
-				break;
+				return false;
 			case MotionEvent.ACTION_MOVE:
 				yMove = event.getRawY();
 				int distance = (int) (yMove - yDown);
@@ -125,6 +125,8 @@ public class PullRefreshListView extends LinearLayout implements
 				} else if (currentState == Tag.Pull_to_Refresh) {
 					// 松手时如果是下拉状态，就去调用隐藏下拉头
 					new HideHeaderTask().execute();
+				} else if (currentState == Tag.Normal) {
+					return false;
 				}
 
 				break;
@@ -141,7 +143,7 @@ public class PullRefreshListView extends LinearLayout implements
 			listView.setFocusableInTouchMode(false);
 			lastState = currentState;
 			// 当前正处于下拉或释放状态，通过返回true屏蔽掉ListView的滚动事件
-			return true;
+			return false;
 		}
 		return false;
 	}

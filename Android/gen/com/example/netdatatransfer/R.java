@@ -72,12 +72,12 @@ public final class R {
         public static final int wait_0012=0x7f020013;
     }
     public static final class id {
-        public static final int about=0x7f090010;
+        public static final int about=0x7f090011;
         public static final int back=0x7f090002;
         public static final int charContent=0x7f090003;
         public static final int chat=0x7f090004;
         public static final int editText=0x7f090005;
-        public static final int exit=0x7f090011;
+        public static final int exit=0x7f090012;
         public static final int head=0x7f09000e;
         public static final int listContent=0x7f09000c;
         public static final int refreshProgress=0x7f09000a;
@@ -85,9 +85,10 @@ public final class R {
         public static final int refresh_head=0x7f090008;
         public static final int send=0x7f090006;
         public static final int sendMore=0x7f090007;
-        public static final int userIP=0x7f09000f;
+        public static final int titleName=0x7f090001;
+        public static final int userIP=0x7f090010;
         public static final int userList=0x7f09000b;
-        public static final int userName=0x7f090001;
+        public static final int userName=0x7f09000f;
         public static final int userTitle=0x7f090000;
         public static final int wait=0x7f09000d;
     }
@@ -104,14 +105,13 @@ public final class R {
     public static final class string {
         public static final int about=0x7f060002;
         public static final int app_name=0x7f060000;
-        public static final int back=0x7f060005;
-        public static final int editText_hint=0x7f060008;
+        public static final int back=0x7f060004;
+        public static final int editText_hint=0x7f060007;
         public static final int exit=0x7f060001;
-        public static final int more=0x7f060004;
-        public static final int pull_to_refresh=0x7f060009;
-        public static final int release_to_refresh=0x7f06000a;
-        public static final int sendMore=0x7f060006;
-        public static final int sendText=0x7f060007;
+        public static final int pull_to_refresh=0x7f060008;
+        public static final int release_to_refresh=0x7f060009;
+        public static final int sendMore=0x7f060005;
+        public static final int sendText=0x7f060006;
         public static final int titleName=0x7f060003;
     }
     public static final class style {
