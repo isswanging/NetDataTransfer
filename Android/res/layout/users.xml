@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/userList"
+<net.ui.PullRefreshListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:dividerHeight="@dimen/list_divide"
-    android:paddingLeft="@dimen/list_padding"
-    android:paddingRight="@dimen/list_padding"
-    android:scrollbarStyle="outsideOverlay" >
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-</ListView>
+</net.ui.PullRefreshListView>

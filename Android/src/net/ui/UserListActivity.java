@@ -1,17 +1,19 @@
 package net.ui;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.conf.SystemConf;
 import net.service.BroadcastMonitorService;
+import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.util.NetDomain;
 import net.vo.Host;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -20,14 +22,16 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
@@ -37,6 +41,14 @@ public class UserListActivity extends Activity {
 	ImageView waitGif;
 	List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
 	AnimationDrawable anim;
+
+	public final int login = 0;
+	public final int refresh = 1;
+
+	SimpleAdapter adapter;
+	PullRefreshListView pullRefreshListView;
+
+	Handler handler = new ListHandler(this);
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,22 +86,33 @@ public class UserListActivity extends Activity {
 
 	}
 
+	private void forceShowOverflowMenu() {
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class
+					.getDeclaredField("sHasPermanentMenuKey");
+			if (menuKeyField != null) {
+				menuKeyField.setAccessible(true);
+				menuKeyField.setBoolean(config, false);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void initUI() {
-		// 隐藏标题栏
-		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		forceShowOverflowMenu();
 		setContentView(R.layout.user_list);
 		waitGif = (ImageView) findViewById(R.id.wait);
 
 		// 延迟一点加载列表
 		if (SystemConf.wifi == 1) {
-			final Handler handler = new ListHandler(this);
 			new Thread(new Runnable() {
-
 				@Override
 				public void run() {
 					Message msg = handler.obtainMessage();
-					msg.what = 0;
-					handler.sendMessageDelayed(msg, 800);
+					msg.what = login;
+					handler.sendMessageDelayed(msg, 1000);
 				}
 			}).start();
 		}
@@ -147,6 +170,7 @@ public class UserListActivity extends Activity {
 	}
 
 	private List<Map<String, Object>> getData() {
+		userList.clear();
 		for (Host host : SystemConf.hostList) {
 			Map<String, Object> item = new HashMap<String, Object>();
 			item.put("name", host.getUserName());
@@ -169,22 +193,61 @@ public class UserListActivity extends Activity {
 		public void handleMessage(Message msg) {
 			final UserListActivity act = refActvity.get();
 			if (act != null) {
-				if (msg.what == 0) {
+				if (msg.what == act.login) {
+					act.adapter = new SimpleAdapter(act, act.getData(),
+							R.layout.user_list_item, new String[] { "name",
+									"ip", "img" }, new int[] { R.id.userName,
+									R.id.userIP, R.id.head });
+					Log.i(this.toString(),
+							String.valueOf(SystemConf.hostList.size()));
+
 					// 更新UI
-					if (act.anim.isRunning())
+					if (act.anim != null && act.anim.isRunning())
 						act.anim.stop();
 					LinearLayout listConent = (LinearLayout) act
 							.findViewById(R.id.listContent);
 					LayoutInflater layoutInflater = act.getLayoutInflater();
+					act.pullRefreshListView = (PullRefreshListView) layoutInflater
+							.inflate(R.layout.users, null);
+
 					listConent.removeView(act.findViewById(R.id.wait));
-					ListView userList = (ListView) layoutInflater.inflate(
-							R.layout.users, null);
-					listConent.addView(userList);
-					SimpleAdapter adapter = new SimpleAdapter(act,
-							act.getData(), R.layout.user_list_item,
-							new String[] { "name", "ip", "img" }, new int[] {
-									R.id.userName, R.id.userIP, R.id.head });
-					userList.setAdapter(adapter);
+					listConent.addView(act.pullRefreshListView);
+
+					act.pullRefreshListView.getListView().setAdapter(
+							act.adapter);
+					act.pullRefreshListView
+							.setPullListener(new PullToRefreshListener() {
+
+								@Override
+								public void onRefresh() {
+									SystemConf.hostList.clear();
+									String userName = android.os.Build.MODEL;// 获取用户名
+									String hostName = "Android";// 获取主机名
+									String userDomain = "Android";// 获取计算机域
+
+									// 加入在线列表
+									Host host = new Host(userName, userDomain,
+											SystemConf.hostIP, hostName, 1, 0);
+									NetDomain.addHost(host);
+									try {
+										NetDomain.sendUdpData(
+												new DatagramSocket(), host,
+												SystemConf.broadcastIP,
+												SystemConf.broadcastPort);
+									} catch (SocketException e) {
+										e.printStackTrace();
+									}
+									Message msg = act.handler.obtainMessage();
+									msg.what = act.refresh;
+									act.handler.sendMessageDelayed(msg, 2000);
+								}
+							});
+				}
+
+				if (msg.what == act.refresh) {
+					act.pullRefreshListView.finishRefreshing();
+					act.getData();
+					act.adapter.notifyDataSetChanged();
 				}
 			}
 		}

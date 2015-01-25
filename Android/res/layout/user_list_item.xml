@@ -2,6 +2,7 @@
 <RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     >
     
     <ImageView 
@@ -22,6 +23,7 @@
         android:layout_toRightOf="@id/head"
         android:layout_marginLeft="@dimen/user_marginLeft"
         android:textColor="#000000"
+        android:background="#FFFFFF"
         android:textSize="@dimen/userName_size" />
     
     <TextView
@@ -32,6 +34,7 @@
         android:layout_toRightOf="@id/head"
         android:layout_marginLeft="@dimen/user_marginLeft"
         android:textColor="#000000"
+        android:background="#FFFFFF"
         android:textSize="@dimen/ip_size" />
 
 </RelativeLayout >

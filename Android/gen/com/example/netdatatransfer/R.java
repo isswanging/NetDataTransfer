@@ -22,30 +22,32 @@ public final class R {
          */
         public static final int activity_horizontal_margin=0x7f050000;
         public static final int activity_vertical_margin=0x7f050001;
-        public static final int back_left=0x7f050005;
-        public static final int back_text_size=0x7f050006;
-        public static final int chat_height=0x7f05000e;
-        public static final int editText_height=0x7f05000b;
-        public static final int editText_left=0x7f050009;
-        public static final int editText_width=0x7f05000a;
-        public static final int head_height=0x7f050010;
-        public static final int head_margin=0x7f050011;
-        public static final int head_width=0x7f05000f;
-        public static final int ip_size=0x7f050016;
-        public static final int list_divide=0x7f050014;
-        public static final int list_padding=0x7f050015;
-        public static final int more_right=0x7f050004;
-        public static final int refresh_height=0x7f050019;
-        public static final int sendMore_right=0x7f050007;
-        public static final int sendMore_text_size=0x7f050008;
-        public static final int sendText_left=0x7f05000d;
-        public static final int sendText_text_size=0x7f05000c;
+        public static final int back_left=0x7f050004;
+        public static final int back_text_size=0x7f050005;
+        public static final int chat_height=0x7f05000d;
+        public static final int editText_height=0x7f05000a;
+        public static final int editText_left=0x7f050008;
+        public static final int editText_width=0x7f050009;
+        public static final int head_height=0x7f05000f;
+        public static final int head_margin=0x7f050010;
+        public static final int head_width=0x7f05000e;
+        public static final int ip_size=0x7f050015;
+        public static final int list_divide=0x7f050013;
+        public static final int list_padding=0x7f050014;
+        public static final int refreshProgress_size=0x7f05001b;
+        public static final int refresh_height=0x7f050018;
+        public static final int refresh_height_margin_top=0x7f050019;
+        public static final int refresh_text=0x7f05001a;
+        public static final int sendMore_right=0x7f050006;
+        public static final int sendMore_text_size=0x7f050007;
+        public static final int sendText_left=0x7f05000c;
+        public static final int sendText_text_size=0x7f05000b;
         public static final int title_height=0x7f050002;
         public static final int title_text_size=0x7f050003;
-        public static final int userName_size=0x7f050013;
-        public static final int user_marginLeft=0x7f050012;
-        public static final int wait_length=0x7f050017;
-        public static final int wait_top=0x7f050018;
+        public static final int userName_size=0x7f050012;
+        public static final int user_marginLeft=0x7f050011;
+        public static final int wait_length=0x7f050016;
+        public static final int wait_top=0x7f050017;
     }
     public static final class drawable {
         public static final int chatfrom_bg_normal=0x7f020000;
@@ -70,44 +72,47 @@ public final class R {
         public static final int wait_0012=0x7f020013;
     }
     public static final class id {
-        public static final int action_settings=0x7f090012;
+        public static final int about=0x7f090010;
         public static final int back=0x7f090002;
         public static final int charContent=0x7f090003;
         public static final int chat=0x7f090004;
         public static final int editText=0x7f090005;
-        public static final int head=0x7f09000f;
-        public static final int listContent=0x7f09000b;
-        public static final int more=0x7f09000a;
-        public static final int refresh=0x7f09000c;
-        public static final int refreshText=0x7f09000d;
+        public static final int exit=0x7f090011;
+        public static final int head=0x7f09000e;
+        public static final int listContent=0x7f09000c;
+        public static final int refreshProgress=0x7f09000a;
+        public static final int refreshText=0x7f090009;
+        public static final int refresh_head=0x7f090008;
         public static final int send=0x7f090006;
         public static final int sendMore=0x7f090007;
-        public static final int title=0x7f090008;
-        public static final int titleName=0x7f090009;
-        public static final int userIP=0x7f090010;
-        public static final int userList=0x7f090011;
+        public static final int userIP=0x7f09000f;
+        public static final int userList=0x7f09000b;
         public static final int userName=0x7f090001;
         public static final int userTitle=0x7f090000;
-        public static final int wait=0x7f09000e;
+        public static final int wait=0x7f09000d;
     }
     public static final class layout {
         public static final int chat=0x7f030000;
-        public static final int user_list=0x7f030001;
-        public static final int user_list_item=0x7f030002;
-        public static final int users=0x7f030003;
+        public static final int pull_refresh_listview=0x7f030001;
+        public static final int user_list=0x7f030002;
+        public static final int user_list_item=0x7f030003;
+        public static final int users=0x7f030004;
     }
     public static final class menu {
         public static final int menu=0x7f080000;
     }
     public static final class string {
+        public static final int about=0x7f060002;
         public static final int app_name=0x7f060000;
-        public static final int back=0x7f060004;
-        public static final int editText_hint=0x7f060007;
+        public static final int back=0x7f060005;
+        public static final int editText_hint=0x7f060008;
         public static final int exit=0x7f060001;
-        public static final int more=0x7f060003;
-        public static final int sendMore=0x7f060005;
-        public static final int sendText=0x7f060006;
-        public static final int titleName=0x7f060002;
+        public static final int more=0x7f060004;
+        public static final int pull_to_refresh=0x7f060009;
+        public static final int release_to_refresh=0x7f06000a;
+        public static final int sendMore=0x7f060006;
+        public static final int sendText=0x7f060007;
+        public static final int titleName=0x7f060003;
     }
     public static final class style {
         /** 

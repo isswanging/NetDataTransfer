@@ -12,6 +12,7 @@ import net.vo.Host;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 public class BroadcastMonitorService extends Service {
 	DatagramSocket broadSocket = null;
@@ -30,6 +31,7 @@ public class BroadcastMonitorService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i(this.toString(), "BroadcastMonitor started");
 		new Thread(new Runnable() {
 			@Override
 			public void run() {

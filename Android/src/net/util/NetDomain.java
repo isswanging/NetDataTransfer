@@ -12,6 +12,8 @@ import java.net.SocketException;
 import net.conf.SystemConf;
 import net.vo.Host;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
@@ -22,7 +24,12 @@ public class NetDomain {
 		// 获取wifi服务
 		WifiManager wifiManager = (WifiManager) userListActivity
 				.getSystemService(Context.WIFI_SERVICE);
-		if (wifiManager.isWifiEnabled()) {
+		// 获取连接状态
+		ConnectivityManager connectMgr = (ConnectivityManager) userListActivity
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifiNetInfo = connectMgr
+				.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		if (wifiManager.isWifiEnabled() && wifiNetInfo.isConnected()) {
 			SystemConf.wifi = 1;
 			try {
 				new DatagramSocket(SystemConf.textPort).close();
@@ -38,7 +45,7 @@ public class NetDomain {
 			}
 		} else
 			SystemConf.wifi = 0;
-			return SystemConf.ERROR;
+		return SystemConf.ERROR;
 
 	}
 

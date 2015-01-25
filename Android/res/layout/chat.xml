@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/chat_height"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/title" >
+        android:background="#009ACD" >
 
         <EditText
             android:id="@+id/editText"
