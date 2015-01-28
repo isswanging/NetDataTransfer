@@ -4,58 +4,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <RelativeLayout
-        android:id="@+id/userTitle"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/title_height"
-        android:layout_alignParentTop="true"
-        android:background="#00EC00" >
-
-        <TextView
-            android:id="@+id/titleName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/title_text_size" />
-
-        <TextView
-            android:id="@+id/back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/back_left"
-            android:text="@string/back"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/back_text_size" />
-    </RelativeLayout>
-
     <ListView
         android:id="@+id/charContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/userTitle" >
+        android:layout_height="match_parent" >
     </ListView>
 
     <RelativeLayout
         android:id="@+id/chat"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/chat_height"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#009ACD" >
+        android:background="@drawable/chat_bottom" >
 
         <EditText
             android:id="@+id/editText"
             android:layout_width="@dimen/editText_width"
-            android:layout_height="@dimen/editText_height"
+            android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/editText_left"
-            android:background="#FFFFFF"
+            android:background="@drawable/edittext"
+            android:hint="@string/editText_hint"
+            android:maxLines="3"
             android:singleLine="false"
             android:textColor="#000000"
-            android:hint="@string/editText_hint" >
+            android:textSize="@dimen/chat_text_size" >
 
             <requestFocus />
         </EditText>

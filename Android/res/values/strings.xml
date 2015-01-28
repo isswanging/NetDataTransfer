@@ -5,7 +5,7 @@
     <string name="exit">退出</string>
     <string name="about">关于</string>
     <string name="titleName">用户列表</string>
-	<string name="back">&#060;</string>
+	<string name="back">←</string>
 	<string name="sendMore">+</string>
 	<string name="sendText">发送</string>
 	<string name="editText_hint">请输入</string>
