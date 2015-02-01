@@ -4,14 +4,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ListView
-        android:id="@+id/charContent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </ListView>
 
     <RelativeLayout
-        android:id="@+id/chat"
+        android:id="@+id/chatBottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -57,4 +52,13 @@
             android:textSize="@dimen/sendMore_text_size" />
     </RelativeLayout>
 
+    
+    <ListView
+        android:id="@+id/charContentList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" 
+        android:layout_above="@id/chatBottom"
+        android:transcriptMode="alwaysScroll"
+        android:divider="@null">
+    </ListView>
 </RelativeLayout>

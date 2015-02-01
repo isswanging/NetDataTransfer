@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.vo.Host;
 
 public class SystemConf {
+	public static boolean isChating = false;
 	public static int wifi = 0;
 	
     // 发送普通信息端口

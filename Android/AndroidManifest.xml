@@ -11,7 +11,8 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme" 
+        android:label="@string/app_name">
         <activity
             android:name="net.ui.UserListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -29,8 +30,7 @@
             android:windowSoftInputMode="adjustUnspecified|stateHidden" 
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
             <intent-filter>
-                <action android:name="net.ui.chat" />
-
+                <action android:name="net.ui.chatting" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -39,6 +39,12 @@
             android:name="net.service.BroadcastMonitorService"
             android:exported="false" >
         </service>
+        
+        <service
+            android:name="net.service.UdpDataMonitorService"
+            android:exported="false" >
+        </service>
+        
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />

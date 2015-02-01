@@ -337,7 +337,7 @@ public class MainGui {
         login();
         // 更新(延时一点，等待网络通信)
         try {
-            Thread.sleep(300);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             logger.error("exception: " + e);
         }
@@ -374,7 +374,7 @@ public class MainGui {
 
     // 更新主机列表
     private void updateHostList() {
-        logger.debug("table size:" + String.valueOf(SystemConf.hostList.size()));
+        logger.info("table size:" + String.valueOf(SystemConf.hostList.size()));
         number.setText(String.valueOf(SystemConf.hostList.size()));
         for (Host host : SystemConf.hostList) {
             model.addRow(new String[] { host.getUserName(),
@@ -399,11 +399,11 @@ public class MainGui {
                     NoticeGui.warnNotice(jf, "请输入消息");
                 } else {
                     for (int i : rowIndex) {
-                        Vector<?> row = (Vector<?>) model.getDataVector().get(
-                                rowIndex[i]);
+                        Vector<?> row = (Vector<?>) model.getDataVector()
+                                .get(i);
                         String targetIp = (String) row.elementAt(3);
-                        sendUdpData(hostName, ip, targetIp, message, 0,
-                                SystemConf.textPort);
+                        sendUdpData(hostName, ip, targetIp, message,
+                                SystemConf.text, SystemConf.textPort);
                     }
                 }
             }

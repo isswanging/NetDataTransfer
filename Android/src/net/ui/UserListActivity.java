@@ -11,6 +11,7 @@ import java.util.Map;
 
 import net.conf.SystemConf;
 import net.service.BroadcastMonitorService;
+import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.util.NetDomain;
 import net.vo.Host;
@@ -149,6 +150,7 @@ public class UserListActivity extends Activity {
 
 	private void listen() {
 		this.startService(new Intent(this, BroadcastMonitorService.class));
+		this.startService(new Intent(this, UdpDataMonitorService.class));
 	}
 
 	private void preCheck() {
