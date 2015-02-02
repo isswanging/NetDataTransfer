@@ -6,7 +6,7 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-import net.conf.SystemConf;
+import net.app.NetConfApplication;
 import net.vo.DataPacket;
 import android.app.Service;
 import android.content.Intent;
@@ -20,6 +20,7 @@ public class UdpDataMonitorService extends Service {
 	DataPacket dp = null;
 	ObjectInputStream objectStream = null;
 	ByteArrayInputStream byteArrayStream = null;
+	NetConfApplication app;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -33,6 +34,8 @@ public class UdpDataMonitorService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		app = (NetConfApplication) getApplication();
+
 		Log.i(this.toString(), "UDPdataMonitor started");
 		new Thread(new Runnable() {
 
@@ -41,7 +44,7 @@ public class UdpDataMonitorService extends Service {
 				try {
 
 					UdpPacket = new DatagramPacket(new byte[1024], 1024);
-					UdpSocket = new DatagramSocket(SystemConf.textPort);
+					UdpSocket = new DatagramSocket(app.textPort);
 					while (true) {
 						// 收到消息
 						UdpSocket.receive(UdpPacket);
@@ -52,9 +55,8 @@ public class UdpDataMonitorService extends Service {
 						objectStream = new ObjectInputStream(byteArrayStream);
 						dp = (DataPacket) objectStream.readObject();
 
-						switch (dp.getTag()) {
-						case SystemConf.text:
-							if (SystemConf.isChating) {
+						if (dp.getTag() == app.text) {
+							if (app.isChating) {
 								// 发广播在交给聊天窗口处理
 								Intent intent = new Intent("net.ui.chatFrom");
 								Bundle bundle = new Bundle();
@@ -68,7 +70,6 @@ public class UdpDataMonitorService extends Service {
 								// 发送通知
 
 							}
-							break;
 						}
 					}
 

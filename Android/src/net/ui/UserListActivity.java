@@ -9,11 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.conf.SystemConf;
+import net.app.NetConfApplication;
 import net.service.BroadcastMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
-import net.util.NetDomain;
 import net.vo.Host;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -53,6 +52,7 @@ public class UserListActivity extends Activity {
 	PullRefreshListView pullRefreshListView;
 
 	Handler handler = new ListHandler(this);
+	NetConfApplication app;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -64,6 +64,7 @@ public class UserListActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		stopService(new Intent(this, BroadcastMonitorService.class));
+		stopService(new Intent(this, UdpDataMonitorService.class));
 		super.onDestroy();
 	}
 
@@ -77,6 +78,7 @@ public class UserListActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		app = (NetConfApplication) getApplication();
 		super.onCreate(savedInstanceState);
 
 		// 检查端口
@@ -111,7 +113,7 @@ public class UserListActivity extends Activity {
 		waitGif = (ImageView) findViewById(R.id.wait);
 
 		// 延迟一点加载列表
-		if (SystemConf.wifi == 1) {
+		if (app.wifi == 1) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -129,9 +131,9 @@ public class UserListActivity extends Activity {
 		userDomain = "Android";// 获取计算机域
 
 		// 加入在线列表
-		final Host host = new Host(userName, userDomain, SystemConf.hostIP,
-				hostName, 1, 0);
-		NetDomain.addHost(host);
+		final Host host = new Host(userName, userDomain, app.hostIP, hostName,
+				1, 0);
+		app.addHost(host);
 
 		// 广播登录信息
 		new Thread(new Runnable() {
@@ -139,8 +141,8 @@ public class UserListActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					NetDomain.sendUdpData(new DatagramSocket(), host,
-							SystemConf.broadcastIP, SystemConf.broadcastPort);
+					app.sendUdpData(new DatagramSocket(), host,
+							app.broadcastIP, app.broadcastPort);
 				} catch (SocketException e) {
 					e.printStackTrace();
 				}
@@ -154,8 +156,8 @@ public class UserListActivity extends Activity {
 	}
 
 	private void preCheck() {
-		if (NetDomain.check(this).endsWith(SystemConf.SUCCESS)) {
-			SystemConf.hostIP = NetDomain.getHostIp(this);// 获取ip地址
+		if (app.check(this).endsWith(app.SUCCESS)) {
+			app.hostIP = app.getHostIp(this);// 获取ip地址
 		} else {
 			// 弹出警告框并退出
 			new AlertDialog.Builder(this)
@@ -177,7 +179,7 @@ public class UserListActivity extends Activity {
 
 	private List<Map<String, Object>> getData() {
 		userList.clear();
-		for (Host host : SystemConf.hostList) {
+		for (Host host : app.hostList) {
 			Map<String, Object> item = new HashMap<String, Object>();
 			item.put("name", host.getUserName());
 			item.put("ip", host.getIp());
@@ -205,7 +207,7 @@ public class UserListActivity extends Activity {
 									"ip", "img" }, new int[] { R.id.userName,
 									R.id.userIP, R.id.head });
 					Log.i(this.toString(),
-							String.valueOf(SystemConf.hostList.size()));
+							String.valueOf(act.app.hostList.size()));
 
 					// 更新UI
 					if (act.anim != null && act.anim.isRunning())
@@ -247,20 +249,20 @@ public class UserListActivity extends Activity {
 
 								@Override
 								public void onRefresh() {
-									SystemConf.hostList.clear();
+									act.app.hostList.clear();
 									String userName = android.os.Build.MODEL;// 获取用户名
 									String hostName = "Android";// 获取主机名
 									String userDomain = "Android";// 获取计算机域
 
 									// 加入在线列表
 									Host host = new Host(userName, userDomain,
-											SystemConf.hostIP, hostName, 1, 0);
-									NetDomain.addHost(host);
+											act.app.hostIP, hostName, 1, 0);
+									act.app.addHost(host);
 									try {
-										NetDomain.sendUdpData(
+										act.app.sendUdpData(
 												new DatagramSocket(), host,
-												SystemConf.broadcastIP,
-												SystemConf.broadcastPort);
+												act.app.broadcastIP,
+												act.app.broadcastPort);
 									} catch (SocketException e) {
 										e.printStackTrace();
 									}

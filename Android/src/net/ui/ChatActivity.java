@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import net.conf.SystemConf;
-import net.util.NetDomain;
+import net.app.NetConfApplication;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.app.ActionBar;
@@ -45,6 +44,8 @@ public class ChatActivity extends Activity {
 	ChatReceiver chatReceiver;
 	IntentFilter filter;
 
+	NetConfApplication app;
+
 	private void initActionBar() {
 		ActionBar title = getActionBar();
 		title.setDisplayShowHomeEnabled(false);
@@ -63,9 +64,10 @@ public class ChatActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		app = (NetConfApplication) getApplication();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat);
-		SystemConf.isChating = true;
+		app.isChating = true;
 		Bundle bundle = getIntent().getExtras();
 		targetName = bundle.getString("name");
 		targetIp = bundle.getString("ip");
@@ -113,7 +115,7 @@ public class ChatActivity extends Activity {
 		public void onClick(View v) {
 			switch (v.getId()) {
 			case R.id.back:
-				SystemConf.isChating = false;
+				app.isChating = false;
 				finish();
 				break;
 
@@ -128,16 +130,16 @@ public class ChatActivity extends Activity {
 					chatEditText.setText("");
 					mListView.setSelection(mListView.getCount() - 1);
 
-					final DataPacket dp = new DataPacket(SystemConf.hostIP,
-							hostName, chatText, SystemConf.text);
+					final DataPacket dp = new DataPacket(app.hostIP, hostName,
+							chatText, app.text);
 
 					new Thread(new Runnable() {
 
 						@Override
 						public void run() {
 							try {
-								NetDomain.sendUdpData(new DatagramSocket(), dp,
-										targetIp, SystemConf.textPort);
+								app.sendUdpData(new DatagramSocket(), dp,
+										targetIp, app.textPort);
 							} catch (SocketException e) {
 								e.printStackTrace();
 							}
@@ -187,7 +189,7 @@ public class ChatActivity extends Activity {
 						.setContentIntent(contentIntent).build();
 				notification.flags = Notification.FLAG_AUTO_CANCEL;
 				notification.defaults |= Notification.DEFAULT_SOUND;
-				nManager.notify(Integer.valueOf(dp.getIp()), notification);
+				nManager.notify(R.id.chatName, notification);
 
 			}
 		}

@@ -6,8 +6,7 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-import net.conf.SystemConf;
-import net.util.NetDomain;
+import net.app.NetConfApplication;
 import net.vo.Host;
 import android.app.Service;
 import android.content.Intent;
@@ -18,6 +17,7 @@ public class BroadcastMonitorService extends Service {
 	DatagramSocket broadSocket = null;
 	ByteArrayInputStream byteArrayStram = null;
 	ObjectInputStream objectStream = null;
+	NetConfApplication app;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -31,6 +31,8 @@ public class BroadcastMonitorService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		app = (NetConfApplication) getApplication();
+
 		Log.i(this.toString(), "BroadcastMonitor started");
 		new Thread(new Runnable() {
 			@Override
@@ -38,7 +40,7 @@ public class BroadcastMonitorService extends Service {
 				try {
 					DatagramPacket broadPacket = new DatagramPacket(
 							new byte[512], 512);
-					broadSocket = new DatagramSocket(SystemConf.broadcastPort);
+					broadSocket = new DatagramSocket(app.broadcastPort);
 					while (true) {
 						// 收到广播
 						broadSocket.receive(broadPacket);
@@ -51,10 +53,10 @@ public class BroadcastMonitorService extends Service {
 						Host host = (Host) objectStream.readObject();
 						host.setState(0);
 
-						if (!host.getIp().equals(SystemConf.hostIP)) {
-							if (!NetDomain.containHost(host)) {
+						if (!host.getIp().equals(app.hostIP)) {
+							if (!app.containHost(host)) {
 								host.setState(1);
-								NetDomain.addHost(host);
+								app.addHost(host);
 
 								// 回应广播, 发送本机信息去目标地址
 								if (host.getTag() == 0) {
@@ -63,13 +65,11 @@ public class BroadcastMonitorService extends Service {
 									String userDomain = "Android";// 获取计算机域
 
 									// 广播主机信息
-									Host res = new Host(userName,
-											userDomain, SystemConf.hostIP,
-											hostName, 1, 1);
+									Host res = new Host(userName, userDomain,
+											app.hostIP, hostName, 1, 1);
 
-									NetDomain.sendUdpData(broadSocket, res,
-											host.getIp(),
-											SystemConf.broadcastPort);
+									app.sendUdpData(broadSocket, res,
+											host.getIp(), app.broadcastPort);
 
 								}
 							}
