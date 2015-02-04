@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-
     <RelativeLayout
         android:id="@+id/chatBottom"
         android:layout_width="match_parent"
@@ -52,13 +51,14 @@
             android:textSize="@dimen/sendMore_text_size" />
     </RelativeLayout>
 
-    
     <ListView
         android:id="@+id/charContentList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" 
+        android:layout_height="match_parent"
         android:layout_above="@id/chatBottom"
-        android:transcriptMode="alwaysScroll"
-        android:divider="@null">
+        android:divider="@null"
+        android:transcriptMode="alwaysScroll" 
+        android:background="@drawable/chat_bg">
     </ListView>
+
 </RelativeLayout>

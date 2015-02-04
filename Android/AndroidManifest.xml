@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="18"
+        android:minSdkVersion="16"
         android:targetSdkVersion="20" />
 
     <application
@@ -16,7 +16,6 @@
         <activity
             android:name="net.ui.UserListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/titleName"
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
             <intent-filter>

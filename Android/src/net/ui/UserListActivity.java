@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,38 +35,35 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
-	String hostName;
-	String userName;
-	String userDomain;
-	ImageView waitGif;
-	List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-	AnimationDrawable anim;
+	private String hostName;
+	private String userName;
+	private String userDomain;
+	private ImageView waitGif;
+	private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+	private AnimationDrawable anim;
 
-	public final int login = 0;
-	public final int refresh = 1;
+	private final int login = 0;
+	private final int refresh = 1;
 
-	SimpleAdapter adapter;
-	PullRefreshListView pullRefreshListView;
+	private SimpleAdapter adapter;
+	private PullRefreshListView pullRefreshListView;
 
-	Handler handler = new ListHandler(this);
-	NetConfApplication app;
+	private Handler handler = new ListHandler(this);
+	private NetConfApplication app;
+
+	// 按两次退出的计时
+	private long exitTime = 0;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu, menu);
 		return true;
-	}
-
-	@Override
-	protected void onDestroy() {
-		stopService(new Intent(this, BroadcastMonitorService.class));
-		stopService(new Intent(this, UdpDataMonitorService.class));
-		super.onDestroy();
 	}
 
 	@Override
@@ -79,6 +77,7 @@ public class UserListActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		app = (NetConfApplication) getApplication();
+		getActionBar().setTitle(getResources().getString(R.string.titleName));
 		super.onCreate(savedInstanceState);
 
 		// 检查端口
@@ -90,6 +89,28 @@ public class UserListActivity extends Activity {
 		// 建立界面
 		initUI();
 
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if ((System.currentTimeMillis() - exitTime) > 2000) {
+			Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+			exitTime = System.currentTimeMillis();
+			return false;
+		}else{
+			finish();
+			return super.onKeyDown(keyCode, event);
+		}
+
+		
+	};
+
+	@Override
+	protected void onDestroy() {
+		stopService(new Intent(this, BroadcastMonitorService.class));
+		stopService(new Intent(this, UdpDataMonitorService.class));
+		System.exit(0);
+		super.onDestroy();
 	}
 
 	private void forceShowOverflowMenu() {
@@ -171,9 +192,8 @@ public class UserListActivity extends Activity {
 										int which) {
 									setResult(RESULT_OK);// 确定按钮事件
 									finish();
-									System.exit(0);
 								}
-							}).show();
+							}).setCancelable(false).show();
 		}
 	}
 

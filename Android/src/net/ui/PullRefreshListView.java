@@ -85,7 +85,6 @@ public class PullRefreshListView extends LinearLayout implements
 
 		hideHeaderHeight = (int) -getResources().getDimension(
 				R.dimen.refresh_height);
-		Log.i(this.toString(), String.valueOf(header.getHeight()));
 		currentState = Tag.Normal;
 	}
 
@@ -97,6 +96,7 @@ public class PullRefreshListView extends LinearLayout implements
 			switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				yDown = event.getRawY();
+				Log.i(this.toString(), "yDown   "+String.valueOf(yDown));
 				return false;
 			case MotionEvent.ACTION_MOVE:
 				yMove = event.getRawY();

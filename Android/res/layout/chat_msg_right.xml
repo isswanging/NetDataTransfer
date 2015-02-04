@@ -15,7 +15,6 @@
             android:id="@+id/sendTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#bfbfbf"
             android:padding="2dp"
             android:textColor="#ffffff"
             android:textSize="12sp" />
@@ -28,11 +27,11 @@
 
         <ImageView
             android:id="@+id/chatHead"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@drawable/chat_head"
+            android:background="@drawable/chat_head_right"
             android:focusable="false" />
 
         <TextView

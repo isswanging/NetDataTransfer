@@ -18,6 +18,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
@@ -162,6 +164,17 @@ public class ChatActivity extends Activity {
 
 			// 判断是否当前聊天窗口
 			if (dp.getIp().equals(targetIp)) {
+				// 播放消息提示音乐
+				MediaPlayer mp = new MediaPlayer();
+				try {
+					mp.setDataSource(ChatActivity.this, RingtoneManager
+							.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+					mp.prepare();
+					mp.start();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 				ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
 						getDate(), dp.getContent(), true);
 				mDataArrays.add(entity);
