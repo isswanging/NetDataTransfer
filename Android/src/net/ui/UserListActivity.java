@@ -37,6 +37,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
@@ -97,12 +98,11 @@ public class UserListActivity extends Activity {
 			Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
 			exitTime = System.currentTimeMillis();
 			return false;
-		}else{
+		} else {
 			finish();
 			return super.onKeyDown(keyCode, event);
 		}
 
-		
 	};
 
 	@Override
@@ -152,8 +152,8 @@ public class UserListActivity extends Activity {
 		userDomain = "Android";// 获取计算机域
 
 		// 加入在线列表
-		final Host host = new Host(userName, userDomain, app.hostIP, hostName,
-				1, 0);
+		Host host = new Host(userName, userDomain, app.hostIP, hostName, 1, 0);
+		final String hostInfo = JSON.toJSONString(host);
 		app.addHost(host);
 
 		// 广播登录信息
@@ -162,7 +162,7 @@ public class UserListActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					app.sendUdpData(new DatagramSocket(), host,
+					app.sendUdpData(new DatagramSocket(), hostInfo,
 							app.broadcastIP, app.broadcastPort);
 				} catch (SocketException e) {
 					e.printStackTrace();
@@ -277,10 +277,11 @@ public class UserListActivity extends Activity {
 									// 加入在线列表
 									Host host = new Host(userName, userDomain,
 											act.app.hostIP, hostName, 1, 0);
+									String hostInfo = JSON.toJSONString(host);
 									act.app.addHost(host);
 									try {
 										act.app.sendUdpData(
-												new DatagramSocket(), host,
+												new DatagramSocket(), hostInfo,
 												act.app.broadcastIP,
 												act.app.broadcastPort);
 									} catch (SocketException e) {

@@ -22,6 +22,8 @@ import net.vo.DataPacket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.alibaba.fastjson.JSON;
+
 public class ConfirmGui {
     JFrame fr;
     DataPacket dp = null;
@@ -61,8 +63,9 @@ public class ConfirmGui {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    NetDomain.sendUdpData(new DatagramSocket(), new DataPacket(
-                            SystemConf.hostIP, null, null, SystemConf.refuse),
+                    NetDomain.sendUdpData(new DatagramSocket(), JSON
+                            .toJSONString(new DataPacket(SystemConf.hostIP,
+                                    null, null, SystemConf.refuse)),
                             dp.getIp(), SystemConf.textPort);
                 } catch (SocketException e1) {
                     e1.printStackTrace();
@@ -118,7 +121,8 @@ public class ConfirmGui {
                 dp.setIp(OSUtil.getLocalIP());
                 logger.info("路径发送请求：" + dp.getContent());
                 try {
-                    NetDomain.sendUdpData(new DatagramSocket(), dp, targetIp,
+                    NetDomain.sendUdpData(new DatagramSocket(),
+                            JSON.toJSONString(dp), targetIp,
                             SystemConf.textPort);
 
                 } catch (SocketException e1) {

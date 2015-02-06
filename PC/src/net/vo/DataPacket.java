@@ -1,15 +1,15 @@
 package net.vo;
 
-import java.io.Serializable;
-
 // 数据包
-public class DataPacket implements Serializable {
-    private static final long serialVersionUID = -4196219561242601831L;
+public class DataPacket {
 
     private String ip; // 自己的ip
     private String senderName; // 自己的主机名
     private String content; // 发送内容
     private int tag; // 标识发送的阶段
+
+    public DataPacket() {
+    }
 
     public DataPacket(String ip, String senderName, String content, int tag) {
         this.ip = ip;

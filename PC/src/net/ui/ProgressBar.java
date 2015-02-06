@@ -18,6 +18,8 @@ import net.vo.DataPacket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.alibaba.fastjson.JSON;
+
 public class ProgressBar {
     JProgressBar bar = new JProgressBar(JProgressBar.CENTER);
     JFrame frame = new JFrame("发送进度");
@@ -67,8 +69,9 @@ public class ProgressBar {
                 SystemConf.savePathList.remove(taskId);
                 SystemConf.taskList.remove(taskId);
                 try {
-                    NetDomain.sendUdpData(new DatagramSocket(), new DataPacket("",
-                            "", taskId, SystemConf.end), targetIp,
+                    NetDomain.sendUdpData(new DatagramSocket(), JSON
+                            .toJSONString(new DataPacket("", "", taskId,
+                                    SystemConf.end)), targetIp,
                             SystemConf.textPort);
                 } catch (SocketException e) {
                     logger.error("exception: " + e);

@@ -1,15 +1,10 @@
 package net.listener;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 import javax.swing.JPanel;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import net.conf.SystemConf;
 import net.ui.ChatGui;
@@ -18,15 +13,18 @@ import net.ui.NoticeGui;
 import net.util.SendPath;
 import net.vo.DataPacket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.alibaba.fastjson.JSON;
+
 public class UdpDataMonitor implements Runnable {
     DatagramSocket UdpSocket = null;
     DatagramPacket UdpPacket = null;
     DataPacket dp = null;
-    ObjectInputStream objectStream = null;
-    ByteArrayInputStream byteArrayStream = null;
 
     private final Log logger = LogFactory.getLog(this.getClass());
-    
+
     @Override
     public void run() {
         try {
@@ -38,9 +36,9 @@ public class UdpDataMonitor implements Runnable {
                 UdpSocket.receive(UdpPacket);
 
                 // 解析处理并显示
-                byteArrayStream = new ByteArrayInputStream(UdpPacket.getData());
-                objectStream = new ObjectInputStream(byteArrayStream);
-                dp = (DataPacket) objectStream.readObject();
+                String info = new String(UdpPacket.getData(), 0,
+                        UdpPacket.getLength());
+                dp = JSON.parseObject(info, DataPacket.class);
 
                 switch (dp.getTag()) {
                 case SystemConf.text:
@@ -72,16 +70,6 @@ public class UdpDataMonitor implements Runnable {
             }
         } catch (IOException e) {
             logger.error("exception: " + e);
-        } catch (ClassNotFoundException e) {
-            logger.error("exception: " + e);
-        } finally {
-            try {
-                UdpSocket.close();
-                objectStream.close();
-                byteArrayStream.close();
-            } catch (Exception e) {
-                logger.error("exception: " + e);
-            }
         }
     }
 

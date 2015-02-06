@@ -22,6 +22,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.JsonReader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +31,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
 import com.example.netdatatransfer.R;
 
 public class ChatActivity extends Activity {
@@ -69,7 +71,6 @@ public class ChatActivity extends Activity {
 		app = (NetConfApplication) getApplication();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat);
-		app.isChating = true;
 		Bundle bundle = getIntent().getExtras();
 		targetName = bundle.getString("name");
 		targetIp = bundle.getString("ip");
@@ -117,7 +118,6 @@ public class ChatActivity extends Activity {
 		public void onClick(View v) {
 			switch (v.getId()) {
 			case R.id.back:
-				app.isChating = false;
 				finish();
 				break;
 
@@ -132,15 +132,16 @@ public class ChatActivity extends Activity {
 					chatEditText.setText("");
 					mListView.setSelection(mListView.getCount() - 1);
 
-					final DataPacket dp = new DataPacket(app.hostIP, hostName,
+					DataPacket dp = new DataPacket(app.hostIP, hostName,
 							chatText, app.text);
+					final String dpInfo = JSON.toJSONString(dp);
 
 					new Thread(new Runnable() {
 
 						@Override
 						public void run() {
 							try {
-								app.sendUdpData(new DatagramSocket(), dp,
+								app.sendUdpData(new DatagramSocket(), dpInfo,
 										targetIp, app.textPort);
 							} catch (SocketException e) {
 								e.printStackTrace();
@@ -160,62 +161,28 @@ public class ChatActivity extends Activity {
 		@Override
 		public void onReceive(Context content, Intent intent) {
 			Bundle bundle = intent.getExtras();
-			DataPacket dp = (DataPacket) bundle.getSerializable("content");
+			DataPacket dp = JSON.parseObject(bundle.getString("content"),
+					DataPacket.class);
 
 			// 判断是否当前聊天窗口
-			if (dp.getIp().equals(targetIp)) {
-				// 播放消息提示音乐
-				MediaPlayer mp = new MediaPlayer();
-				try {
-					mp.setDataSource(ChatActivity.this, RingtoneManager
-							.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-					mp.prepare();
-					mp.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
-				ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-						getDate(), dp.getContent(), true);
-				mDataArrays.add(entity);
-				mAdapter.notifyDataSetChanged();
-				mListView.setSelection(mListView.getCount() - 1);
-			}
-			// 如果不是当前窗口就发送notify通知
-			else {
-				// 点击启动activity
-				Intent notifyIntent = new Intent("net.ui.chatting");
-				notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				bundle.putString("name", dp.getSenderName());
-				bundle.putString("ip", dp.getIp());
-				notifyIntent.putExtras(bundle);
-				PendingIntent contentIntent = PendingIntent.getActivity(
-						ChatActivity.this, R.string.app_name, notifyIntent,
-						PendingIntent.FLAG_UPDATE_CURRENT);
-
-				// 显示
-				NotificationManager nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-				Notification notification = new NotificationCompat.Builder(
-						ChatActivity.this).setSmallIcon(R.drawable.notify)
-						.setTicker("新消息").setContentTitle("点击查看")
-						.setContentText(dp.getSenderName() + "发来一条新消息")
-						.setContentIntent(contentIntent).build();
-				notification.flags = Notification.FLAG_AUTO_CANCEL;
-				notification.defaults |= Notification.DEFAULT_SOUND;
-				nManager.notify(R.id.chatName, notification);
-
-			}
+			ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
+					getDate(), dp.getContent(), true);
+			mDataArrays.add(entity);
+			mAdapter.notifyDataSetChanged();
+			mListView.setSelection(mListView.getCount() - 1);
 		}
 	}
 
 	@Override
 	protected void onStop() {
+		app.chatId = "none";
 		unregisterReceiver(chatReceiver);
 		super.onStop();
 	}
 
 	@Override
 	protected void onResume() {
+		app.chatId = targetIp;
 		registerReceiver(chatReceiver, filter);
 		super.onResume();
 	}

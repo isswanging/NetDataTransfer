@@ -56,33 +56,17 @@ public class NetDomain {
     }
 
     // 发送UDP消息
-    public static void sendUdpData(DatagramSocket broadSocket, Object obj,
+    public static void sendUdpData(DatagramSocket broadSocket, String obj,
             String targetIp, int port) {
-        ByteArrayOutputStream byteArrayStream = null;
-        ObjectOutputStream objectStream = null;
         try {
-            byteArrayStream = new ByteArrayOutputStream();
-            objectStream = new ObjectOutputStream(byteArrayStream);
-            objectStream.writeObject(obj);
-            byte[] info = byteArrayStream.toByteArray();
+            byte[] info = obj.getBytes();
 
             DatagramPacket broadPacket = new DatagramPacket(info, info.length,
                     InetAddress.getByName(targetIp), port);
-
             broadSocket.send(broadPacket);
 
         } catch (IOException e) {
             logger.error("exception: " + e);
-        } finally {
-            try {
-                if (objectStream != null)
-                    objectStream.close();
-                if (byteArrayStream != null)
-                    byteArrayStream.close();
-            } catch (IOException e) {
-                logger.error("exception: " + e);
-            }
-
         }
     }
 

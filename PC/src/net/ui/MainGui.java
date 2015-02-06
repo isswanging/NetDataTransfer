@@ -56,6 +56,8 @@ import net.vo.Host;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.alibaba.fastjson.JSON;
+
 // 程序入口
 public class MainGui {
     JTable userList;
@@ -106,12 +108,13 @@ public class MainGui {
 
             // 加入在线列表
             Host host = new Host(userName, userDomain, ip, hostName, 1, 0);
+            String hostInfo = JSON.toJSONString(host);
             NetDomain.addHost(host);
 
             logger.info("主机" + ip + "登录成功");
 
             // 广播登录信息
-            NetDomain.sendUdpData(new DatagramSocket(), host,
+            NetDomain.sendUdpData(new DatagramSocket(), hostInfo,
                     SystemConf.broadcastIP, SystemConf.broadcastPort);
 
         } catch (IOException e) {
@@ -507,7 +510,8 @@ public class MainGui {
         DatagramSocket socket = null;
         try {
             socket = new DatagramSocket();
-            NetDomain.sendUdpData(socket, dp, targetIp, port);
+            NetDomain
+                    .sendUdpData(socket, JSON.toJSONString(dp), targetIp, port);
         } catch (SocketException e) {
             logger.error("exception: " + e);
         } finally {

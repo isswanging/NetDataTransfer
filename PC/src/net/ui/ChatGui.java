@@ -5,6 +5,9 @@ import net.util.NetDomain;
 import net.vo.DataPacket;
 
 import javax.swing.*;
+
+import com.alibaba.fastjson.JSON;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,7 +22,7 @@ public class ChatGui {
     DatagramSocket udpSocket = null;
     JFrame fr;
 
-    public ChatGui(DataPacket dp1,DatagramSocket udp) {
+    public ChatGui(DataPacket dp1, DatagramSocket udp) {
         this.dp = dp1;
         this.udpSocket = udp;
 
@@ -89,9 +92,10 @@ public class ChatGui {
                         String hostName = addr.getHostName();// 获取主机名
                         String ip = SystemConf.hostIP;// 获取ip地址
                         String message = output.getText();
-                        NetDomain.sendUdpData(udpSocket, new DataPacket(ip,
-                                hostName, message, SystemConf.text),
-                                dp.getIp(), SystemConf.textPort);
+                        NetDomain.sendUdpData(udpSocket, JSON
+                                .toJSONString(new DataPacket(ip, hostName,
+                                        message, SystemConf.text)), dp.getIp(),
+                                SystemConf.textPort);
                         fr.dispose();
                     } catch (UnknownHostException e1) {
                         e1.printStackTrace();

@@ -1,13 +1,12 @@
 package net.app;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
@@ -22,8 +21,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
 public class NetConfApplication extends Application {
-	public boolean isChating = false;
 	public int wifi = 0;
+	public String chatId = "none";
 
 	// 发送普通信息端口
 	public final int textPort = 2324;
@@ -139,32 +138,21 @@ public class NetConfApplication extends Application {
 	}
 
 	// 发送UDP消息
-	public void sendUdpData(DatagramSocket broadSocket, Object obj,
+	public void sendUdpData(DatagramSocket broadSocket, String obj,
 			String targetIp, int port) {
-		ByteArrayOutputStream byteArrayStream = null;
-		ObjectOutputStream objectStream = null;
+		byte[] info = obj.getBytes();
+
+		DatagramPacket broadPacket;
 		try {
-			byteArrayStream = new ByteArrayOutputStream();
-			objectStream = new ObjectOutputStream(byteArrayStream);
-			objectStream.writeObject(obj);
-			byte[] info = byteArrayStream.toByteArray();
-
-			DatagramPacket broadPacket = new DatagramPacket(info, info.length,
+			broadPacket = new DatagramPacket(info, info.length,
 					InetAddress.getByName(targetIp), port);
-
 			broadSocket.send(broadPacket);
-
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
-		} finally {
-			try {
-				if (objectStream != null)
-					objectStream.close();
-				if (byteArrayStream != null)
-					byteArrayStream.close();
-			} catch (IOException e) {
-			}
-
+			e.printStackTrace();
 		}
+
 	}
 
 	// 获取本机IP
@@ -172,10 +160,6 @@ public class NetConfApplication extends Application {
 		// 获取wifi服务
 		WifiManager wifiManager = (WifiManager) context
 				.getSystemService(Context.WIFI_SERVICE);
-		// 判断wifi是否开启
-		if (!wifiManager.isWifiEnabled()) {
-			wifiManager.setWifiEnabled(true);
-		}
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 		int ipAddress = wifiInfo.getIpAddress();
 		String ip = intToIp(ipAddress);

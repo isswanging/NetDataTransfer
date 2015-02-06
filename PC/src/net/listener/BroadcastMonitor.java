@@ -1,9 +1,5 @@
 package net.listener;
 
-import net.conf.SystemConf;
-import net.util.NetDomain;
-import net.vo.Host;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -12,14 +8,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import net.conf.SystemConf;
+import net.util.NetDomain;
+import net.vo.Host;
+
+import com.alibaba.fastjson.JSON;
 
 public class BroadcastMonitor implements Runnable {
     DatagramSocket broadSocket = null;
     ByteArrayInputStream byteArrayStram = null;
     ObjectInputStream objectStream = null;
-    private final Log logger = LogFactory.getLog(this.getClass());
 
     @Override
     public void run() {
@@ -31,11 +29,9 @@ public class BroadcastMonitor implements Runnable {
                 // 收到广播
                 broadSocket.receive(broadPacket);
                 // 整理信息
-                byte[] buf = new byte[broadPacket.getLength()];
-                System.arraycopy(broadPacket.getData(), 0, buf, 0, buf.length);
-                byteArrayStram = new ByteArrayInputStream(buf);
-                objectStream = new ObjectInputStream(byteArrayStram);
-                Host host = (Host) objectStream.readObject();
+                String info = new String(broadPacket.getData(), 0,
+                        broadPacket.getLength());
+                Host host = JSON.parseObject(info, Host.class);
                 host.setState(0);
 
                 if (!host.getIp().equals(SystemConf.hostIP)) {
@@ -57,17 +53,15 @@ public class BroadcastMonitor implements Runnable {
                             // 广播主机信息
                             Host res = new Host(userName, userDomain, ip,
                                     hostName, 1, 1);
-
-                            NetDomain.sendUdpData(broadSocket, res,
-                                    host.getIp(), SystemConf.broadcastPort);
+                            NetDomain.sendUdpData(broadSocket,
+                                    JSON.toJSONString(res), host.getIp(),
+                                    SystemConf.broadcastPort);
                         }
                     }
                 }
             }
         } catch (IOException e) {
 
-        } catch (ClassNotFoundException e) {
-            logger.error("exception: " + e);
         }
     }
 }

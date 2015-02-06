@@ -6,6 +6,8 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
+import com.alibaba.fastjson.JSON;
+
 import net.app.NetConfApplication;
 import net.vo.Host;
 import android.app.Service;
@@ -45,12 +47,9 @@ public class BroadcastMonitorService extends Service {
 						// 收到广播
 						broadSocket.receive(broadPacket);
 						// 整理信息
-						byte[] buf = new byte[broadPacket.getLength()];
-						System.arraycopy(broadPacket.getData(), 0, buf, 0,
-								buf.length);
-						byteArrayStram = new ByteArrayInputStream(buf);
-						objectStream = new ObjectInputStream(byteArrayStram);
-						Host host = (Host) objectStream.readObject();
+						String info = new String(broadPacket.getData(), 0,
+								broadPacket.getLength());
+						Host host = JSON.parseObject(info, Host.class);
 						host.setState(0);
 
 						if (!host.getIp().equals(app.hostIP)) {
@@ -67,8 +66,8 @@ public class BroadcastMonitorService extends Service {
 									// 广播主机信息
 									Host res = new Host(userName, userDomain,
 											app.hostIP, hostName, 1, 1);
-
-									app.sendUdpData(broadSocket, res,
+									String hostInfo = JSON.toJSONString(res);
+									app.sendUdpData(broadSocket, hostInfo,
 											host.getIp(), app.broadcastPort);
 
 								}
@@ -76,7 +75,6 @@ public class BroadcastMonitorService extends Service {
 						}
 					}
 				} catch (IOException e) {
-				} catch (ClassNotFoundException e) {
 				}
 			}
 		}).start();
