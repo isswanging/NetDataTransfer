@@ -8,12 +8,15 @@ import java.net.ServerSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.vo.ChatMsgEntity;
 import net.vo.Host;
 import android.app.Application;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -24,6 +27,8 @@ public class NetConfApplication extends Application {
 	public int wifi = 0;
 	public String chatId = "none";
 
+	public NotificationManager nManager;
+	
 	// 发送普通信息端口
 	public final int textPort = 2324;
 
@@ -44,7 +49,7 @@ public class NetConfApplication extends Application {
 	public final String FAIL = "IOException";
 
 	// 广播IP
-	public final String broadcastIP = "255.255.255.255";
+	public final String broadcastIP = "192.168.0.255";
 
 	// 广播端口
 	public final int broadcastPort = 2325;
@@ -82,6 +87,9 @@ public class NetConfApplication extends Application {
 
 	// 记录进度
 	public ConcurrentHashMap<String, Long> progress = new ConcurrentHashMap<String, Long>();
+
+	// 记录聊天内容
+	public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
 
 	// 检查端口
 	public String check(Context userListActivity) {
@@ -174,5 +182,19 @@ public class NetConfApplication extends Application {
 	private String intToIp(int i) {
 		return (i & 0xFF) + "." + ((i >> 8) & 0xFF) + "." + ((i >> 16) & 0xFF)
 				+ "." + (i >> 24 & 0xFF);
+	}
+
+	// 获取日期
+	public String getDate() {
+		Calendar c = Calendar.getInstance();
+		String year = String.valueOf(c.get(Calendar.YEAR));
+		String month = String.valueOf(c.get(Calendar.MONTH));
+		String day = String.valueOf(c.get(Calendar.DAY_OF_MONTH) + 1);
+		String hour = String.valueOf(c.get(Calendar.HOUR_OF_DAY));
+		String mins = String.valueOf(c.get(Calendar.MINUTE));
+		StringBuffer sbBuffer = new StringBuffer();
+		sbBuffer.append(year + "-" + month + "-" + day + " " + hour + ":"
+				+ mins);
+		return sbBuffer.toString();
 	}
 }

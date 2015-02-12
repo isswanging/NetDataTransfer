@@ -4,9 +4,8 @@
 
 	<groupId>NetDataTransfer</groupId>
 	<artifactId>NetDataTransfer</artifactId>
-	<version>2.0</version>
+	<version>2.5</version>
 	<packaging>jar</packaging>
-
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -79,7 +78,7 @@
 	</pluginRepositories>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>

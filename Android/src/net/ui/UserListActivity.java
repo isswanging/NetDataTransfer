@@ -41,9 +41,6 @@ import com.alibaba.fastjson.JSON;
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
-	private String hostName;
-	private String userName;
-	private String userDomain;
 	private ImageView waitGif;
 	private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
 	private AnimationDrawable anim;
@@ -81,12 +78,6 @@ public class UserListActivity extends Activity {
 		getActionBar().setTitle(getResources().getString(R.string.titleName));
 		super.onCreate(savedInstanceState);
 
-		// 检查端口
-		preCheck();
-		// 建立监听
-		listen();
-		// 主机登录
-		login();
 		// 建立界面
 		initUI();
 
@@ -94,22 +85,25 @@ public class UserListActivity extends Activity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((System.currentTimeMillis() - exitTime) > 2000) {
-			Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-			exitTime = System.currentTimeMillis();
-			return false;
-		} else {
-			finish();
-			return super.onKeyDown(keyCode, event);
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if ((System.currentTimeMillis() - exitTime) > 2000) {
+				Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+				exitTime = System.currentTimeMillis();
+				return false;
+			} else {
+//				stopService(new Intent(this, BroadcastMonitorService.class));
+//				stopService(new Intent(this, UdpDataMonitorService.class));
+				finish();
+			}
 		}
 
-	};
+		return super.onKeyDown(keyCode, event);
+	}
 
 	@Override
 	protected void onDestroy() {
 		stopService(new Intent(this, BroadcastMonitorService.class));
 		stopService(new Intent(this, UdpDataMonitorService.class));
-		System.exit(0);
 		super.onDestroy();
 	}
 
@@ -127,7 +121,37 @@ public class UserListActivity extends Activity {
 		}
 	}
 
+	private void login() {
+
+		// 广播登录信息
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					String userName = android.os.Build.MODEL;// 获取用户名
+					String hostName = "Android";// 获取主机名
+					String userDomain = "Android";// 获取计算机域
+
+					// 加入在线列表
+					Host host = new Host(userName, userDomain, app.hostIP,
+							hostName, 1, 0);
+					app.addHost(host);
+
+					app.sendUdpData(new DatagramSocket(),
+							JSON.toJSONString(host), app.broadcastIP,
+							app.broadcastPort);
+				} catch (SocketException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+
 	private void initUI() {
+		// 主机登录
+		login();
+
 		// 显示menu
 		forceShowOverflowMenu();
 		setContentView(R.layout.user_list);
@@ -140,45 +164,9 @@ public class UserListActivity extends Activity {
 				public void run() {
 					Message msg = handler.obtainMessage();
 					msg.what = login;
-					handler.sendMessageDelayed(msg, 1000);
+					handler.sendMessageDelayed(msg, 2000);
 				}
 			}).start();
-		}
-	}
-
-	private void login() {
-		userName = android.os.Build.MODEL;// 获取用户名
-		hostName = "Android";// 获取主机名
-		userDomain = "Android";// 获取计算机域
-
-		// 加入在线列表
-		Host host = new Host(userName, userDomain, app.hostIP, hostName, 1, 0);
-		final String hostInfo = JSON.toJSONString(host);
-		app.addHost(host);
-
-		// 广播登录信息
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					app.sendUdpData(new DatagramSocket(), hostInfo,
-							app.broadcastIP, app.broadcastPort);
-				} catch (SocketException e) {
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
-	private void listen() {
-		this.startService(new Intent(this, BroadcastMonitorService.class));
-		this.startService(new Intent(this, UdpDataMonitorService.class));
-	}
-
-	private void preCheck() {
-		if (app.check(this).endsWith(app.SUCCESS)) {
-			app.hostIP = app.getHostIp(this);// 获取ip地址
 		} else {
 			// 弹出警告框并退出
 			new AlertDialog.Builder(this)
@@ -277,11 +265,11 @@ public class UserListActivity extends Activity {
 									// 加入在线列表
 									Host host = new Host(userName, userDomain,
 											act.app.hostIP, hostName, 1, 0);
-									String hostInfo = JSON.toJSONString(host);
 									act.app.addHost(host);
 									try {
 										act.app.sendUdpData(
-												new DatagramSocket(), hostInfo,
+												new DatagramSocket(),
+												JSON.toJSONString(host),
 												act.app.broadcastIP,
 												act.app.broadcastPort);
 									} catch (SocketException e) {

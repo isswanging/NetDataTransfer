@@ -10,6 +10,7 @@ package com.example.netdatatransfer;
 public final class R {
     public static final class anim {
         public static final int frame=0x7f040000;
+        public static final int welcome_anim=0x7f040001;
     }
     public static final class attr {
     }
@@ -78,9 +79,12 @@ public final class R {
         public static final int wait_0010=0x7f02001a;
         public static final int wait_0011=0x7f02001b;
         public static final int wait_0012=0x7f02001c;
+        public static final int welcome_01=0x7f02001d;
+        public static final int welcome_02=0x7f02001e;
+        public static final int welcome_03=0x7f02001f;
     }
     public static final class id {
-        public static final int about=0x7f090015;
+        public static final int about=0x7f090016;
         public static final int back=0x7f090009;
         public static final int charContentList=0x7f090004;
         public static final int chatBottom=0x7f090000;
@@ -89,7 +93,7 @@ public final class R {
         public static final int chatName=0x7f090008;
         public static final int chatUserName=0x7f09000a;
         public static final int editText=0x7f090001;
-        public static final int exit=0x7f090016;
+        public static final int exit=0x7f090017;
         public static final int head=0x7f090012;
         public static final int listContent=0x7f090010;
         public static final int refreshProgress=0x7f09000e;
@@ -103,6 +107,7 @@ public final class R {
         public static final int userList=0x7f09000f;
         public static final int userName=0x7f090013;
         public static final int wait=0x7f090011;
+        public static final int welcome_img=0x7f090015;
     }
     public static final class layout {
         public static final int chat=0x7f030000;
@@ -113,6 +118,7 @@ public final class R {
         public static final int user_list=0x7f030005;
         public static final int user_list_item=0x7f030006;
         public static final int users=0x7f030007;
+        public static final int welcome=0x7f030008;
     }
     public static final class menu {
         public static final int menu=0x7f080000;

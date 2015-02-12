@@ -3,7 +3,6 @@ package net.ui;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import net.app.NetConfApplication;
@@ -11,18 +10,12 @@ import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.MediaPlayer;
-import android.media.RingtoneManager;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.util.JsonReader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -74,6 +67,8 @@ public class ChatActivity extends Activity {
 		Bundle bundle = getIntent().getExtras();
 		targetName = bundle.getString("name");
 		targetIp = bundle.getString("ip");
+		app.chatId = targetIp;
+		Log.i(this.toString(), "create::" + app.chatId);
 
 		// 设置actionBar
 		initActionBar();
@@ -91,25 +86,6 @@ public class ChatActivity extends Activity {
 		filter = new IntentFilter();
 		filter.addAction("net.ui.chatFrom");
 
-		// 如果是从提示消息进入
-		if (null != bundle.getSerializable("content")) {
-
-		}
-
-	}
-
-	// 获取日期
-	private String getDate() {
-		Calendar c = Calendar.getInstance();
-		String year = String.valueOf(c.get(Calendar.YEAR));
-		String month = String.valueOf(c.get(Calendar.MONTH));
-		String day = String.valueOf(c.get(Calendar.DAY_OF_MONTH) + 1);
-		String hour = String.valueOf(c.get(Calendar.HOUR_OF_DAY));
-		String mins = String.valueOf(c.get(Calendar.MINUTE));
-		StringBuffer sbBuffer = new StringBuffer();
-		sbBuffer.append(year + "-" + month + "-" + day + " " + hour + ":"
-				+ mins);
-		return sbBuffer.toString();
 	}
 
 	public class ChatOnClickListener implements OnClickListener {
@@ -126,7 +102,8 @@ public class ChatActivity extends Activity {
 				String hostName = android.os.Build.MODEL;
 				if (!chatText.equals("")) {
 					ChatMsgEntity entity = new ChatMsgEntity(hostName,
-							getDate(), chatEditText.getText().toString(), false);
+							app.getDate(), chatEditText.getText().toString(),
+							false);
 					mDataArrays.add(entity);
 					mAdapter.notifyDataSetChanged();
 					chatEditText.setText("");
@@ -166,7 +143,7 @@ public class ChatActivity extends Activity {
 
 			// 判断是否当前聊天窗口
 			ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-					getDate(), dp.getContent(), true);
+					app.getDate(), dp.getContent(), true);
 			mDataArrays.add(entity);
 			mAdapter.notifyDataSetChanged();
 			mListView.setSelection(mListView.getCount() - 1);
@@ -174,16 +151,27 @@ public class ChatActivity extends Activity {
 	}
 
 	@Override
-	protected void onStop() {
+	protected void onPause() {
 		app.chatId = "none";
+		Log.i(this.toString(), "onPause::" + app.chatId);
 		unregisterReceiver(chatReceiver);
-		super.onStop();
+		super.onPause();
+		finish();
 	}
 
 	@Override
 	protected void onResume() {
 		app.chatId = targetIp;
+		Log.i(this.toString(), "resume::" + app.chatId);
 		registerReceiver(chatReceiver, filter);
+
+		// 如果在后台有新消息来
+		if (app.chatTempMap.containsKey(targetIp)) {
+			app.nManager.cancelAll();
+			mDataArrays.addAll(app.chatTempMap.get(targetIp));
+			app.chatTempMap.remove(targetIp);
+		}
+
 		super.onResume();
 	}
 }
