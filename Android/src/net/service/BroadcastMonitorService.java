@@ -2,23 +2,26 @@ package net.service;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 
 import net.app.NetConfApplication;
 import net.vo.Host;
 import android.app.Service;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 
 public class BroadcastMonitorService extends Service {
-	DatagramSocket broadSocket = null;
+	MulticastSocket broadSocket = null;
 	DatagramPacket broadPacket = null;
 	NetConfApplication app;
 	Thread thread;
 	boolean tag;
+	WifiManager.MulticastLock lock;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -27,6 +30,10 @@ public class BroadcastMonitorService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		WifiManager manager = (WifiManager) this.getSystemService(WIFI_SERVICE);
+		lock = manager.createMulticastLock("wifi");
+		lock.acquire();
+
 		app = (NetConfApplication) getApplication();
 		Log.i(this.toString(), "BroadcastMonitor started");
 		tag = true;
@@ -37,6 +44,7 @@ public class BroadcastMonitorService extends Service {
 
 	@Override
 	public void onDestroy() {
+		lock.release();
 		tag = false;
 		thread.interrupt();
 		Log.i(this.toString(), "service stop");
@@ -50,7 +58,8 @@ public class BroadcastMonitorService extends Service {
 			try {
 				Log.i(this.toString(), "start a service");
 				broadPacket = new DatagramPacket(new byte[512], 512);
-				broadSocket = new DatagramSocket(app.broadcastPort);
+				broadSocket = new MulticastSocket(app.broadcastPort);
+				broadSocket.joinGroup(InetAddress.getByName(app.broadcastIP));
 				while (tag) {
 					// 收到广播
 					broadSocket.receive(broadPacket);

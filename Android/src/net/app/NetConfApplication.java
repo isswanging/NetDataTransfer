@@ -49,7 +49,7 @@ public class NetConfApplication extends Application {
 	public final String FAIL = "IOException";
 
 	// 广播IP
-	public final String broadcastIP = "192.168.0.255";
+	public final String broadcastIP = "224.0.0.1";
 
 	// 广播端口
 	public final int broadcastPort = 2325;
