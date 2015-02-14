@@ -13,7 +13,6 @@ public class BuildFolder {
         analyse(root, content);
         // 构造目录
         structure();
-
     }
 
     private void structure() {

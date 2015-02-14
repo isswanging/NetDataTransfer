@@ -21,93 +21,94 @@ public final class R {
          would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively).
     
          */
-        public static final int activity_horizontal_margin=0x7f050000;
-        public static final int activity_vertical_margin=0x7f050001;
-        public static final int back_left=0x7f050018;
-        public static final int chat_content_text_size=0x7f05001a;
-        public static final int chat_text_size=0x7f050019;
-        public static final int editText_left=0x7f050006;
-        public static final int editText_width=0x7f050007;
-        public static final int head_height=0x7f05000b;
-        public static final int head_margin=0x7f05000c;
-        public static final int head_width=0x7f05000a;
-        public static final int ip_size=0x7f050011;
-        public static final int list_divide=0x7f05000f;
-        public static final int list_padding=0x7f050010;
-        public static final int refreshProgress_size=0x7f050017;
-        public static final int refresh_height=0x7f050014;
-        public static final int refresh_height_margin_top=0x7f050015;
-        public static final int refresh_text=0x7f050016;
-        public static final int sendMore_right=0x7f050004;
-        public static final int sendMore_text_size=0x7f050005;
-        public static final int sendText_left=0x7f050009;
-        public static final int sendText_text_size=0x7f050008;
-        public static final int title_height=0x7f050002;
-        public static final int title_text_size=0x7f050003;
-        public static final int userName_size=0x7f05000e;
-        public static final int user_marginLeft=0x7f05000d;
-        public static final int wait_length=0x7f050012;
-        public static final int wait_top=0x7f050013;
+        public static final int activity_horizontal_margin=0x7f060000;
+        public static final int activity_vertical_margin=0x7f060001;
+        public static final int back_left=0x7f060018;
+        public static final int chat_content_text_size=0x7f06001a;
+        public static final int chat_text_size=0x7f060019;
+        public static final int editText_left=0x7f060006;
+        public static final int editText_width=0x7f060007;
+        public static final int head_height=0x7f06000b;
+        public static final int head_margin=0x7f06000c;
+        public static final int head_width=0x7f06000a;
+        public static final int ip_size=0x7f060011;
+        public static final int list_divide=0x7f06000f;
+        public static final int list_padding=0x7f060010;
+        public static final int refreshProgress_size=0x7f060017;
+        public static final int refresh_height=0x7f060014;
+        public static final int refresh_height_margin_top=0x7f060015;
+        public static final int refresh_text=0x7f060016;
+        public static final int sendMore_right=0x7f060004;
+        public static final int sendMore_text_size=0x7f060005;
+        public static final int sendText_left=0x7f060009;
+        public static final int sendText_text_size=0x7f060008;
+        public static final int title_height=0x7f060002;
+        public static final int title_text_size=0x7f060003;
+        public static final int userName_size=0x7f06000e;
+        public static final int user_marginLeft=0x7f06000d;
+        public static final int wait_length=0x7f060012;
+        public static final int wait_top=0x7f060013;
     }
     public static final class drawable {
-        public static final int back=0x7f020000;
-        public static final int chat_bg=0x7f020001;
-        public static final int chat_bottom=0x7f020002;
-        public static final int chat_head_left=0x7f020003;
-        public static final int chat_head_right=0x7f020004;
-        public static final int chatfrom_bg=0x7f020005;
-        public static final int chatfrom_bg_normal=0x7f020006;
-        public static final int chatfrom_bg_pressed=0x7f020007;
-        public static final int chatto_bg=0x7f020008;
-        public static final int chatto_bg_normal=0x7f020009;
-        public static final int chatto_bg_pressed=0x7f02000a;
-        public static final int edittext=0x7f02000b;
-        public static final int head=0x7f02000c;
-        public static final int ic_launcher=0x7f02000d;
-        public static final int notify=0x7f02000e;
-        public static final int title=0x7f02000f;
-        public static final int wait_0000=0x7f020010;
-        public static final int wait_0001=0x7f020011;
-        public static final int wait_0002=0x7f020012;
-        public static final int wait_0003=0x7f020013;
-        public static final int wait_0004=0x7f020014;
-        public static final int wait_0005=0x7f020015;
-        public static final int wait_0006=0x7f020016;
-        public static final int wait_0007=0x7f020017;
-        public static final int wait_0008=0x7f020018;
-        public static final int wait_0009=0x7f020019;
-        public static final int wait_0010=0x7f02001a;
-        public static final int wait_0011=0x7f02001b;
-        public static final int wait_0012=0x7f02001c;
-        public static final int welcome_01=0x7f02001d;
-        public static final int welcome_02=0x7f02001e;
-        public static final int welcome_03=0x7f02001f;
+        public static final int about_bg=0x7f020000;
+        public static final int back=0x7f020001;
+        public static final int chat_bg=0x7f020002;
+        public static final int chat_bottom=0x7f020003;
+        public static final int chat_head_left=0x7f020004;
+        public static final int chat_head_right=0x7f020005;
+        public static final int chatfrom_bg=0x7f020006;
+        public static final int chatfrom_bg_normal=0x7f020007;
+        public static final int chatfrom_bg_pressed=0x7f020008;
+        public static final int chatto_bg=0x7f020009;
+        public static final int chatto_bg_normal=0x7f02000a;
+        public static final int chatto_bg_pressed=0x7f02000b;
+        public static final int edittext=0x7f02000c;
+        public static final int head=0x7f02000d;
+        public static final int ic_launcher=0x7f02000e;
+        public static final int notify=0x7f02000f;
+        public static final int title=0x7f020010;
+        public static final int wait_0000=0x7f020011;
+        public static final int wait_0001=0x7f020012;
+        public static final int wait_0002=0x7f020013;
+        public static final int wait_0003=0x7f020014;
+        public static final int wait_0004=0x7f020015;
+        public static final int wait_0005=0x7f020016;
+        public static final int wait_0006=0x7f020017;
+        public static final int wait_0007=0x7f020018;
+        public static final int wait_0008=0x7f020019;
+        public static final int wait_0009=0x7f02001a;
+        public static final int wait_0010=0x7f02001b;
+        public static final int wait_0011=0x7f02001c;
+        public static final int wait_0012=0x7f02001d;
+        public static final int welcome_01=0x7f02001e;
+        public static final int welcome_02=0x7f02001f;
+        public static final int welcome_03=0x7f020020;
     }
     public static final class id {
-        public static final int about=0x7f090016;
-        public static final int back=0x7f090009;
-        public static final int charContentList=0x7f090004;
-        public static final int chatBottom=0x7f090000;
-        public static final int chatContent=0x7f090007;
-        public static final int chatHead=0x7f090006;
-        public static final int chatName=0x7f090008;
-        public static final int chatUserName=0x7f09000a;
-        public static final int editText=0x7f090001;
-        public static final int exit=0x7f090017;
-        public static final int head=0x7f090012;
-        public static final int listContent=0x7f090010;
-        public static final int refreshProgress=0x7f09000e;
-        public static final int refreshText=0x7f09000d;
-        public static final int refresh_head=0x7f09000c;
-        public static final int right_hide=0x7f09000b;
-        public static final int send=0x7f090002;
-        public static final int sendMore=0x7f090003;
-        public static final int sendTime=0x7f090005;
-        public static final int userIP=0x7f090014;
-        public static final int userList=0x7f09000f;
-        public static final int userName=0x7f090013;
-        public static final int wait=0x7f090011;
-        public static final int welcome_img=0x7f090015;
+        public static final int about=0x7f0a0016;
+        public static final int back=0x7f0a0009;
+        public static final int charContentList=0x7f0a0004;
+        public static final int chatBottom=0x7f0a0000;
+        public static final int chatContent=0x7f0a0007;
+        public static final int chatHead=0x7f0a0006;
+        public static final int chatName=0x7f0a0008;
+        public static final int chatUserName=0x7f0a000a;
+        public static final int editText=0x7f0a0001;
+        public static final int exit=0x7f0a0017;
+        public static final int head=0x7f0a0012;
+        public static final int listContent=0x7f0a0010;
+        public static final int refreshProgress=0x7f0a000e;
+        public static final int refreshText=0x7f0a000d;
+        public static final int refresh_head=0x7f0a000c;
+        public static final int right_hide=0x7f0a000b;
+        public static final int send=0x7f0a0002;
+        public static final int sendMore=0x7f0a0003;
+        public static final int sendTime=0x7f0a0005;
+        public static final int userIP=0x7f0a0014;
+        public static final int userList=0x7f0a000f;
+        public static final int userName=0x7f0a0013;
+        public static final int wait=0x7f0a0011;
+        public static final int welcome_img=0x7f0a0015;
     }
     public static final class layout {
         public static final int chat=0x7f030000;
@@ -121,18 +122,21 @@ public final class R {
         public static final int welcome=0x7f030008;
     }
     public static final class menu {
-        public static final int menu=0x7f080000;
+        public static final int menu=0x7f090000;
+    }
+    public static final class raw {
+        public static final int msn=0x7f050000;
     }
     public static final class string {
-        public static final int about=0x7f060002;
-        public static final int app_name=0x7f060000;
-        public static final int editText_hint=0x7f060006;
-        public static final int exit=0x7f060001;
-        public static final int pull_to_refresh=0x7f060007;
-        public static final int release_to_refresh=0x7f060008;
-        public static final int sendMore=0x7f060004;
-        public static final int sendText=0x7f060005;
-        public static final int titleName=0x7f060003;
+        public static final int about=0x7f070002;
+        public static final int app_name=0x7f070000;
+        public static final int editText_hint=0x7f070006;
+        public static final int exit=0x7f070001;
+        public static final int pull_to_refresh=0x7f070007;
+        public static final int release_to_refresh=0x7f070008;
+        public static final int sendMore=0x7f070004;
+        public static final int sendText=0x7f070005;
+        public static final int titleName=0x7f070003;
     }
     public static final class style {
         /** 
@@ -156,12 +160,12 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f080000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
-        public static final int chat_content_date_style=0x7f070002;
-        public static final int chat_text_name_style=0x7f070003;
+        public static final int AppTheme=0x7f080001;
+        public static final int chat_content_date_style=0x7f080002;
+        public static final int chat_text_name_style=0x7f080003;
     }
 }
