@@ -119,6 +119,10 @@ public class UdpDataMonitorService extends Service {
                                     .setContentIntent(contentIntent).build();
                             notification.flags = Notification.FLAG_AUTO_CANCEL;
                             app.nManager.notify(R.id.chatName, notification);
+
+                            // 让界面显示未读消息的红点
+                            Intent unReadIntent = new Intent("net.ui.newMsg");
+                            sendBroadcast(unReadIntent);
                         }
                     }
                 }

@@ -6,11 +6,11 @@
     android:background="#FFFFFF"
     android:orientation="vertical" >
 
-    <ImageView
+    <ProgressBar
         android:id="@+id/wait"
-        android:layout_width="@dimen/wait_length"
-        android:layout_height="@dimen/wait_length"
-        android:layout_gravity="center_horizontal"
+        android:layout_width="@dimen/refreshProgress_size"
+        android:layout_height="@dimen/refreshProgress_size"
+        android:layout_gravity="center"
         android:layout_marginTop="@dimen/wait_top" />
 
 </LinearLayout>

@@ -12,21 +12,20 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import com.example.netdatatransfer.R;
+
 import net.vo.ChatMsgEntity;
 import net.vo.Host;
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.RingtoneManager;
 import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+
+import com.example.netdatatransfer.R;
 
 public class NetConfApplication extends Application {
     public int wifi = 0;

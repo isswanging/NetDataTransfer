@@ -16,8 +16,11 @@ import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.vo.Host;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +34,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -41,7 +43,6 @@ import com.alibaba.fastjson.JSON;
 import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
-    private ImageView waitGif;
     private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
     private AnimationDrawable anim;
 
@@ -56,6 +57,14 @@ public class UserListActivity extends Activity {
 
     // 按两次退出的计时
     private long exitTime = 0;
+    
+    //是否界面加载完成
+    private boolean isReady = false;
+    
+    // 更新消息提示的广播
+    newMsgReceiver msgReceiver;
+    IntentFilter filter;
+    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -65,11 +74,14 @@ public class UserListActivity extends Activity {
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        waitGif.setBackgroundResource(R.anim.frame);
-        anim = (AnimationDrawable) waitGif.getBackground();
-        anim.start();
+    protected void onResume() {
+        if (isReady) {
+            registerReceiver(msgReceiver, filter);
+            getData();
+            adapter.notifyDataSetChanged();
+        }
+
+        super.onResume();
     }
 
     @Override
@@ -91,13 +103,17 @@ public class UserListActivity extends Activity {
                 exitTime = System.currentTimeMillis();
                 return false;
             } else {
-                // stopService(new Intent(this, BroadcastMonitorService.class));
-                // stopService(new Intent(this, UdpDataMonitorService.class));
                 finish();
             }
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(msgReceiver);
+        super.onPause();
     }
 
     @Override
@@ -155,10 +171,15 @@ public class UserListActivity extends Activity {
         // 显示menu
         forceShowOverflowMenu();
         setContentView(R.layout.user_list);
-        waitGif = (ImageView) findViewById(R.id.wait);
 
         // 延迟一点加载列表
         if (app.wifi == 1) {
+            // 注册广播
+            msgReceiver = new newMsgReceiver();
+            filter = new IntentFilter();
+            filter.addAction("net.ui.newMsg");
+            registerReceiver(msgReceiver, filter);
+            
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -191,11 +212,25 @@ public class UserListActivity extends Activity {
             Map<String, Object> item = new HashMap<String, Object>();
             item.put("name", host.getUserName());
             item.put("ip", host.getIp());
-            item.put("img", R.drawable.head);
+            if (app.chatTempMap.containsKey(host.getIp())) {
+                item.put("img", R.drawable.unread);
+            } else {
+                item.put("img", null);
+            }
+
             userList.add(item);
         }
 
         return userList;
+    }
+
+    class newMsgReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            getData();
+            adapter.notifyDataSetChanged();
+        }
     }
 
     static class ListHandler extends Handler {
@@ -213,9 +248,10 @@ public class UserListActivity extends Activity {
                     act.adapter = new SimpleAdapter(act, act.getData(),
                             R.layout.user_list_item, new String[] { "name",
                                     "ip", "img" }, new int[] { R.id.userName,
-                                    R.id.userIP, R.id.head });
+                                    R.id.userIP, R.id.unread });
                     Log.i(this.toString(),
                             String.valueOf(act.app.hostList.size()));
+                    act.isReady = true;
 
                     // 更新UI
                     if (act.anim != null && act.anim.isRunning())

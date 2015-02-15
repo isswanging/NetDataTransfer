@@ -9,8 +9,7 @@ package com.example.netdatatransfer;
 
 public final class R {
     public static final class anim {
-        public static final int frame=0x7f040000;
-        public static final int welcome_anim=0x7f040001;
+        public static final int welcome_anim=0x7f040000;
     }
     public static final class attr {
     }
@@ -44,6 +43,8 @@ public final class R {
         public static final int sendText_text_size=0x7f060008;
         public static final int title_height=0x7f060002;
         public static final int title_text_size=0x7f060003;
+        public static final int unread_margin=0x7f06001c;
+        public static final int unread_size=0x7f06001b;
         public static final int userName_size=0x7f06000e;
         public static final int user_marginLeft=0x7f06000d;
         public static final int wait_length=0x7f060012;
@@ -67,25 +68,13 @@ public final class R {
         public static final int ic_launcher=0x7f02000e;
         public static final int notify=0x7f02000f;
         public static final int title=0x7f020010;
-        public static final int wait_0000=0x7f020011;
-        public static final int wait_0001=0x7f020012;
-        public static final int wait_0002=0x7f020013;
-        public static final int wait_0003=0x7f020014;
-        public static final int wait_0004=0x7f020015;
-        public static final int wait_0005=0x7f020016;
-        public static final int wait_0006=0x7f020017;
-        public static final int wait_0007=0x7f020018;
-        public static final int wait_0008=0x7f020019;
-        public static final int wait_0009=0x7f02001a;
-        public static final int wait_0010=0x7f02001b;
-        public static final int wait_0011=0x7f02001c;
-        public static final int wait_0012=0x7f02001d;
-        public static final int welcome_01=0x7f02001e;
-        public static final int welcome_02=0x7f02001f;
-        public static final int welcome_03=0x7f020020;
+        public static final int unread=0x7f020011;
+        public static final int welcome_01=0x7f020012;
+        public static final int welcome_02=0x7f020013;
+        public static final int welcome_03=0x7f020014;
     }
     public static final class id {
-        public static final int about=0x7f0a0016;
+        public static final int about=0x7f0a0017;
         public static final int back=0x7f0a0009;
         public static final int charContentList=0x7f0a0004;
         public static final int chatBottom=0x7f0a0000;
@@ -94,7 +83,7 @@ public final class R {
         public static final int chatName=0x7f0a0008;
         public static final int chatUserName=0x7f0a000a;
         public static final int editText=0x7f0a0001;
-        public static final int exit=0x7f0a0017;
+        public static final int exit=0x7f0a0018;
         public static final int head=0x7f0a0012;
         public static final int listContent=0x7f0a0010;
         public static final int refreshProgress=0x7f0a000e;
@@ -104,11 +93,12 @@ public final class R {
         public static final int send=0x7f0a0002;
         public static final int sendMore=0x7f0a0003;
         public static final int sendTime=0x7f0a0005;
+        public static final int unread=0x7f0a0015;
         public static final int userIP=0x7f0a0014;
         public static final int userList=0x7f0a000f;
         public static final int userName=0x7f0a0013;
         public static final int wait=0x7f0a0011;
-        public static final int welcome_img=0x7f0a0015;
+        public static final int welcome_img=0x7f0a0016;
     }
     public static final class layout {
         public static final int chat=0x7f030000;
