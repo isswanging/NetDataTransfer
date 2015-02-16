@@ -2,10 +2,13 @@ package net.ui;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.app.NetConfApplication;
+import net.service.BroadcastMonitorService;
+import net.service.UdpDataMonitorService;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.app.ActionBar;
@@ -15,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.example.netdatatransfer.R;
@@ -80,6 +85,8 @@ public class ChatActivity extends Activity {
         mListView.setAdapter(mAdapter);
         TextView send = (TextView) findViewById(R.id.send);
         send.setOnClickListener(clickListener);
+        TextView more = (TextView) findViewById(R.id.sendMore);
+        more.setOnClickListener(clickListener);
 
         // 注册广播接收者
         chatReceiver = new ChatReceiver();
@@ -126,6 +133,11 @@ public class ChatActivity extends Activity {
                         }
                     }).start();
                 }
+                break;
+
+            case R.id.sendMore:
+                showFileChooser();
+                break;
 
             default:
                 break;
@@ -154,9 +166,14 @@ public class ChatActivity extends Activity {
     protected void onPause() {
         app.chatId = "none";
         Log.i(this.toString(), "onPause::" + app.chatId);
-        unregisterReceiver(chatReceiver);
         super.onPause();
-        finish();
+    }
+
+    @Override
+    protected void onStop() {
+        unregisterReceiver(chatReceiver);
+        Log.i(this.toString(), "chat stop");
+        super.onStop();
     }
 
     @Override
@@ -167,11 +184,41 @@ public class ChatActivity extends Activity {
 
         // 如果在后台有新消息来
         if (app.chatTempMap.containsKey(targetIp)) {
+            Log.i(this.toString(), "get new massage");
             app.nManager.cancelAll();
             mDataArrays.addAll(app.chatTempMap.get(targetIp));
             app.chatTempMap.remove(targetIp);
+            mAdapter.notifyDataSetChanged();
         }
 
         super.onResume();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        Log.i(this.toString(), "chat:: destory");
+        super.onDestroy();
+    }
+
+    private void showFileChooser() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+       intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"),1024);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            Toast.makeText(this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
+        if (resultCode == Activity.RESULT_OK) {
+            // Get the Uri of the selected file
+
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

@@ -68,8 +68,10 @@ public class UdpDataMonitorService extends Service {
                             UdpPacket.getLength());
                     dp = JSON.parseObject(info, DataPacket.class);
 
-                    // 传文字
-                    if (dp.getTag() == app.text) {
+                    switch (dp.getTag()) {
+                    
+                    case NetConfApplication.text:
+
                         app.playVoice();
 
                         Log.i(this.toString(), "service::" + app.chatId);
@@ -124,7 +126,13 @@ public class UdpDataMonitorService extends Service {
                             Intent unReadIntent = new Intent("net.ui.newMsg");
                             sendBroadcast(unReadIntent);
                         }
+
+                        break;
+
+                    default:
+                        break;
                     }
+
                 }
 
             } catch (IOException e) {

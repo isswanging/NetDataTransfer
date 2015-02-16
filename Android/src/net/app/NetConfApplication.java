@@ -59,13 +59,13 @@ public class NetConfApplication extends Application {
     public final int broadcastPort = 2325;
 
     // 信号
-    public final int text = 0;
-    public final int filePre = 1;
-    public final int fileConf = 2;
-    public final int refuse = 3;
-    public final int folderPre = 4;
-    public final int folderConf = 5;
-    public final int end = 6;
+    public static final int text = 0;
+    public static final int filePre = 1;
+    public static final int fileConf = 2;
+    public static final int refuse = 3;
+    public static final int folderPre = 4;
+    public static final int folderConf = 5;
+    public static final int end = 6;
 
     public int getText() {
         return text;

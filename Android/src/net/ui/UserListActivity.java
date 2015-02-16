@@ -57,14 +57,13 @@ public class UserListActivity extends Activity {
 
     // 按两次退出的计时
     private long exitTime = 0;
-    
-    //是否界面加载完成
+
+    // 是否界面加载完成
     private boolean isReady = false;
-    
+
     // 更新消息提示的广播
     newMsgReceiver msgReceiver;
     IntentFilter filter;
-    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -112,7 +111,10 @@ public class UserListActivity extends Activity {
 
     @Override
     protected void onPause() {
-        unregisterReceiver(msgReceiver);
+        if (isReady) {
+            unregisterReceiver(msgReceiver);
+        }
+
         super.onPause();
     }
 
@@ -179,7 +181,7 @@ public class UserListActivity extends Activity {
             filter = new IntentFilter();
             filter.addAction("net.ui.newMsg");
             registerReceiver(msgReceiver, filter);
-            
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
