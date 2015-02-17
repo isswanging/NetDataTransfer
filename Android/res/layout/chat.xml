@@ -39,16 +39,14 @@
             android:textColor="#FFFFFF"
             android:textSize="@dimen/sendText_text_size" />
 
-        <TextView
+        <ImageView
             android:id="@+id/sendMore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/sendMore_size"
+            android:layout_height="@dimen/sendMore_size"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/sendMore_right"
-            android:text="@string/sendMore"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/sendMore_text_size" />
+            android:background="@drawable/add" />
     </RelativeLayout>
 
     <ListView
@@ -56,9 +54,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/chatBottom"
+        android:background="@drawable/chat_bg"
         android:divider="@null"
-        android:transcriptMode="alwaysScroll" 
-        android:background="@drawable/chat_bg">
+        android:transcriptMode="alwaysScroll" >
     </ListView>
 
 </RelativeLayout>

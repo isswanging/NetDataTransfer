@@ -2,13 +2,10 @@ package net.ui;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.app.NetConfApplication;
-import net.service.BroadcastMonitorService;
-import net.service.UdpDataMonitorService;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.app.ActionBar;
@@ -25,6 +22,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,7 +83,7 @@ public class ChatActivity extends Activity {
         mListView.setAdapter(mAdapter);
         TextView send = (TextView) findViewById(R.id.send);
         send.setOnClickListener(clickListener);
-        TextView more = (TextView) findViewById(R.id.sendMore);
+        ImageView more = (ImageView) findViewById(R.id.sendMore);
         more.setOnClickListener(clickListener);
 
         // 注册广播接收者
@@ -165,13 +163,13 @@ public class ChatActivity extends Activity {
     @Override
     protected void onPause() {
         app.chatId = "none";
+        unregisterReceiver(chatReceiver);
         Log.i(this.toString(), "onPause::" + app.chatId);
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        unregisterReceiver(chatReceiver);
         Log.i(this.toString(), "chat stop");
         super.onStop();
     }
