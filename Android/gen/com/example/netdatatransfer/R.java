@@ -31,6 +31,7 @@ public final class R {
         public static final int head_margin=0x7f06000c;
         public static final int head_width=0x7f06000a;
         public static final int ip_size=0x7f060011;
+        public static final int left_drawer=0x7f06001d;
         public static final int list_divide=0x7f06000f;
         public static final int list_padding=0x7f060010;
         public static final int refreshProgress_size=0x7f060017;
@@ -75,7 +76,7 @@ public final class R {
         public static final int welcome_03=0x7f020015;
     }
     public static final class id {
-        public static final int about=0x7f0a0017;
+        public static final int about=0x7f0a0019;
         public static final int back=0x7f0a0009;
         public static final int charContentList=0x7f0a0004;
         public static final int chatBottom=0x7f0a0000;
@@ -83,10 +84,12 @@ public final class R {
         public static final int chatHead=0x7f0a0006;
         public static final int chatName=0x7f0a0008;
         public static final int chatUserName=0x7f0a000a;
+        public static final int drawer_layout=0x7f0a0010;
         public static final int editText=0x7f0a0001;
-        public static final int exit=0x7f0a0018;
-        public static final int head=0x7f0a0012;
-        public static final int listContent=0x7f0a0010;
+        public static final int exit=0x7f0a001a;
+        public static final int head=0x7f0a0014;
+        public static final int left_drawer=0x7f0a0013;
+        public static final int listContent=0x7f0a0011;
         public static final int refreshProgress=0x7f0a000e;
         public static final int refreshText=0x7f0a000d;
         public static final int refresh_head=0x7f0a000c;
@@ -94,12 +97,12 @@ public final class R {
         public static final int send=0x7f0a0002;
         public static final int sendMore=0x7f0a0003;
         public static final int sendTime=0x7f0a0005;
-        public static final int unread=0x7f0a0015;
-        public static final int userIP=0x7f0a0014;
+        public static final int unread=0x7f0a0017;
+        public static final int userIP=0x7f0a0016;
         public static final int userList=0x7f0a000f;
-        public static final int userName=0x7f0a0013;
-        public static final int wait=0x7f0a0011;
-        public static final int welcome_img=0x7f0a0016;
+        public static final int userName=0x7f0a0015;
+        public static final int wait=0x7f0a0012;
+        public static final int welcome_img=0x7f0a0018;
     }
     public static final class layout {
         public static final int chat=0x7f030000;
