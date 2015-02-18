@@ -25,12 +25,15 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -174,6 +177,17 @@ public class UserListActivity extends Activity {
         forceShowOverflowMenu();
         setContentView(R.layout.user_list);
 
+        findViewById(R.id.left_drawer).setOnTouchListener(
+                new OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        // 吞掉点击事件使下拉刷新失效
+                        return true;
+                    }
+                });
+
+        getDeviceInfo();
+
         // 延迟一点加载列表
         if (app.wifi == 1) {
             // 注册广播
@@ -206,6 +220,27 @@ public class UserListActivity extends Activity {
                                 }
                             }).setCancelable(false).show();
         }
+    }
+
+    private void getDeviceInfo() {
+        String manufacturerName = android.os.Build.MANUFACTURER;
+        String systemVersion = android.os.Build.VERSION.RELEASE;
+        String deviceName = android.os.Build.HARDWARE;
+
+        TelephonyManager tm = (TelephonyManager) this
+                .getSystemService(Context.TELEPHONY_SERVICE);
+
+        TextView t1 = (TextView) findViewById(R.id.device_name);
+        TextView t2 = (TextView) findViewById(R.id.system_version);
+        TextView t3 = (TextView) findViewById(R.id.operate_name);
+        TextView t4 = (TextView) findViewById(R.id.mcc_mnc);
+        TextView t5 = (TextView) findViewById(R.id.manufacturer_name);
+        t1.setText("：" + deviceName);
+        t2.setText("：Android " + systemVersion);
+        t3.setText("：" + tm.getNetworkOperatorName());
+        t4.setText("：" + tm.getNetworkOperator());
+        t5.setText("：" + manufacturerName);
+
     }
 
     private List<Map<String, Object>> getData() {
