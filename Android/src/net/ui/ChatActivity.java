@@ -18,8 +18,10 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -43,6 +45,7 @@ public class ChatActivity extends Activity {
 
     ChatReceiver chatReceiver;
     IntentFilter filter;
+    TextView sendFile;
 
     NetConfApplication app;
 
@@ -85,11 +88,23 @@ public class ChatActivity extends Activity {
         send.setOnClickListener(clickListener);
         ImageView more = (ImageView) findViewById(R.id.sendMore);
         more.setOnClickListener(clickListener);
+        sendFile = (TextView) findViewById(R.id.sendFile);
+        sendFile.setOnClickListener(clickListener);
 
         // 注册广播接收者
         chatReceiver = new ChatReceiver();
         filter = new IntentFilter();
         filter.addAction("net.ui.chatFrom");
+
+        mListView.setOnTouchListener(new OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.i(this.toString(), "touch .................");
+                sendFile.setVisibility(View.GONE);
+                return false;
+            }
+        });
 
     }
 
@@ -134,6 +149,11 @@ public class ChatActivity extends Activity {
                 break;
 
             case R.id.sendMore:
+                sendFile.setVisibility(View.VISIBLE);
+                break;
+
+            case R.id.sendFile:
+                sendFile.setVisibility(View.GONE);
                 showFileChooser();
                 break;
 
@@ -191,7 +211,7 @@ public class ChatActivity extends Activity {
 
         super.onResume();
     }
-    
+
     @Override
     protected void onDestroy() {
         Log.i(this.toString(), "chat:: destory");
@@ -201,15 +221,16 @@ public class ChatActivity extends Activity {
     private void showFileChooser() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-       intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
-            startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"),1024);
+            startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"),
+                    1024);
         } catch (android.content.ActivityNotFoundException ex) {
             // Potentially direct the user to the Market with a Dialog
             Toast.makeText(this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
