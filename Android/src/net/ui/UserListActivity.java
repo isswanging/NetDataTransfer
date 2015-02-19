@@ -25,12 +25,15 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -54,6 +57,7 @@ public class UserListActivity extends Activity {
 
     private SimpleAdapter adapter;
     private PullRefreshListView pullRefreshListView;
+    private DrawerLayout drawerLayout;
 
     private Handler handler = new ListHandler(this);
     private NetConfApplication app;
@@ -110,6 +114,15 @@ public class UserListActivity extends Activity {
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.exit) {
+            finish();
+            return false;
+        }
+        return false;
     }
 
     @Override
@@ -176,6 +189,7 @@ public class UserListActivity extends Activity {
         // 显示menu
         forceShowOverflowMenu();
         setContentView(R.layout.user_list);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         findViewById(R.id.left_drawer).setOnTouchListener(
                 new OnTouchListener() {
@@ -313,15 +327,21 @@ public class UserListActivity extends Activity {
                                             .findViewById(R.id.userName);
                                     TextView ip = (TextView) view
                                             .findViewById(R.id.userIP);
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("name", name.getText()
-                                            .toString());
-                                    bundle.putString("ip", ip.getText()
-                                            .toString());
-                                    Intent intent = new Intent(act,
-                                            ChatActivity.class);
-                                    intent.putExtras(bundle);
-                                    act.startActivity(intent);
+
+                                    if (ip.getText().equals(act.app.hostIP)) {
+                                        act.drawerLayout
+                                                .openDrawer(Gravity.LEFT);
+                                    } else {
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("name", name.getText()
+                                                .toString());
+                                        bundle.putString("ip", ip.getText()
+                                                .toString());
+                                        Intent intent = new Intent(act,
+                                                ChatActivity.class);
+                                        intent.putExtras(bundle);
+                                        act.startActivity(intent);
+                                    }
                                 }
                             });
 
