@@ -2,6 +2,7 @@ package net.ui;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
@@ -61,6 +63,12 @@ public class UserListActivity extends Activity {
 
     private Handler handler = new ListHandler(this);
     private NetConfApplication app;
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        setOverflowIconVisible(featureId, menu);
+        return super.onMenuOpened(featureId, menu);
+    }
 
     // 按两次退出的计时
     private long exitTime = 0;
@@ -141,6 +149,7 @@ public class UserListActivity extends Activity {
         super.onDestroy();
     }
 
+    // 在物理菜单键存在时仍然显示溢出菜单
     private void forceShowOverflowMenu() {
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
@@ -152,6 +161,21 @@ public class UserListActivity extends Activity {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // 利用反射让隐藏在Overflow中的MenuItem显示Icon图标
+    private void setOverflowIconVisible(int featureId, Menu menu) {
+        if (featureId == Window.FEATURE_ACTION_BAR && menu != null) {
+            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
+                try {
+                    Method m = menu.getClass().getDeclaredMethod(
+                            "setOptionalIconsVisible", Boolean.TYPE);
+                    m.setAccessible(true);
+                    m.invoke(menu, true);
+                } catch (Exception e) {
+                }
+            }
         }
     }
 
