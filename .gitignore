@@ -1,2 +1,4 @@
-/target/
-/SysLogs.log
+/Android/bin/
+/Android/gen/
+/PC/target/
+/PC/SysLogs.log

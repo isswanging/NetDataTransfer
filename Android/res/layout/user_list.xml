@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/listContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:orientation="vertical" >
+
+        <ProgressBar
+            android:id="@+id/wait"
+            android:layout_width="@dimen/refreshProgress_size"
+            android:layout_height="@dimen/refreshProgress_size"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/wait_top" />
+    </LinearLayout>
+
+   <include layout="@layout/left_drawer"/>
+
+</android.support.v4.widget.DrawerLayout>
