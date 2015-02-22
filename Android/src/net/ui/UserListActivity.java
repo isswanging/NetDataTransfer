@@ -290,7 +290,7 @@ public class UserListActivity extends Activity {
             if (app.chatTempMap.containsKey(host.getIp())) {
                 item.put("img", R.drawable.unread);
             } else {
-                item.put("img", null);
+                item.put("img", 0);
             }
 
             userList.add(item);
