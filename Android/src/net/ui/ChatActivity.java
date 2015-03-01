@@ -8,14 +8,19 @@ import java.util.List;
 import net.app.NetConfApplication;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -129,16 +134,15 @@ public class ChatActivity extends Activity {
                     chatEditText.setText("");
                     mListView.setSelection(mListView.getCount() - 1);
 
-                    DataPacket dp = new DataPacket(app.hostIP, hostName,
+                    final DataPacket dp = new DataPacket(app.hostIP, hostName,
                             chatText, app.text);
-                    final String dpInfo = JSON.toJSONString(dp);
 
                     new Thread(new Runnable() {
 
                         @Override
                         public void run() {
                             try {
-                                app.sendUdpData(new DatagramSocket(), dpInfo,
+                                app.sendUdpData(new DatagramSocket(), JSON.toJSONString(dp),
                                         targetIp, app.textPort);
                             } catch (SocketException e) {
                                 e.printStackTrace();
@@ -220,11 +224,11 @@ public class ChatActivity extends Activity {
 
     private void showFileChooser() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+        intent.setType("image/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
-            startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"),
-                    1024);
+            startActivityForResult(Intent.createChooser(intent, "请选择一个要发送的文件"),
+                    image);
         } catch (android.content.ActivityNotFoundException ex) {
             // Potentially direct the user to the Market with a Dialog
             Toast.makeText(this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
@@ -233,11 +237,97 @@ public class ChatActivity extends Activity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO Auto-generated method stub
         if (resultCode == Activity.RESULT_OK) {
-            // Get the Uri of the selected file
+            Uri uri = data.getData();
+            Log.i(this.toString(), uri.toString());
+            String filePath = uri2filePath(uri, this);
+            Log.i(this.toString(), filePath);
+
+            switch (requestCode) {
+            case image:
+                //
+                final DataPacket dp = new DataPacket(app.hostIP, android.os.Build.MODEL,
+                        filePath, app.filePre);
+                new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            app.sendUdpData(new DatagramSocket(), JSON.toJSONString(dp),
+                                    targetIp, app.textPort);
+                        } catch (SocketException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+                break;
+            case audio:
+
+                break;
+            case vedio:
+
+                break;
+            default:
+                break;
+            }
 
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    // 根据uri获取文件路径
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public String uri2filePath(Uri uri, Activity activity) {
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        // android4.4以上适用
+        if (isKitKat) {
+            String path = "";
+            if (DocumentsContract.isDocumentUri(activity, uri)) {
+                String wholeID = DocumentsContract.getDocumentId(uri);
+                String id = wholeID.split(":")[1];
+                String[] column = { MediaStore.Images.Media.DATA };
+                String sel = MediaStore.Images.Media._ID + "=?";
+                Cursor cursor = activity.getContentResolver().query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, column,
+                        sel, new String[] { id }, null);
+                int columnIndex = cursor.getColumnIndex(column[0]);
+                if (cursor.moveToFirst()) {
+                    path = cursor.getString(columnIndex);
+                }
+                cursor.close();
+            } else {
+                String[] projection = { MediaStore.Images.Media.DATA };
+                Cursor cursor = activity.getContentResolver().query(uri,
+                        projection, null, null, null);
+                int column_index = cursor
+                        .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                path = cursor.getString(column_index);
+
+            }
+
+            return path;
+        }
+        // android 4.4以下适用
+        else {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            // 好像是android多媒体数据库的封装接口，具体的看Android文档
+            Cursor cursor = managedQuery(uri, proj, null, null, null);
+            // 按我个人理解 这个是获得用户选择的图片的索引值
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            // 将光标移至开头 ，这个很重要，不小心很容易引起越界
+            cursor.moveToFirst();
+            // 最后根据索引值获取图片路径
+            String path = cursor.getString(column_index);
+            return path;
+        }
+
+    }
+
+    private final int image = 997;
+    private final int vedio = 998;
+    private final int audio = 999;
+
 }

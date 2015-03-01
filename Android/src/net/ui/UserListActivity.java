@@ -188,12 +188,11 @@ public class UserListActivity extends Activity {
             public void run() {
                 try {
                     String userName = android.os.Build.MODEL;// 获取用户名
-                    String hostName = "Android";// 获取主机名
                     String userDomain = "Android";// 获取计算机域
 
                     // 加入在线列表
                     Host host = new Host(userName, userDomain, app.hostIP,
-                            hostName, 1, 0);
+                            app.hostName, 1, 0);
                     app.addHost(host);
 
                     app.sendUdpData(new DatagramSocket(),

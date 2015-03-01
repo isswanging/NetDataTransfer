@@ -39,12 +39,6 @@ public class NetConfApplication extends Application {
     // 发送文件端口
     public final int filePort = 2324;
 
-    // 发送文件夹端口
-    public final int folderPort = 2325;
-
-    // 发送文件路径端口
-    public final int pathPort = 2326;
-
     // 系统信息标识
     public final String SUCCESS = "success";
 
@@ -63,8 +57,6 @@ public class NetConfApplication extends Application {
     public static final int filePre = 1;
     public static final int fileConf = 2;
     public static final int refuse = 3;
-    public static final int folderPre = 4;
-    public static final int folderConf = 5;
     public static final int end = 6;
 
     public int getText() {
@@ -79,15 +71,10 @@ public class NetConfApplication extends Application {
 
     // 本机ip
     public String hostIP = "";
+    public String hostName = "Android";
 
     // 传输文件夹任务列表
     public HashMap<String, ArrayList<String>> taskList = new HashMap<String, ArrayList<String>>();
-
-    // 传输文件夹时记录的文件路径
-    public HashMap<String, String> sendPathList = new HashMap<String, String>();
-
-    // 传输文件夹时记录的文件路径
-    public HashMap<String, String> savePathList = new HashMap<String, String>();
 
     // 记录进度
     public ConcurrentHashMap<String, Long> progress = new ConcurrentHashMap<String, Long>();
@@ -110,8 +97,6 @@ public class NetConfApplication extends Application {
             try {
                 new DatagramSocket(textPort).close();
                 new ServerSocket(filePort).close();
-                new ServerSocket(folderPort).close();
-                new ServerSocket(pathPort).close();
 
                 return SUCCESS;
             } catch (SocketException e) {
@@ -212,4 +197,5 @@ public class NetConfApplication extends Application {
         // 播放消息提示音乐
         soundPool.play(1, 1, 1, 0, 0, 1);
     }
+
 }

@@ -2,6 +2,7 @@ package net.ui;
 
 import net.app.NetConfApplication;
 import net.service.BroadcastMonitorService;
+import net.service.FileMonitorService;
 import net.service.UdpDataMonitorService;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -54,7 +55,7 @@ public class WelcomeActivity extends Activity {
     private void listen() {
         this.startService(new Intent(this, UdpDataMonitorService.class));
         this.startService(new Intent(this, BroadcastMonitorService.class));
-
+        this.startService(new Intent(this, FileMonitorService.class));
     }
 
     private void preCheck() {

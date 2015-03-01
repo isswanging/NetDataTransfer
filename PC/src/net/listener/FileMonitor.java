@@ -1,15 +1,23 @@
 package net.listener;
 
-import net.conf.SystemConf;
-import net.vo.DataPacket;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import net.conf.SystemConf;
+import net.vo.DataPacket;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.alibaba.fastjson.JSON;
 
 public class FileMonitor implements Runnable {
     ServerSocket server = null;
@@ -34,7 +42,7 @@ public class FileMonitor implements Runnable {
 
     public class SendFile implements Runnable {
         Socket socket = null;
-        ObjectInputStream geter = null;
+        DataInputStream geter = null;
 
         public SendFile(Socket s) {
             socket = s;
@@ -43,18 +51,18 @@ public class FileMonitor implements Runnable {
         @Override
         public void run() {
             try {
-                geter = new ObjectInputStream(socket.getInputStream());
-                DataPacket dp = (DataPacket) geter.readObject();
+                DataOutputStream o = new DataOutputStream(
+                        socket.getOutputStream());
+                DataPacket dp = JSON.parseObject(geter.readUTF(),
+                        DataPacket.class);
 
                 if (dp.getTag() == SystemConf.fileConf) {
                     BufferedInputStream bis = new BufferedInputStream(
-                            new FileInputStream(new File(
-                                    dp.getContent())));
+                            new FileInputStream(new File(dp.getContent())));
 
                     // 文件大小
                     long total = bis.available();
-                    DataOutputStream o = new DataOutputStream(
-                            socket.getOutputStream());
+
                     o.writeLong(total);
 
                     // 发文件
@@ -70,12 +78,9 @@ public class FileMonitor implements Runnable {
                     bos.close();
                 }
 
-            } catch (ClassNotFoundException e) {
-                logger.error("exception: " + e);
             } catch (IOException e) {
                 logger.error("exception: " + e);
             }
         }
-
     }
 }

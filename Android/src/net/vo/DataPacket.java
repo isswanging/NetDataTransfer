@@ -11,6 +11,18 @@ public class DataPacket {
     public DataPacket() {
     }
 
+    /**
+     * 自定义的数据包格式
+     * 
+     * @param ip
+     *            自己的ip
+     * @param senderName
+     *            自己的主机名
+     * @param content
+     *            发送内容
+     * @param tag
+     *            标识发送的阶段
+     */
     public DataPacket(String ip, String senderName, String content, int tag) {
         this.ip = ip;
         this.senderName = senderName;
