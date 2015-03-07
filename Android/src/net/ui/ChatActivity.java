@@ -262,14 +262,17 @@ public class ChatActivity extends Activity {
                         }
                     }
                 }).start();
-                break;
             case audio:
 
-                break;
             case vedio:
 
-                break;
             default:
+                ChatMsgEntity entity = new ChatMsgEntity(
+                        android.os.Build.MODEL, app.getDate(), "向对方发送了一个文件",
+                        false);
+                mDataArrays.add(entity);
+                mAdapter.notifyDataSetChanged();
+                mListView.setSelection(mListView.getCount() - 1);
                 break;
             }
 

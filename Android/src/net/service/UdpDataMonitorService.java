@@ -13,10 +13,12 @@ import net.vo.DataPacket;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -30,6 +32,7 @@ public class UdpDataMonitorService extends Service {
     Thread thread;
     boolean tag;
     NetConfApplication app;
+    Vibrator vibrator;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -39,6 +42,7 @@ public class UdpDataMonitorService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         app = (NetConfApplication) getApplication();
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         Logger.info(this.toString(), "UDPdataMonitor started");
         tag = true;
@@ -53,6 +57,54 @@ public class UdpDataMonitorService extends Service {
         thread.interrupt();
         Logger.info(this.toString(), "service stop");
         super.onDestroy();
+    }
+
+    private void dispatchMessage(String info) {
+        if (app.chatId.equals(dp.getIp())) {
+            // 发广播在交给聊天窗口处理
+            Intent intent = new Intent("net.ui.chatFrom");
+            Bundle bundle = new Bundle();
+            bundle.putString("content", info);
+            intent.putExtras(bundle);
+
+            // 发送广播
+            sendBroadcast(intent);
+
+        } else {
+            // 发送通知
+            Intent notifyIntent = new Intent("net.ui.chatting");
+            notifyIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Bundle bundle = new Bundle();
+            bundle.putString("name", dp.getSenderName());
+            bundle.putString("ip", dp.getIp());
+            notifyIntent.putExtras(bundle);
+            PendingIntent contentIntent = PendingIntent.getActivity(
+                    UdpDataMonitorService.this, R.string.app_name,
+                    notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
+                    app.getDate(), dp.getContent(), true);
+            if (app.chatTempMap.containsKey(dp.getIp())) {
+                app.chatTempMap.get(dp.getIp()).add(entity);
+            } else {
+                ArrayList<ChatMsgEntity> list = new ArrayList<ChatMsgEntity>();
+                list.add(entity);
+                app.chatTempMap.put(dp.getIp(), list);
+            }
+
+            // 显示
+            Notification notification = new NotificationCompat.Builder(
+                    UdpDataMonitorService.this).setSmallIcon(R.drawable.notify)
+                    .setTicker("新消息").setContentTitle("点击查看")
+                    .setContentText(dp.getSenderName() + "发来一条新消息")
+                    .setContentIntent(contentIntent).build();
+            notification.flags = Notification.FLAG_AUTO_CANCEL;
+            app.nManager.notify(R.id.chatName, notification);
+
+            // 让界面显示未读消息的红点
+            Intent unReadIntent = new Intent("net.ui.newMsg");
+            sendBroadcast(unReadIntent);
+        }
     }
 
     private class ReceiveInfo implements Runnable {
@@ -78,58 +130,7 @@ public class UdpDataMonitorService extends Service {
                         app.playVoice();
 
                         Logger.info(this.toString(), "service::" + app.chatId);
-                        if (app.chatId.equals(dp.getIp())) {
-                            // 发广播在交给聊天窗口处理
-                            Intent intent = new Intent("net.ui.chatFrom");
-                            Bundle bundle = new Bundle();
-                            bundle.putString("content", info);
-                            intent.putExtras(bundle);
-
-                            // 发送广播
-                            sendBroadcast(intent);
-
-                        } else {
-                            // 发送通知
-                            Intent notifyIntent = new Intent("net.ui.chatting");
-                            notifyIntent
-                                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                            Bundle bundle = new Bundle();
-                            bundle.putString("name", dp.getSenderName());
-                            bundle.putString("ip", dp.getIp());
-                            notifyIntent.putExtras(bundle);
-                            PendingIntent contentIntent = PendingIntent
-                                    .getActivity(UdpDataMonitorService.this,
-                                            R.string.app_name, notifyIntent,
-                                            PendingIntent.FLAG_UPDATE_CURRENT);
-
-                            ChatMsgEntity entity = new ChatMsgEntity(
-                                    dp.getSenderName(), app.getDate(),
-                                    dp.getContent(), true);
-                            if (app.chatTempMap.containsKey(dp.getIp())) {
-                                app.chatTempMap.get(dp.getIp()).add(entity);
-                            } else {
-                                ArrayList<ChatMsgEntity> list = new ArrayList<ChatMsgEntity>();
-                                list.add(entity);
-                                app.chatTempMap.put(dp.getIp(), list);
-                            }
-
-                            // 显示
-                            Notification notification = new NotificationCompat.Builder(
-                                    UdpDataMonitorService.this)
-                                    .setSmallIcon(R.drawable.notify)
-                                    .setTicker("新消息")
-                                    .setContentTitle("点击查看")
-                                    .setContentText(
-                                            dp.getSenderName() + "发来一条新消息")
-                                    .setContentIntent(contentIntent).build();
-                            notification.flags = Notification.FLAG_AUTO_CANCEL;
-                            app.nManager.notify(R.id.chatName, notification);
-
-                            // 让界面显示未读消息的红点
-                            Intent unReadIntent = new Intent("net.ui.newMsg");
-                            sendBroadcast(unReadIntent);
-                        }
-
+                        dispatchMessage(info);
                         break;
 
                     case NetConfApplication.refuse:
@@ -142,14 +143,17 @@ public class UdpDataMonitorService extends Service {
 
                     case NetConfApplication.filePre:
                         Logger.info(this.toString(), "file send request");
-                        // accept
+                        // 振动提示
+                        vibrator.vibrate(700);
+                        // accept file
                         new TransferFile().execute(dp);
+                        dp.setContent("向你发来了一个文件");
+                        dispatchMessage(JSON.toJSONString(dp));
                         break;
 
                     default:
                         break;
                     }
-
                 }
 
             } catch (IOException e) {
