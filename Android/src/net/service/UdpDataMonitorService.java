@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
@@ -17,7 +18,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
@@ -40,7 +40,7 @@ public class UdpDataMonitorService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         app = (NetConfApplication) getApplication();
 
-        Log.i(this.toString(), "UDPdataMonitor started");
+        Logger.info(this.toString(), "UDPdataMonitor started");
         tag = true;
         thread = new Thread(new ReceiveInfo());
         thread.start();
@@ -51,7 +51,7 @@ public class UdpDataMonitorService extends Service {
     public void onDestroy() {
         tag = false;
         thread.interrupt();
-        Log.i(this.toString(), "service stop");
+        Logger.info(this.toString(), "service stop");
         super.onDestroy();
     }
 
@@ -77,7 +77,7 @@ public class UdpDataMonitorService extends Service {
 
                         app.playVoice();
 
-                        Log.i(this.toString(), "service::" + app.chatId);
+                        Logger.info(this.toString(), "service::" + app.chatId);
                         if (app.chatId.equals(dp.getIp())) {
                             // 发广播在交给聊天窗口处理
                             Intent intent = new Intent("net.ui.chatFrom");
@@ -139,9 +139,9 @@ public class UdpDataMonitorService extends Service {
                                 .show();
                         Looper.loop();
                         break;
-                        
+
                     case NetConfApplication.filePre:
-                        Log.i(this.toString(), "file send request");
+                        Logger.info(this.toString(), "file send request");
                         // accept
                         new TransferFile().execute(dp);
                         break;
@@ -153,7 +153,7 @@ public class UdpDataMonitorService extends Service {
                 }
 
             } catch (IOException e) {
-
+                Logger.error(this.toString(), e.toString());
             }
         }
     }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.annotation.TargetApi;
@@ -21,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -79,7 +79,7 @@ public class ChatActivity extends Activity {
         targetName = bundle.getString("name");
         targetIp = bundle.getString("ip");
         app.chatId = targetIp;
-        Log.i(this.toString(), "create::" + app.chatId);
+        Logger.info(this.toString(), "create::" + app.chatId);
 
         // 设置actionBar
         initActionBar();
@@ -105,7 +105,7 @@ public class ChatActivity extends Activity {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.i(this.toString(), "touch .................");
+                Logger.info(this.toString(), "touch .................");
                 sendFile.setVisibility(View.GONE);
                 return false;
             }
@@ -189,25 +189,25 @@ public class ChatActivity extends Activity {
     protected void onPause() {
         app.chatId = "none";
         unregisterReceiver(chatReceiver);
-        Log.i(this.toString(), "onPause::" + app.chatId);
+        Logger.info(this.toString(), "onPause::" + app.chatId);
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Log.i(this.toString(), "chat stop");
+        Logger.info(this.toString(), "chat stop");
         super.onStop();
     }
 
     @Override
     protected void onResume() {
         app.chatId = targetIp;
-        Log.i(this.toString(), "resume::" + app.chatId);
+        Logger.info(this.toString(), "resume::" + app.chatId);
         registerReceiver(chatReceiver, filter);
 
         // 如果在后台有新消息来
         if (app.chatTempMap.containsKey(targetIp)) {
-            Log.i(this.toString(), "get new massage");
+            Logger.info(this.toString(), "get new massage");
             app.nManager.cancelAll();
             mDataArrays.addAll(app.chatTempMap.get(targetIp));
             app.chatTempMap.remove(targetIp);
@@ -219,7 +219,7 @@ public class ChatActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        Log.i(this.toString(), "chat:: destory");
+        Logger.info(this.toString(), "chat:: destory");
         super.onDestroy();
     }
 
@@ -240,9 +240,9 @@ public class ChatActivity extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-            Log.i(this.toString(), "uri::::" + uri.toString());
+            Logger.info(this.toString(), "uri::::" + uri.toString());
             String filePath = uri2filePath(uri, this);
-            Log.i(this.toString(), "path::::" + filePath);
+            Logger.info(this.toString(), "path::::" + filePath);
 
             final DataPacket dp = new DataPacket(app.hostIP,
                     android.os.Build.MODEL, filePath, app.filePre);

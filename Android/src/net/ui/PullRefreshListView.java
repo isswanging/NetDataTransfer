@@ -1,9 +1,9 @@
 package net.ui;
 
+import net.log.Logger;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -96,7 +96,7 @@ public class PullRefreshListView extends LinearLayout implements
             switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 yDown = event.getRawY();
-                Log.i(this.toString(), "yDown   " + String.valueOf(yDown));
+                Logger.info(this.toString(), "yDown   " + String.valueOf(yDown));
                 return false;
             case MotionEvent.ACTION_MOVE:
                 yMove = event.getRawY();

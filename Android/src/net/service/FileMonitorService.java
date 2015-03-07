@@ -10,15 +10,15 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.alibaba.fastjson.JSON;
-
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.vo.DataPacket;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.util.Log;
+
+import com.alibaba.fastjson.JSON;
 
 public class FileMonitorService extends Service {
     Thread thread;
@@ -37,7 +37,7 @@ public class FileMonitorService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         sendfile = new SendFileTask();
         app = (NetConfApplication) getApplication();
-        Log.i(this.toString(), "FileMonitorService started");
+        Logger.info(this.toString(), "FileMonitorService started");
         tag = true;
         thread = new Thread(new ReceiveInfo());
         thread.start();
@@ -48,7 +48,7 @@ public class FileMonitorService extends Service {
     public void onDestroy() {
         tag = false;
         thread.interrupt();
-        Log.i(this.toString(), "service stop");
+        Logger.info(this.toString(), "service stop");
         super.onDestroy();
     }
 
@@ -60,7 +60,7 @@ public class FileMonitorService extends Service {
                 server = new ServerSocket(app.filePort);
                 while (tag) {
                     Socket socket = server.accept();
-                    Log.i(this.toString(), "send file request");
+                    Logger.info(this.toString(), "send file request");
                     sendfile.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                             socket);
                 }
@@ -107,7 +107,7 @@ public class FileMonitorService extends Service {
                 }
 
             } catch (IOException e) {
-                Log.i(this.toString(), "IOException");
+                Logger.info(this.toString(), e.toString());
             }
 
             return null;

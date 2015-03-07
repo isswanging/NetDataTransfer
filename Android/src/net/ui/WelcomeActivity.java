@@ -1,9 +1,9 @@
 package net.ui;
 
 import java.io.File;
-import java.io.IOException;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.UdpDataMonitorService;
@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.netdatatransfer.R;
@@ -45,10 +44,10 @@ public class WelcomeActivity extends Activity {
             app.loadVoice();
             // 创建接收文件的目录
             app.saveFilePath = app.getSDPath() + "/NetDataTransfer/recFile";
-            Log.i(this.toString(), app.saveFilePath);
+            Logger.info(this.toString(), app.saveFilePath);
             File recFile = new File(app.saveFilePath);
             if (!recFile.exists()) {
-                Log.i(this.toString(), "create dir");
+                Logger.info(this.toString(), "create dir");
                 recFile.mkdirs();
             }
         }

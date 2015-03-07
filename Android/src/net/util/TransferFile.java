@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.net.Socket;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.vo.DataPacket;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 
@@ -21,7 +21,7 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
     @Override
     protected Void doInBackground(DataPacket... params) {
         try {
-            Log.i(this.toString(), "begin accept file");
+            Logger.info(this.toString(), "begin accept file");
             DataPacket dp = params[0];
             Socket socket = new Socket(dp.getIp(), NetConfApplication.filePort);
 
@@ -37,7 +37,7 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
             // 设置文件大小
             DataInputStream in = new DataInputStream(socket.getInputStream());
             long total = in.readLong();
-            Log.i(this.toString(), "size" + total);
+            Logger.info(this.toString(), "size" + total);
 
             // 接收文件
             BufferedInputStream bis = new BufferedInputStream(
@@ -52,7 +52,7 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
 
             byte[] bytes = new byte[1024];
             while ((len = bis.read(bytes)) != -1) {
-                Log.i(this.toString(), "receiveing");
+                Logger.info(this.toString(), "receiveing");
                 bos.write(bytes, 0, len);
                 bos.flush();
                 byteRead += len;
@@ -63,10 +63,10 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
             bos.close();
             bis.close();
             socket.close();
-            Log.i(this.toString(), "end file");
+            Logger.info(this.toString(), "end file");
 
         } catch (IOException e) {
-            Log.i(this.toString(), e.toString());
+            Logger.error(this.toString(), e.toString());
         }
         return null;
     }

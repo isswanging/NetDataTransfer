@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
@@ -28,7 +29,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -323,7 +323,7 @@ public class UserListActivity extends Activity {
                             R.layout.user_list_item, new String[] { "name",
                                     "ip", "img" }, new int[] { R.id.userName,
                                     R.id.userIP, R.id.unread });
-                    Log.i(this.toString(),
+                    Logger.info(this.toString(),
                             String.valueOf(act.app.hostList.size()));
                     act.isReady = true;
 
