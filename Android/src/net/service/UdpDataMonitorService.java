@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 import net.app.NetConfApplication;
+import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.app.Notification;
@@ -14,8 +15,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.example.netdatatransfer.R;
@@ -69,7 +72,7 @@ public class UdpDataMonitorService extends Service {
                     dp = JSON.parseObject(info, DataPacket.class);
 
                     switch (dp.getTag()) {
-                    
+
                     case NetConfApplication.text:
 
                         app.playVoice();
@@ -127,6 +130,20 @@ public class UdpDataMonitorService extends Service {
                             sendBroadcast(unReadIntent);
                         }
 
+                        break;
+
+                    case NetConfApplication.refuse:
+                        Looper.prepare();
+                        Toast.makeText(UdpDataMonitorService.this,
+                                dp.getIp() + "拒绝了文件传输", Toast.LENGTH_SHORT)
+                                .show();
+                        Looper.loop();
+                        break;
+                        
+                    case NetConfApplication.filePre:
+                        Log.i(this.toString(), "file send request");
+                        // accept
+                        new TransferFile().execute(dp);
                         break;
 
                     default:

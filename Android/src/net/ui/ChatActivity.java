@@ -142,8 +142,9 @@ public class ChatActivity extends Activity {
                         @Override
                         public void run() {
                             try {
-                                app.sendUdpData(new DatagramSocket(), JSON.toJSONString(dp),
-                                        targetIp, app.textPort);
+                                app.sendUdpData(new DatagramSocket(),
+                                        JSON.toJSONString(dp), targetIp,
+                                        app.textPort);
                             } catch (SocketException e) {
                                 e.printStackTrace();
                             }
@@ -224,7 +225,7 @@ public class ChatActivity extends Activity {
 
     private void showFileChooser() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
+        intent.setType("audio/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(intent, "请选择一个要发送的文件"),
@@ -239,22 +240,23 @@ public class ChatActivity extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-            Log.i(this.toString(), uri.toString());
+            Log.i(this.toString(), "uri::::" + uri.toString());
             String filePath = uri2filePath(uri, this);
-            Log.i(this.toString(), filePath);
+            Log.i(this.toString(), "path::::" + filePath);
+
+            final DataPacket dp = new DataPacket(app.hostIP,
+                    android.os.Build.MODEL, filePath, app.filePre);
 
             switch (requestCode) {
             case image:
-                //
-                final DataPacket dp = new DataPacket(app.hostIP, android.os.Build.MODEL,
-                        filePath, app.filePre);
                 new Thread(new Runnable() {
 
                     @Override
                     public void run() {
                         try {
-                            app.sendUdpData(new DatagramSocket(), JSON.toJSONString(dp),
-                                    targetIp, app.textPort);
+                            app.sendUdpData(new DatagramSocket(),
+                                    JSON.toJSONString(dp), targetIp,
+                                    app.textPort);
                         } catch (SocketException e) {
                             e.printStackTrace();
                         }
@@ -286,10 +288,10 @@ public class ChatActivity extends Activity {
             if (DocumentsContract.isDocumentUri(activity, uri)) {
                 String wholeID = DocumentsContract.getDocumentId(uri);
                 String id = wholeID.split(":")[1];
-                String[] column = { MediaStore.Images.Media.DATA };
-                String sel = MediaStore.Images.Media._ID + "=?";
+                String[] column = { MediaStore.Audio.Media.DATA };
+                String sel = MediaStore.Audio.Media._ID + "=?";
                 Cursor cursor = activity.getContentResolver().query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, column,
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, column,
                         sel, new String[] { id }, null);
                 int columnIndex = cursor.getColumnIndex(column[0]);
                 if (cursor.moveToFirst()) {

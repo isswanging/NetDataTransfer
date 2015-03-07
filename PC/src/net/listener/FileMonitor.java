@@ -42,7 +42,6 @@ public class FileMonitor implements Runnable {
 
     public class SendFile implements Runnable {
         Socket socket = null;
-        DataInputStream geter = null;
 
         public SendFile(Socket s) {
             socket = s;
@@ -53,6 +52,8 @@ public class FileMonitor implements Runnable {
             try {
                 DataOutputStream o = new DataOutputStream(
                         socket.getOutputStream());
+                DataInputStream geter = new DataInputStream(
+                        socket.getInputStream());
                 DataPacket dp = JSON.parseObject(geter.readUTF(),
                         DataPacket.class);
 
@@ -62,7 +63,7 @@ public class FileMonitor implements Runnable {
 
                     // 文件大小
                     long total = bis.available();
-
+                    logger.info("size" + total);
                     o.writeLong(total);
 
                     // 发文件
