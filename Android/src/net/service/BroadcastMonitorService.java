@@ -6,12 +6,12 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.vo.Host;
 import android.app.Service;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 
@@ -35,7 +35,7 @@ public class BroadcastMonitorService extends Service {
         lock.acquire();
 
         app = (NetConfApplication) getApplication();
-        Log.i(this.toString(), "BroadcastMonitor started");
+        Logger.info(this.toString(), "BroadcastMonitor started");
         tag = true;
         thread = new Thread(new ReceiveHost());
         thread.start();
@@ -47,7 +47,7 @@ public class BroadcastMonitorService extends Service {
         lock.release();
         tag = false;
         thread.interrupt();
-        Log.i(this.toString(), "service stop");
+        Logger.info(this.toString(), "service stop");
         super.onDestroy();
     }
 
@@ -56,26 +56,26 @@ public class BroadcastMonitorService extends Service {
         @Override
         public void run() {
             try {
-                Log.i(this.toString(), "start a service");
+                Logger.info(this.toString(), "start a service");
                 broadPacket = new DatagramPacket(new byte[512], 512);
                 broadSocket = new MulticastSocket(app.broadcastPort);
                 broadSocket.joinGroup(InetAddress.getByName(app.broadcastIP));
                 while (tag) {
                     // 收到广播
                     broadSocket.receive(broadPacket);
-                    Log.i(this.toString(), "receive a broadcast");
+                    Logger.info(this.toString(), "receive a broadcast");
                     // 整理信息
                     String info = new String(broadPacket.getData(), 0,
                             broadPacket.getLength());
                     Host host = JSON.parseObject(info, Host.class);
                     host.setState(0);
-                    Log.i(this.toString(), "host: " + host.getHostName());
+                    Logger.info(this.toString(), "host: " + host.getHostName());
 
-                    Log.i(this.toString(), "receive a host");
+                    Logger.info(this.toString(), "receive a host");
                     if (!app.containHost(host)) {
                         host.setState(1);
                         app.addHost(host);
-                        Log.i(this.toString(), "add a host");
+                        Logger.info(this.toString(), "add a host");
 
                         // 回应广播, 发送本机信息去目标地址
                         if (host.getTag() == 0) {
@@ -94,6 +94,7 @@ public class BroadcastMonitorService extends Service {
                     }
                 }
             } catch (IOException e) {
+                Logger.error(this.toString(), e.toString());
             }
 
         }

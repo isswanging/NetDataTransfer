@@ -2,6 +2,7 @@ package net.ui;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.app.NetConfApplication;
+import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
@@ -27,7 +29,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
@@ -61,6 +63,12 @@ public class UserListActivity extends Activity {
 
     private Handler handler = new ListHandler(this);
     private NetConfApplication app;
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        setOverflowIconVisible(featureId, menu);
+        return super.onMenuOpened(featureId, menu);
+    }
 
     // 按两次退出的计时
     private long exitTime = 0;
@@ -141,6 +149,7 @@ public class UserListActivity extends Activity {
         super.onDestroy();
     }
 
+    // 在物理菜单键存在时仍然显示溢出菜单
     private void forceShowOverflowMenu() {
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
@@ -155,6 +164,21 @@ public class UserListActivity extends Activity {
         }
     }
 
+    // 利用反射让隐藏在Overflow中的MenuItem显示Icon图标
+    private void setOverflowIconVisible(int featureId, Menu menu) {
+        if (featureId == Window.FEATURE_ACTION_BAR && menu != null) {
+            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
+                try {
+                    Method m = menu.getClass().getDeclaredMethod(
+                            "setOptionalIconsVisible", Boolean.TYPE);
+                    m.setAccessible(true);
+                    m.invoke(menu, true);
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
+
     private void login() {
 
         // 广播登录信息
@@ -164,12 +188,11 @@ public class UserListActivity extends Activity {
             public void run() {
                 try {
                     String userName = android.os.Build.MODEL;// 获取用户名
-                    String hostName = "Android";// 获取主机名
                     String userDomain = "Android";// 获取计算机域
 
                     // 加入在线列表
                     Host host = new Host(userName, userDomain, app.hostIP,
-                            hostName, 1, 0);
+                            app.hostName, 1, 0);
                     app.addHost(host);
 
                     app.sendUdpData(new DatagramSocket(),
@@ -266,7 +289,7 @@ public class UserListActivity extends Activity {
             if (app.chatTempMap.containsKey(host.getIp())) {
                 item.put("img", R.drawable.unread);
             } else {
-                item.put("img", null);
+                item.put("img", 0);
             }
 
             userList.add(item);
@@ -300,7 +323,7 @@ public class UserListActivity extends Activity {
                             R.layout.user_list_item, new String[] { "name",
                                     "ip", "img" }, new int[] { R.id.userName,
                                     R.id.userIP, R.id.unread });
-                    Log.i(this.toString(),
+                    Logger.info(this.toString(),
                             String.valueOf(act.app.hostList.size()));
                     act.isReady = true;
 

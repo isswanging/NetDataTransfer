@@ -1,5 +1,6 @@
 package net.app;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -24,6 +25,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 
 import com.example.netdatatransfer.R;
 
@@ -34,16 +36,13 @@ public class NetConfApplication extends Application {
     public NotificationManager nManager;
 
     // 发送普通信息端口
-    public final int textPort = 2324;
+    public final static int textPort = 2324;
 
     // 发送文件端口
-    public final int filePort = 2324;
+    public final static int filePort = 2324;
 
-    // 发送文件夹端口
-    public final int folderPort = 2325;
-
-    // 发送文件路径端口
-    public final int pathPort = 2326;
+    // 广播端口
+    public final static int broadcastPort = 2325;
 
     // 系统信息标识
     public final String SUCCESS = "success";
@@ -55,16 +54,11 @@ public class NetConfApplication extends Application {
     // 广播IP
     public final String broadcastIP = "224.0.0.1";
 
-    // 广播端口
-    public final int broadcastPort = 2325;
-
     // 信号
     public static final int text = 0;
     public static final int filePre = 1;
     public static final int fileConf = 2;
     public static final int refuse = 3;
-    public static final int folderPre = 4;
-    public static final int folderConf = 5;
     public static final int end = 6;
 
     public int getText() {
@@ -77,17 +71,12 @@ public class NetConfApplication extends Application {
     // 在线主机列表
     public Vector<Host> hostList = new Vector<Host>();
 
-    // 本机ip
-    public String hostIP = "";
+    public static String hostIP = "";
+    public static String hostName = "Android";
+    public static String saveFilePath = "";
 
     // 传输文件夹任务列表
     public HashMap<String, ArrayList<String>> taskList = new HashMap<String, ArrayList<String>>();
-
-    // 传输文件夹时记录的文件路径
-    public HashMap<String, String> sendPathList = new HashMap<String, String>();
-
-    // 传输文件夹时记录的文件路径
-    public HashMap<String, String> savePathList = new HashMap<String, String>();
 
     // 记录进度
     public ConcurrentHashMap<String, Long> progress = new ConcurrentHashMap<String, Long>();
@@ -110,8 +99,6 @@ public class NetConfApplication extends Application {
             try {
                 new DatagramSocket(textPort).close();
                 new ServerSocket(filePort).close();
-                new ServerSocket(folderPort).close();
-                new ServerSocket(pathPort).close();
 
                 return SUCCESS;
             } catch (SocketException e) {
@@ -211,5 +198,16 @@ public class NetConfApplication extends Application {
     public void playVoice() {
         // 播放消息提示音乐
         soundPool.play(1, 1, 1, 0, 0, 1);
+    }
+
+    // 获取sd卡路径
+    public String getSDPath() {
+        File sdDir = null;
+        boolean sdCardExist = Environment.getExternalStorageState().equals(
+                android.os.Environment.MEDIA_MOUNTED); // 判断sd卡是否存在
+        if (sdCardExist) {
+            sdDir = Environment.getExternalStorageDirectory();
+        }
+        return sdDir.toString();
     }
 }

@@ -9,6 +9,8 @@ import javax.swing.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.alibaba.fastjson.JSON;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -25,7 +27,7 @@ public class TransferFile implements Runnable {
     DataPacket dp = null;
     String savePath = "";
     String fileName = "";
-    
+
     private final Log logger = LogFactory.getLog(this.getClass());
 
     public TransferFile(String path, String name, DataPacket data) {
@@ -69,10 +71,10 @@ public class TransferFile implements Runnable {
 
             // 发送TCP消息建立文件传输连接
             socket = new Socket(dp.getIp(), SystemConf.filePort);
-            ObjectOutputStream toServer = new ObjectOutputStream(
+            DataOutputStream toServer = new DataOutputStream(
                     socket.getOutputStream());
-            toServer.writeObject(new DataPacket(ip, hostName, dp.getContent(),
-                    SystemConf.fileConf));
+            toServer.writeUTF(JSON.toJSONString(new DataPacket(ip, hostName, dp
+                    .getContent(), SystemConf.fileConf)));
 
             // 设置文件大小
             DataInputStream in = new DataInputStream(socket.getInputStream());
