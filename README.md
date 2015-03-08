@@ -7,8 +7,11 @@ NetDataTransfer
 UDP主要传输文字聊天
 TCP主要传输文件或文件夹
 
+新增了android版本可与PC端互通，支持用户列表刷新，聊天，传文件功能，暂不支持传送文件夹
+
 目前主要功能完成。
 
-![image](https://github.com/isswanging/NetDataTransfer/blob/master/img-folder/%E7%95%8C%E9%9D%A2.png)
+![image](https://github.com/isswanging/NetDataTransfer/blob/dev/img-folder/PC%E7%95%8C%E9%9D%A2.png)
+![image](https://github.com/isswanging/NetDataTransfer/blob/dev/img-folder/android%E7%95%8C%E9%9D%A2.png)
 
 -----------------------------
