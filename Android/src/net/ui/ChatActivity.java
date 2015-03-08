@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Images.Media;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,6 +31,7 @@ import android.view.View.OnTouchListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +52,7 @@ public class ChatActivity extends Activity {
 
     ChatReceiver chatReceiver;
     IntentFilter filter;
-    TextView sendFile;
+    LinearLayout sendFile;
 
     NetConfApplication app;
 
@@ -93,8 +95,14 @@ public class ChatActivity extends Activity {
         send.setOnClickListener(clickListener);
         ImageView more = (ImageView) findViewById(R.id.sendMore);
         more.setOnClickListener(clickListener);
-        sendFile = (TextView) findViewById(R.id.sendFile);
-        sendFile.setOnClickListener(clickListener);
+        sendFile = (LinearLayout) findViewById(R.id.sendFile);
+
+        TextView sendImg = (TextView) findViewById(R.id.sendImg);
+        TextView sendVideo = (TextView) findViewById(R.id.sendVideo);
+        TextView sendAudio = (TextView) findViewById(R.id.sendAudio);
+        sendImg.setOnClickListener(clickListener);
+        sendVideo.setOnClickListener(clickListener);
+        sendAudio.setOnClickListener(clickListener);
 
         // 注册广播接收者
         chatReceiver = new ChatReceiver();
@@ -157,9 +165,19 @@ public class ChatActivity extends Activity {
                 sendFile.setVisibility(View.VISIBLE);
                 break;
 
-            case R.id.sendFile:
+            case R.id.sendImg:
                 sendFile.setVisibility(View.GONE);
-                showFileChooser();
+                showFileChooser("image/*", image);
+                break;
+
+            case R.id.sendVideo:
+                sendFile.setVisibility(View.GONE);
+                showFileChooser("vedio/*", vedio);
+                break;
+
+            case R.id.sendAudio:
+                sendFile.setVisibility(View.GONE);
+                showFileChooser("audio/*", audio);
                 break;
 
             default:
@@ -223,13 +241,14 @@ public class ChatActivity extends Activity {
         super.onDestroy();
     }
 
-    private void showFileChooser() {
+    private void showFileChooser(String type, int code) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/*");
+        intent.setType(type);
+        // intent.setType("audio/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
             startActivityForResult(Intent.createChooser(intent, "请选择一个要发送的文件"),
-                    image);
+                    code);
         } catch (android.content.ActivityNotFoundException ex) {
             // Potentially direct the user to the Market with a Dialog
             Toast.makeText(this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
@@ -238,51 +257,60 @@ public class ChatActivity extends Activity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        String filePath = null;
+
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-            Logger.info(this.toString(), "uri::::" + uri.toString());
-            String filePath = uri2filePath(uri, this);
-            Logger.info(this.toString(), "path::::" + filePath);
-
-            final DataPacket dp = new DataPacket(app.hostIP,
-                    android.os.Build.MODEL, filePath, app.filePre);
 
             switch (requestCode) {
             case image:
-                new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            app.sendUdpData(new DatagramSocket(),
-                                    JSON.toJSONString(dp), targetIp,
-                                    app.textPort);
-                        } catch (SocketException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-            case audio:
-
             case vedio:
+                Logger.info(this.toString(), "image uri::::" + uri.toString());
+                filePath = uri2filePath(uri, images, imageID, imageUri, this);
+                Logger.info(this.toString(), "path::::" + filePath);
+                sendnotifyMsg(filePath);
+                break;
+
+            case audio:
+                Logger.info(this.toString(), "audio uri::::" + uri.toString());
+                filePath = uri2filePath(uri, audios, audioID, audioUri, this);
+                Logger.info(this.toString(), "path::::" + filePath);
+                sendnotifyMsg(filePath);
+                break;
 
             default:
-                ChatMsgEntity entity = new ChatMsgEntity(
-                        android.os.Build.MODEL, app.getDate(), "向对方发送了一个文件",
-                        false);
-                mDataArrays.add(entity);
-                mAdapter.notifyDataSetChanged();
-                mListView.setSelection(mListView.getCount() - 1);
                 break;
             }
-
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    public void sendnotifyMsg(String filePath) {
+        final DataPacket dp = new DataPacket(app.hostIP,
+                android.os.Build.MODEL, filePath, app.filePre);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    app.sendUdpData(new DatagramSocket(),
+                            JSON.toJSONString(dp), targetIp, app.textPort);
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        ChatMsgEntity entity = new ChatMsgEntity(android.os.Build.MODEL,
+                app.getDate(), "向对方发送了一个文件", false);
+        mDataArrays.add(entity);
+        mAdapter.notifyDataSetChanged();
+        mListView.setSelection(mListView.getCount() - 1);
+    }
+
     // 根据uri获取文件路径
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public String uri2filePath(Uri uri, Activity activity) {
+    public String uri2filePath(Uri uri, String type, String tId, Uri tUri,
+            Activity activity) {
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
         // android4.4以上适用
@@ -291,22 +319,20 @@ public class ChatActivity extends Activity {
             if (DocumentsContract.isDocumentUri(activity, uri)) {
                 String wholeID = DocumentsContract.getDocumentId(uri);
                 String id = wholeID.split(":")[1];
-                String[] column = { MediaStore.Audio.Media.DATA };
-                String sel = MediaStore.Audio.Media._ID + "=?";
-                Cursor cursor = activity.getContentResolver().query(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, column,
-                        sel, new String[] { id }, null);
+                String[] column = { type };
+                String sel = tId + "=?";
+                Cursor cursor = activity.getContentResolver().query(tUri,
+                        column, sel, new String[] { id }, null);
                 int columnIndex = cursor.getColumnIndex(column[0]);
                 if (cursor.moveToFirst()) {
                     path = cursor.getString(columnIndex);
                 }
                 cursor.close();
             } else {
-                String[] projection = { MediaStore.Images.Media.DATA };
+                String[] projection = { type };
                 Cursor cursor = activity.getContentResolver().query(uri,
                         projection, null, null, null);
-                int column_index = cursor
-                        .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                int column_index = cursor.getColumnIndexOrThrow(type);
                 cursor.moveToFirst();
                 path = cursor.getString(column_index);
 
@@ -316,12 +342,11 @@ public class ChatActivity extends Activity {
         }
         // android 4.4以下适用
         else {
-            String[] proj = { MediaStore.Images.Media.DATA };
+            String[] proj = { type };
             // 好像是android多媒体数据库的封装接口，具体的看Android文档
             Cursor cursor = managedQuery(uri, proj, null, null, null);
             // 按我个人理解 这个是获得用户选择的图片的索引值
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            int column_index = cursor.getColumnIndexOrThrow(type);
             // 将光标移至开头 ，这个很重要，不小心很容易引起越界
             cursor.moveToFirst();
             // 最后根据索引值获取图片路径
@@ -334,5 +359,11 @@ public class ChatActivity extends Activity {
     private final int image = 997;
     private final int vedio = 998;
     private final int audio = 999;
+    private final String images = MediaStore.Images.Media.DATA;
+    private final String audios = MediaStore.Audio.Media.DATA;
+    private final String imageID = MediaStore.Images.Media._ID;
+    private final String audioID = MediaStore.Audio.Media._ID;
+    private final Uri imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    private final Uri audioUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
 }

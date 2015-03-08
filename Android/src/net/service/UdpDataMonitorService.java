@@ -146,9 +146,14 @@ public class UdpDataMonitorService extends Service {
                         // 振动提示
                         vibrator.vibrate(700);
                         // accept file
-                        new TransferFile().execute(dp);
-                        dp.setContent("向你发来了一个文件");
-                        dispatchMessage(JSON.toJSONString(dp));
+                        new TransferFile(UdpDataMonitorService.this)
+                                .execute(dp);
+                        DataPacket dpClone = new DataPacket();
+                        dpClone.setContent("向你发来了一个文件");
+                        dpClone.setIp(dp.getIp());
+                        dpClone.setSenderName(dp.getSenderName());
+                        dpClone.setTag(dp.getTag());
+                        dispatchMessage(JSON.toJSONString(dpClone));
                         break;
 
                     default:

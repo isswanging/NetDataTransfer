@@ -12,11 +12,19 @@ import java.net.Socket;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 
 public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
+    Context context;
+    String fileName;
+
+    public TransferFile(Context c) {
+        context = c;
+    }
 
     @Override
     protected Void doInBackground(DataPacket... params) {
@@ -48,14 +56,14 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
 
             // 设置进度条和读文件
             int len;
-            long byteRead = 0;
+            // long byteRead = 0;
 
             byte[] bytes = new byte[1024];
             while ((len = bis.read(bytes)) != -1) {
                 Logger.info(this.toString(), "receiveing");
                 bos.write(bytes, 0, len);
                 bos.flush();
-                byteRead += len;
+                //byteRead += len;
             }
 
             in.close();
@@ -71,10 +79,17 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
         return null;
     }
 
+    @Override
+    protected void onPostExecute(Void result) {
+        Toast.makeText(context, "文件 " + fileName + " 接收完毕", Toast.LENGTH_LONG)
+                .show();
+    }
+
     public String getFileSavePath(String path) {
 
         // 获取文件名
         String[] s = path.replaceAll("\\\\", "/").split("/");
+        fileName = s[s.length - 1];
         // 文件分隔符
         String fs = System.getProperties().getProperty("file.separator");
         // 保存文件路径

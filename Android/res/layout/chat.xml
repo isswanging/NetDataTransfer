@@ -64,17 +64,52 @@
         </ListView>
     </RelativeLayout>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/sendFile"
-        android:layout_width="60dp"
-        android:layout_height="27dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="45dp"
         android:layout_marginRight="5dp"
-        android:background="#FFFFFF"
-        android:gravity="center"
-        android:text="传文件"
-        android:textSize="17dp"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/sendImg"
+            android:layout_width="60dp"
+            android:layout_height="27dp"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="传图片"
+            android:textSize="17dp" />
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="1dp"
+            android:background="#9D9D9D" />
+
+        <TextView
+            android:id="@+id/sendVideo"
+            android:layout_width="60dp"
+            android:layout_height="27dp"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="传视频"
+            android:textSize="17dp" />
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="1dp"
+            android:background="#9D9D9D" />
+
+        <TextView
+            android:id="@+id/sendAudio"
+            android:layout_width="60dp"
+            android:layout_height="27dp"
+            android:background="#FFFFFF"
+            android:gravity="center"
+            android:text="传音乐"
+            android:textSize="17dp" />
+    </LinearLayout>
 
 </FrameLayout>
