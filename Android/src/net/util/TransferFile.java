@@ -12,25 +12,30 @@ import java.net.Socket;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
+import net.vo.GetTask;
+import android.app.Service;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 
-public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
+public class TransferFile extends AsyncTask<GetTask, Void, Void> {
     Context context;
     String fileName;
+    NetConfApplication app;
 
-    public TransferFile(Context c) {
+    public TransferFile(Service c) {
         context = c;
+        app = (NetConfApplication) c.getApplication();
     }
 
     @Override
-    protected Void doInBackground(DataPacket... params) {
+    protected Void doInBackground(GetTask... params) {
         try {
             Logger.info(this.toString(), "begin accept file");
-            DataPacket dp = params[0];
+            DataPacket dp = params[0].getDp();
+            int taskId = params[0].getTaskId();
             Socket socket = new Socket(dp.getIp(), NetConfApplication.filePort);
 
             String hostName = NetConfApplication.hostName;// 获取主机名
@@ -56,14 +61,15 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
 
             // 设置进度条和读文件
             int len;
-            // long byteRead = 0;
+            long byteRead = 0;
 
             byte[] bytes = new byte[1024];
             while ((len = bis.read(bytes)) != -1) {
                 Logger.info(this.toString(), "receiveing");
                 bos.write(bytes, 0, len);
                 bos.flush();
-                //byteRead += len;
+                byteRead += len;
+                app.taskList.put(taskId, (int) (byteRead * 100 / total));
             }
 
             in.close();
@@ -86,7 +92,6 @@ public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
     }
 
     public String getFileSavePath(String path) {
-
         // 获取文件名
         String[] s = path.replaceAll("\\\\", "/").split("/");
         fileName = s[s.length - 1];

@@ -3,6 +3,24 @@
     tools:context="com.example.netdatatransfer.MainActivity" >
 
     <item
+        android:id="@+id/getProgress"
+        android:icon="@drawable/get"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/get_progress"/>
+    <item
+        android:id="@+id/sendProgress"
+        android:icon="@drawable/send"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/send_progress"/>
+    <item
+        android:id="@+id/openFolder"
+        android:icon="@drawable/open"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/open_folder"/>
+    <item
         android:id="@+id/exit"
         android:icon="@drawable/close"
         android:orderInCategory="100"

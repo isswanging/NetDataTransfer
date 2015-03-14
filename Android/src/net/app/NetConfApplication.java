@@ -75,11 +75,11 @@ public class NetConfApplication extends Application {
     public static String hostName = "Android";
     public static String saveFilePath = "";
 
+    
+    // 文件传送的任务id
+    public static int taskId = 0;
     // 传输文件夹任务列表
-    public HashMap<String, ArrayList<String>> taskList = new HashMap<String, ArrayList<String>>();
-
-    // 记录进度
-    public ConcurrentHashMap<String, Long> progress = new ConcurrentHashMap<String, Long>();
+    public static HashMap<Integer, Integer> taskList = new HashMap<Integer, Integer>();
 
     // 记录聊天内容
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();

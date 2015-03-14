@@ -13,6 +13,7 @@ import java.net.Socket;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
+import net.vo.SendTask;
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -25,7 +26,6 @@ public class FileMonitorService extends Service {
     boolean tag;
     NetConfApplication app;
     ServerSocket server = null;
-    SendFileTask sendfile;
     DataInputStream geter;
 
     @Override
@@ -35,7 +35,6 @@ public class FileMonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        sendfile = new SendFileTask();
         app = (NetConfApplication) getApplication();
         Logger.info(this.toString(), "FileMonitorService started");
         tag = true;
@@ -61,8 +60,10 @@ public class FileMonitorService extends Service {
                 while (tag) {
                     Socket socket = server.accept();
                     Logger.info(this.toString(), "send file request");
-                    sendfile.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                            socket);
+
+                    new SendFileTask().executeOnExecutor(
+                            AsyncTask.THREAD_POOL_EXECUTOR, new SendTask(
+                                    app.taskId++, socket));
                 }
 
             } catch (IOException e) {
@@ -73,12 +74,13 @@ public class FileMonitorService extends Service {
 
     }
 
-    class SendFileTask extends AsyncTask<Socket, Integer, Void> {
+    class SendFileTask extends AsyncTask<SendTask, Integer, Void> {
 
         @Override
-        protected Void doInBackground(Socket... params) {
+        protected Void doInBackground(SendTask... params) {
             try {
-                Socket s = params[0];
+                Socket s = params[0].getSocket();
+                int taskId = params[0].getTaskId();
                 geter = new DataInputStream(s.getInputStream());
                 DataPacket dp = JSON.parseObject(geter.readUTF(),
                         DataPacket.class);
@@ -89,6 +91,7 @@ public class FileMonitorService extends Service {
 
                     // 文件大小
                     long total = bis.available();
+                    long byteRead = 0;
                     DataOutputStream o = new DataOutputStream(
                             s.getOutputStream());
                     o.writeLong(total);
@@ -101,6 +104,10 @@ public class FileMonitorService extends Service {
                     while ((len = bis.read(bytes)) != -1) {
                         bos.write(bytes, 0, len);
                         bos.flush();
+                        byteRead += len;
+                        app.taskList
+                                .put(taskId, (int) (byteRead * 100 / total));
+
                     }
                     bis.close();
                     bos.close();
