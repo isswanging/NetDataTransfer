@@ -27,7 +27,7 @@ public class FileListActivity extends Activity {
         setContentView(R.layout.file_list);
         initActionBar();
         TextView t = (TextView) findViewById(R.id.filePath);
-        t.setText("文件根目录：" + NetConfApplication.saveFilePath);
+        t.setText("所在目录：" + NetConfApplication.saveFilePath);
 
         ListView fileList = (ListView) findViewById(R.id.fileList);
         SimpleAdapter adapter = new SimpleAdapter(this, getData(),
@@ -60,7 +60,7 @@ public class FileListActivity extends Activity {
                 R.layout.common_title, null);
         title.setDisplayShowCustomEnabled(true);
         title.setCustomView(actionbarLayout);
-        ((TextView) findViewById(R.id.titleName)).setText(" 文件列表");
+        ((TextView) findViewById(R.id.titleName)).setText("文件列表");
 
         ImageButton back = (ImageButton) findViewById(R.id.back);
         back.setOnClickListener(new OnClickListener() {

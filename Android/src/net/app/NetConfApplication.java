@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.vo.ChatMsgEntity;
 import net.vo.Host;
+import net.vo.Progress;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -75,11 +75,11 @@ public class NetConfApplication extends Application {
     public static String hostName = "Android";
     public static String saveFilePath = "";
 
-    
     // 文件传送的任务id
     public static int taskId = 0;
-    // 传输文件夹任务列表
-    public static HashMap<Integer, Integer> taskList = new HashMap<Integer, Integer>();
+    // 传输文件任务列表
+    public static HashMap<Integer, Progress> sendTaskList = new HashMap<Integer, Progress>();
+    public static HashMap<Integer, Progress> getTaskList = new HashMap<Integer, Progress>();
 
     // 记录聊天内容
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();

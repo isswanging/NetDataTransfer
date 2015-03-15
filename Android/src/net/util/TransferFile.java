@@ -13,6 +13,7 @@ import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
 import net.vo.GetTask;
+import net.vo.Progress;
 import android.app.Service;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -32,10 +33,11 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
 
     @Override
     protected Void doInBackground(GetTask... params) {
+
+        Logger.info(this.toString(), "begin accept file");
+        DataPacket dp = params[0].getDp();
+        int taskId = params[0].getTaskId();
         try {
-            Logger.info(this.toString(), "begin accept file");
-            DataPacket dp = params[0].getDp();
-            int taskId = params[0].getTaskId();
             Socket socket = new Socket(dp.getIp(), NetConfApplication.filePort);
 
             String hostName = NetConfApplication.hostName;// 获取主机名
@@ -52,7 +54,6 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
             long total = in.readLong();
             Logger.info(this.toString(), "size" + total);
 
-            // 接收文件
             BufferedInputStream bis = new BufferedInputStream(
                     socket.getInputStream());
             BufferedOutputStream bos = new BufferedOutputStream(
@@ -65,11 +66,17 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
 
             byte[] bytes = new byte[1024];
             while ((len = bis.read(bytes)) != -1) {
-                Logger.info(this.toString(), "receiveing");
+                // Logger.info(this.toString(), "receiveing");
                 bos.write(bytes, 0, len);
                 bos.flush();
                 byteRead += len;
-                app.taskList.put(taskId, (int) (byteRead * 100 / total));
+                if (app.sendTaskList.containsKey(taskId)) {
+                    app.sendTaskList.get(taskId).setNum(
+                            (int) (byteRead * 100 / total));
+                } else {
+                    app.sendTaskList.put(taskId, new Progress(fileName,
+                            (int) (byteRead * 100 / total)));
+                }
             }
 
             in.close();
@@ -78,8 +85,10 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
             bis.close();
             socket.close();
             Logger.info(this.toString(), "end file");
+            app.sendTaskList.remove(taskId);
 
         } catch (IOException e) {
+            app.sendTaskList.remove(taskId);
             Logger.error(this.toString(), e.toString());
         }
         return null;

@@ -1,6 +1,5 @@
 package net.ui;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,7 +25,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -129,12 +127,27 @@ public class UserListActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int send = 0;
+        int get = 1;
+
         switch (item.getItemId()) {
         case R.id.exit:
             finish();
             break;
         case R.id.openFolder:
             startActivity(new Intent(this, FileListActivity.class));
+            break;
+
+        case R.id.sendProgress:
+            Intent intentSend = new Intent(this, ProgressBarListActivity.class);
+            intentSend.setFlags(send);
+            startActivity(intentSend);
+            break;
+
+        case R.id.getProgress:
+            Intent intentGet = new Intent(this, ProgressBarListActivity.class);
+            intentGet.setFlags(send);
+            startActivity(intentGet);
             break;
         default:
             break;

@@ -13,6 +13,7 @@ import java.net.Socket;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
+import net.vo.Progress;
 import net.vo.SendTask;
 import android.app.Service;
 import android.content.Intent;
@@ -78,9 +79,10 @@ public class FileMonitorService extends Service {
 
         @Override
         protected Void doInBackground(SendTask... params) {
+
+            Socket s = params[0].getSocket();
+            int taskId = params[0].getTaskId();
             try {
-                Socket s = params[0].getSocket();
-                int taskId = params[0].getTaskId();
                 geter = new DataInputStream(s.getInputStream());
                 DataPacket dp = JSON.parseObject(geter.readUTF(),
                         DataPacket.class);
@@ -89,6 +91,10 @@ public class FileMonitorService extends Service {
                     BufferedInputStream bis = new BufferedInputStream(
                             new FileInputStream(new File(dp.getContent())));
 
+                    String[] sn = dp.getContent().replaceAll("\\\\", "/")
+                            .split("/");
+                    String fileName = sn[sn.length - 1];
+
                     // 文件大小
                     long total = bis.available();
                     long byteRead = 0;
@@ -96,7 +102,6 @@ public class FileMonitorService extends Service {
                             s.getOutputStream());
                     o.writeLong(total);
 
-                    // 发文件
                     BufferedOutputStream bos = new BufferedOutputStream(
                             s.getOutputStream());
                     int len;
@@ -105,15 +110,22 @@ public class FileMonitorService extends Service {
                         bos.write(bytes, 0, len);
                         bos.flush();
                         byteRead += len;
-                        app.taskList
-                                .put(taskId, (int) (byteRead * 100 / total));
 
+                        if (app.getTaskList.containsKey(taskId)) {
+                            app.getTaskList.get(taskId).setNum(
+                                    (int) (byteRead * 100 / total));
+                        } else {
+                            app.getTaskList.put(taskId, new Progress(fileName,
+                                    (int) (byteRead * 100 / total)));
+                        }
                     }
                     bis.close();
                     bos.close();
+                    app.getTaskList.remove(taskId);
                 }
 
             } catch (IOException e) {
+                app.getTaskList.remove(taskId);
                 Logger.info(this.toString(), e.toString());
             }
 
