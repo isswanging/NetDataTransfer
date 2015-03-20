@@ -17,9 +17,15 @@ import net.vo.Progress;
 import android.app.Service;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.example.netdatatransfer.R;
 
 public class TransferFile extends AsyncTask<GetTask, Void, Void> {
     Context context;
@@ -96,8 +102,17 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
 
     @Override
     protected void onPostExecute(Void result) {
-        Toast.makeText(context, "文件 " + fileName + " 接收完毕", Toast.LENGTH_LONG)
-                .show();
+        Logger.info(this.toString(), "toast notify");
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.custom_toast, null);
+        TextView title = (TextView) layout.findViewById(R.id.toastInfo);
+        title.setText("文件 " + fileName + " 接收完毕");
+        Toast toast = new Toast(context);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 100);
+        toast.setView(layout);
+        toast.show();
     }
 
     public String getFileSavePath(String path) {
