@@ -111,17 +111,12 @@ public class FileMonitorService extends Service {
                         bos.flush();
                         byteRead += len;
 
-                        if (app.getTaskList.containsKey(taskId)) {
-                            app.getTaskList.get(taskId).setNum(
-                                    (int) (byteRead * 100 / total));
-                        } else {
-                            app.getTaskList.put(taskId, new Progress(fileName,
-                                    (int) (byteRead * 100 / total)));
-                        }
+                        app.sendTaskList.put(taskId, new Progress(fileName,
+                                (int) (byteRead * 100 / total)));
                     }
                     bis.close();
                     bos.close();
-                    app.getTaskList.remove(taskId);
+                    app.sendTaskList.remove(taskId);
                 }
 
             } catch (IOException e) {

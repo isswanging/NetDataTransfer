@@ -26,6 +26,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.util.SparseArray;
 
 import com.example.netdatatransfer.R;
 
@@ -78,8 +79,8 @@ public class NetConfApplication extends Application {
     // 文件传送的任务id
     public static int taskId = 0;
     // 传输文件任务列表
-    public static HashMap<Integer, Progress> sendTaskList = new HashMap<Integer, Progress>();
-    public static HashMap<Integer, Progress> getTaskList = new HashMap<Integer, Progress>();
+    public static SparseArray<Progress> sendTaskList = new SparseArray<Progress>();
+    public static SparseArray<Progress> getTaskList = new SparseArray<Progress>();
 
     // 记录聊天内容
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();

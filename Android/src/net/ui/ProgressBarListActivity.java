@@ -1,9 +1,6 @@
 package net.ui;
 
 import java.util.ArrayList;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
@@ -13,7 +10,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,10 +32,6 @@ public class ProgressBarListActivity extends Activity {
     private ArrayList<Progress> data = new ArrayList<Progress>();
     ProgressAdapter adapter;
 
-    // 定时刷新进度条
-    private ScheduledThreadPoolExecutor se = new ScheduledThreadPoolExecutor(1);
-    private ScheduledFuture<?> sf;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         tag = getIntent().getFlags();
@@ -51,46 +44,34 @@ public class ProgressBarListActivity extends Activity {
         listView.setAdapter(adapter);
 
         // 启动刷新任务
-        refresh();
+        updateHandler.postDelayed(running, 500);
 
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onDestroy() {
-        sf.cancel(true);
+        updateHandler.removeCallbacks(running);
         super.onDestroy();
-    }
-
-    private void refresh() {
-        sf = se.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                initData();
-                try {
-                    Message msg = updateHandler.obtainMessage();
-                    msg.what = refresh;
-                    msg.sendToTarget();
-                    Logger.info(this.toString(), "refreshig......");
-                } catch (Exception e) {
-                    Logger.error(this.toString(), "refreshig error");
-                }
-            }
-        }, 100, 500, TimeUnit.MILLISECONDS);
     }
 
     private void initData() {
         data.clear();
-        if (tag == send) {
-            for (Progress p : NetConfApplication.sendTaskList.values()) {
-                data.add(p);
-            }
-        } else if (tag == get) {
-            for (Progress p : NetConfApplication.sendTaskList.values()) {
-                data.add(p);
+        if (tag == send)
+            initData(NetConfApplication.sendTaskList);
+        else if (tag == get)
+            initData(NetConfApplication.getTaskList);
+    }
+
+    private void initData(SparseArray<Progress> sa) {
+        int key;
+        for (int i = 0, nsize = sa.size(); i < nsize; i++) {
+            key = sa.keyAt(i);
+            if (key != -1) {
+                data.add(sa.get(key));
             }
         }
+        Logger.info(this.toString(), "data size" + data.size());
     }
 
     private void initActionBar() {
@@ -109,7 +90,7 @@ public class ProgressBarListActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                sf.cancel(true);
+                updateHandler.removeCallbacks(running);
                 finish();
             }
         });
@@ -161,7 +142,6 @@ public class ProgressBarListActivity extends Activity {
                 v = (ViewHolder) convertView.getTag();
             }
 
-            Logger.info(this.toString(), "bbbbbbbbbbbbbbb");
             // 显示进度
             v.fileName.setText(p.getName());
             v.progerss.setProgress(p.getNum());
@@ -169,18 +149,20 @@ public class ProgressBarListActivity extends Activity {
         }
     }
 
-    Handler updateHandler = new Handler() {
+    Handler updateHandler = new Handler();
+
+    Runnable running = new Runnable() {
 
         @Override
-        public void handleMessage(Message msg) {
-
-            if (msg.what == refresh) {
+        public void run() {
+            try {
+                initData();
                 adapter.notifyDataSetChanged();
+                updateHandler.postDelayed(this, 500);
+            } catch (Exception e) {
+                updateHandler.removeCallbacks(running);
             }
-
-            super.handleMessage(msg);
         }
-
     };
 
 }

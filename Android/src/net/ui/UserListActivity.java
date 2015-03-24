@@ -146,7 +146,7 @@ public class UserListActivity extends Activity {
 
         case R.id.getProgress:
             Intent intentGet = new Intent(this, ProgressBarListActivity.class);
-            intentGet.setFlags(send);
+            intentGet.setFlags(get);
             startActivity(intentGet);
             break;
         default:

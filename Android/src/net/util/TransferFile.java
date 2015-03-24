@@ -20,7 +20,6 @@ import android.os.AsyncTask;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,13 +75,8 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
                 bos.write(bytes, 0, len);
                 bos.flush();
                 byteRead += len;
-                if (app.sendTaskList.containsKey(taskId)) {
-                    app.sendTaskList.get(taskId).setNum(
-                            (int) (byteRead * 100 / total));
-                } else {
-                    app.sendTaskList.put(taskId, new Progress(fileName,
-                            (int) (byteRead * 100 / total)));
-                }
+                app.getTaskList.put(taskId, new Progress(fileName,
+                        (int) (byteRead * 100 / total)));
             }
 
             in.close();
@@ -91,7 +85,7 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
             bis.close();
             socket.close();
             Logger.info(this.toString(), "end file");
-            app.sendTaskList.remove(taskId);
+            app.getTaskList.remove(taskId);
 
         } catch (IOException e) {
             app.sendTaskList.remove(taskId);
