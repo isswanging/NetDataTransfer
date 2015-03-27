@@ -30,6 +30,7 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
     Context context;
     String fileName;
     NetConfApplication app;
+    boolean error = false;
 
     public TransferFile(Service c) {
         context = c;
@@ -42,6 +43,7 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
         Logger.info(this.toString(), "begin accept file");
         DataPacket dp = params[0].getDp();
         int taskId = params[0].getTaskId();
+        fileName = params[0].getFileName();
         try {
             Socket socket = new Socket(dp.getIp(), NetConfApplication.filePort);
 
@@ -62,8 +64,7 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
             BufferedInputStream bis = new BufferedInputStream(
                     socket.getInputStream());
             BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(new File(
-                            getFileSavePath(dp.getContent()))));
+                    new FileOutputStream(new File(getFileSavePath(fileName))));
 
             // 设置进度条和读文件
             int len;
@@ -85,38 +86,38 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
             bis.close();
             socket.close();
             Logger.info(this.toString(), "end file");
-            app.getTaskList.remove(taskId);
 
         } catch (IOException e) {
-            app.sendTaskList.remove(taskId);
+            error = true;
             Logger.error(this.toString(), e.toString());
+        } finally {
+            app.sendTaskList.remove(taskId);
         }
         return null;
     }
 
     @Override
     protected void onPostExecute(Void result) {
-        Logger.info(this.toString(), "toast notify");
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.custom_toast, null);
-        TextView title = (TextView) layout.findViewById(R.id.toastInfo);
-        title.setText("文件 " + fileName + " 接收完毕");
-        Toast toast = new Toast(context);
-        toast.setDuration(Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 100);
-        toast.setView(layout);
-        toast.show();
+        if (!error) {
+            Logger.info(this.toString(), "toast notify");
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflater.inflate(R.layout.custom_toast, null);
+            TextView title = (TextView) layout.findViewById(R.id.toastInfo);
+            title.setText("文件 " + fileName + " 接收完毕");
+            Toast toast = new Toast(context);
+            toast.setDuration(Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 100);
+            toast.setView(layout);
+            toast.show();
+        }
     }
 
-    public String getFileSavePath(String path) {
-        // 获取文件名
-        String[] s = path.replaceAll("\\\\", "/").split("/");
-        fileName = s[s.length - 1];
+    public String getFileSavePath(String name) {
         // 文件分隔符
         String fs = System.getProperties().getProperty("file.separator");
         // 保存文件路径
-        return NetConfApplication.saveFilePath + fs + s[s.length - 1];
+        return NetConfApplication.saveFilePath + fs + name;
 
     }
 

@@ -62,24 +62,31 @@ public class FileMonitorService extends Service {
                     Socket socket = server.accept();
                     Logger.info(this.toString(), "send file request");
 
-                    new SendFileTask().executeOnExecutor(
-                            AsyncTask.THREAD_POOL_EXECUTOR, new SendTask(
-                                    app.taskId++, socket));
-                }
+                    DataPacket dp = JSON.parseObject(
+                            new DataInputStream(socket.getInputStream())
+                                    .readUTF(), DataPacket.class);
 
+                    String[] sn = dp.getContent().replaceAll("\\\\", "/")
+                            .split("/");
+                    String fileName = sn[sn.length - 1];
+                    int id = app.taskId++;
+                    app.sendTaskList.put(id, new Progress(fileName, 0));
+
+                    new SendFileTask().executeOnExecutor(
+                            AsyncTask.THREAD_POOL_EXECUTOR, new SendTask(id,
+                                    socket, fileName));
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
     class SendFileTask extends AsyncTask<SendTask, Integer, Void> {
 
         @Override
         protected Void doInBackground(SendTask... params) {
-
+            String fileName = params[0].getFileName();
             Socket s = params[0].getSocket();
             int taskId = params[0].getTaskId();
             try {
@@ -90,10 +97,6 @@ public class FileMonitorService extends Service {
                 if (dp.getTag() == app.fileConf) {
                     BufferedInputStream bis = new BufferedInputStream(
                             new FileInputStream(new File(dp.getContent())));
-
-                    String[] sn = dp.getContent().replaceAll("\\\\", "/")
-                            .split("/");
-                    String fileName = sn[sn.length - 1];
 
                     // 文件大小
                     long total = bis.available();
@@ -116,12 +119,12 @@ public class FileMonitorService extends Service {
                     }
                     bis.close();
                     bos.close();
-                    app.sendTaskList.remove(taskId);
                 }
 
             } catch (IOException e) {
-                app.getTaskList.remove(taskId);
                 Logger.info(this.toString(), e.toString());
+            } finally {
+                app.getTaskList.remove(taskId);
             }
 
             return null;

@@ -11,6 +11,7 @@ import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import net.vo.GetTask;
+import net.vo.Progress;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -147,11 +148,18 @@ public class UdpDataMonitorService extends Service {
                         Logger.info(this.toString(), "file send request");
                         // 振动提示
                         vibrator.vibrate(700);
+
+                        String[] s = dp.getContent().replaceAll("\\\\", "/")
+                                .split("/");
+                        String fileName = s[s.length - 1];
+                        int id = app.taskId++;
+                        app.getTaskList.put(id, new Progress(fileName, 0));
+
                         // accept file
                         new TransferFile(UdpDataMonitorService.this)
                                 .executeOnExecutor(
                                         AsyncTask.THREAD_POOL_EXECUTOR,
-                                        new GetTask(app.taskId++, dp));
+                                        new GetTask(id, dp, fileName));
                         DataPacket dpClone = new DataPacket();
                         dpClone.setContent("向你发来了一个文件");
                         dpClone.setIp(dp.getIp());
