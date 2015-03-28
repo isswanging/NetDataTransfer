@@ -48,6 +48,7 @@ public class FileListActivity extends Activity {
             m.put("info", path);
             fileList.add(m);
         }
+
         return fileList;
     }
 

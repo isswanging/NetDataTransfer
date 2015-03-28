@@ -53,7 +53,6 @@ import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
     private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-    private AnimationDrawable anim;
 
     private final int login = 0;
     private final int refresh = 1;
@@ -351,8 +350,6 @@ public class UserListActivity extends Activity {
                     act.isReady = true;
 
                     // 更新UI
-                    if (act.anim != null && act.anim.isRunning())
-                        act.anim.stop();
                     LinearLayout listConent = (LinearLayout) act
                             .findViewById(R.id.listContent);
                     LayoutInflater layoutInflater = act.getLayoutInflater();

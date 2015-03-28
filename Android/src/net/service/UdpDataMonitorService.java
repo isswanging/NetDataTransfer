@@ -101,7 +101,11 @@ public class UdpDataMonitorService extends Service {
                     .setTicker("新消息").setContentTitle("点击查看")
                     .setContentText(dp.getSenderName() + "发来一条新消息")
                     .setContentIntent(contentIntent).build();
-            notification.flags = Notification.FLAG_AUTO_CANCEL;
+            notification.flags = Notification.FLAG_AUTO_CANCEL
+                    | Notification.FLAG_SHOW_LIGHTS;
+            notification.ledARGB = 0x00FF00;
+            notification.ledOffMS = 100;
+            notification.ledOnMS = 100;
             app.nManager.notify(R.id.chatName, notification);
 
             // 让界面显示未读消息的红点
