@@ -62,8 +62,12 @@ public class TransferFile implements Runnable {
     @Override
     public void run() {
         bar.setStringPainted(true);// 设置在进度条中绘制完成百分比
-
         InetAddress address;
+
+        DataOutputStream toServer = null;
+        DataInputStream in = null;
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
         try {
             address = InetAddress.getLocalHost();
             String hostName = address.getHostName();// 获取主机名
@@ -71,20 +75,18 @@ public class TransferFile implements Runnable {
 
             // 发送TCP消息建立文件传输连接
             socket = new Socket(dp.getIp(), SystemConf.filePort);
-            DataOutputStream toServer = new DataOutputStream(
-                    socket.getOutputStream());
+            toServer = new DataOutputStream(socket.getOutputStream());
             toServer.writeUTF(JSON.toJSONString(new DataPacket(ip, hostName, dp
                     .getContent(), SystemConf.fileConf)));
 
             // 设置文件大小
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+            in = new DataInputStream(socket.getInputStream());
             long total = in.readLong();
 
             // 接收文件
-            BufferedInputStream bis = new BufferedInputStream(
-                    socket.getInputStream());
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(new File(savePath)));
+            bis = new BufferedInputStream(socket.getInputStream());
+            bos = new BufferedOutputStream(new FileOutputStream(new File(
+                    savePath)));
 
             // 设置进度条和读文件
             bar.setMinimum(0);
@@ -104,16 +106,21 @@ public class TransferFile implements Runnable {
             NoticeGui.messageNotice(new JPanel(), "   文件：" + fileName
                     + "\n       接收完毕");
 
-            in.close();
-            toServer.close();
-            bos.close();
-            bis.close();
-            socket.close();
-
         } catch (UnknownHostException e) {
             logger.error("exception: " + e);
         } catch (IOException e) {
             logger.error("exception: " + e);
+        } finally {
+            try {
+                in.close();
+                toServer.close();
+                bos.close();
+                bis.close();
+                socket.close();
+            } catch (IOException e) {
+                logger.error("exception: " + e);
+            }
+
         }
     }
 }

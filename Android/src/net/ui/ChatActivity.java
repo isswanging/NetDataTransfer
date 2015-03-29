@@ -22,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images.Media;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -62,10 +61,10 @@ public class ChatActivity extends Activity {
         title.setDisplayShowTitleEnabled(false);
 
         View actionbarLayout = LayoutInflater.from(this).inflate(
-                R.layout.chat_title, null);
+                R.layout.common_title, null);
         title.setDisplayShowCustomEnabled(true);
         title.setCustomView(actionbarLayout);
-        ((TextView) findViewById(R.id.chatUserName)).setText(targetName);
+        ((TextView) findViewById(R.id.titleName)).setText(targetName);
 
         ImageButton back = (ImageButton) findViewById(R.id.back);
         back.setOnClickListener(clickListener);
@@ -261,7 +260,7 @@ public class ChatActivity extends Activity {
 
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-
+           
             switch (requestCode) {
             case image:
             case vedio:

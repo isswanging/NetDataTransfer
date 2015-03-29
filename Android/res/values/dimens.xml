@@ -30,4 +30,5 @@
     <dimen name="unread_size">25dp</dimen>
     <dimen name="unread_margin">15dp</dimen>
     <dimen name="left_drawer">248dp</dimen>
+    <dimen name="file_img_size">50dp</dimen>
 </resources>

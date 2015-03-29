@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.vo.ChatMsgEntity;
 import net.vo.Host;
+import net.vo.Progress;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -26,6 +26,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
+import android.util.SparseArray;
 
 import com.example.netdatatransfer.R;
 
@@ -75,11 +76,11 @@ public class NetConfApplication extends Application {
     public static String hostName = "Android";
     public static String saveFilePath = "";
 
-    // 传输文件夹任务列表
-    public HashMap<String, ArrayList<String>> taskList = new HashMap<String, ArrayList<String>>();
-
-    // 记录进度
-    public ConcurrentHashMap<String, Long> progress = new ConcurrentHashMap<String, Long>();
+    // 文件传送的任务id
+    public static int taskId = 0;
+    // 传输文件任务列表
+    public static SparseArray<Progress> sendTaskList = new SparseArray<Progress>();
+    public static SparseArray<Progress> getTaskList = new SparseArray<Progress>();
 
     // 记录聊天内容
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();

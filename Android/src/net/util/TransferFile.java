@@ -12,88 +12,120 @@ import java.net.Socket;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
+import net.vo.GetTask;
+import net.vo.Progress;
+import android.app.Service;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.example.netdatatransfer.R;
 
-public class TransferFile extends AsyncTask<DataPacket, Void, Void> {
+public class TransferFile extends AsyncTask<GetTask, Void, Void> {
     Context context;
     String fileName;
+    NetConfApplication app;
+    boolean error = false;
 
-    public TransferFile(Context c) {
+    public TransferFile(Service c) {
         context = c;
+        app = (NetConfApplication) c.getApplication();
     }
 
     @Override
-    protected Void doInBackground(DataPacket... params) {
-        try {
-            Logger.info(this.toString(), "begin accept file");
-            DataPacket dp = params[0];
-            Socket socket = new Socket(dp.getIp(), NetConfApplication.filePort);
+    protected Void doInBackground(GetTask... params) {
 
+        Logger.info(this.toString(), "begin accept file");
+        DataPacket dp = params[0].getDp();
+        int taskId = params[0].getTaskId();
+        fileName = params[0].getFileName();
+
+        Socket socket = null;
+        DataInputStream in = null;
+        DataOutputStream toServer = null;
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        try {
+            socket = new Socket(dp.getIp(), NetConfApplication.filePort);
             String hostName = NetConfApplication.hostName;// 获取主机名
             String ip = NetConfApplication.hostIP;// 获取ip地址
 
             // 发送TCP消息建立文件传输连接
-            DataOutputStream toServer = new DataOutputStream(
-                    socket.getOutputStream());
+            toServer = new DataOutputStream(socket.getOutputStream());
             toServer.writeUTF(JSON.toJSONString(new DataPacket(ip, hostName, dp
                     .getContent(), NetConfApplication.fileConf)));
 
             // 设置文件大小
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+            in = new DataInputStream(socket.getInputStream());
             long total = in.readLong();
             Logger.info(this.toString(), "size" + total);
 
-            // 接收文件
-            BufferedInputStream bis = new BufferedInputStream(
-                    socket.getInputStream());
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(new File(
-                            getFileSavePath(dp.getContent()))));
+            bis = new BufferedInputStream(socket.getInputStream());
+            bos = new BufferedOutputStream(new FileOutputStream(new File(
+                    getFileSavePath(fileName))));
 
             // 设置进度条和读文件
             int len;
-            // long byteRead = 0;
+            long byteRead = 0;
 
             byte[] bytes = new byte[1024];
             while ((len = bis.read(bytes)) != -1) {
-                Logger.info(this.toString(), "receiveing");
+                // Logger.info(this.toString(), "receiveing");
                 bos.write(bytes, 0, len);
                 bos.flush();
-                //byteRead += len;
+                byteRead += len;
+                NetConfApplication.getTaskList.put(taskId, new Progress(
+                        fileName, (int) (byteRead * 100 / total)));
             }
 
-            in.close();
-            toServer.close();
-            bos.close();
-            bis.close();
-            socket.close();
             Logger.info(this.toString(), "end file");
 
         } catch (IOException e) {
+            error = true;
             Logger.error(this.toString(), e.toString());
+        } finally {
+            NetConfApplication.sendTaskList.remove(taskId);
+            try {
+                in.close();
+                toServer.close();
+                bos.close();
+                bis.close();
+                socket.close();
+            } catch (IOException e) {
+                Logger.info(this.toString(), e.toString());
+            }
+
         }
         return null;
     }
 
     @Override
     protected void onPostExecute(Void result) {
-        Toast.makeText(context, "文件 " + fileName + " 接收完毕", Toast.LENGTH_LONG)
-                .show();
+        if (!error) {
+            Logger.info(this.toString(), "toast notify");
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflater.inflate(R.layout.custom_toast, null);
+            TextView title = (TextView) layout.findViewById(R.id.toastInfo);
+            title.setText("文件 " + fileName + " 接收完毕");
+            Toast toast = new Toast(context);
+            toast.setDuration(Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 100);
+            toast.setView(layout);
+            toast.show();
+        }
     }
 
-    public String getFileSavePath(String path) {
-
-        // 获取文件名
-        String[] s = path.replaceAll("\\\\", "/").split("/");
-        fileName = s[s.length - 1];
+    public String getFileSavePath(String name) {
         // 文件分隔符
         String fs = System.getProperties().getProperty("file.separator");
         // 保存文件路径
-        return NetConfApplication.saveFilePath + fs + s[s.length - 1];
+        return NetConfApplication.saveFilePath + fs + name;
 
     }
 

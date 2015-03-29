@@ -13,6 +13,7 @@ import java.util.Map;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.service.BroadcastMonitorService;
+import net.service.FileMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.vo.Host;
@@ -52,7 +53,6 @@ import com.example.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
     private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-    private AnimationDrawable anim;
 
     private final int login = 0;
     private final int refresh = 1;
@@ -126,9 +126,30 @@ public class UserListActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.exit) {
+        int send = 0;
+        int get = 1;
+
+        switch (item.getItemId()) {
+        case R.id.exit:
             finish();
-            return false;
+            break;
+        case R.id.openFolder:
+            startActivity(new Intent(this, FileListActivity.class));
+            break;
+
+        case R.id.sendProgress:
+            Intent intentSend = new Intent(this, ProgressBarListActivity.class);
+            intentSend.setFlags(send);
+            startActivity(intentSend);
+            break;
+
+        case R.id.getProgress:
+            Intent intentGet = new Intent(this, ProgressBarListActivity.class);
+            intentGet.setFlags(get);
+            startActivity(intentGet);
+            break;
+        default:
+            break;
         }
         return false;
     }
@@ -146,6 +167,7 @@ public class UserListActivity extends Activity {
     protected void onDestroy() {
         stopService(new Intent(this, BroadcastMonitorService.class));
         stopService(new Intent(this, UdpDataMonitorService.class));
+        stopService(new Intent(this, FileMonitorService.class));
         super.onDestroy();
     }
 
@@ -320,16 +342,14 @@ public class UserListActivity extends Activity {
             if (act != null) {
                 if (msg.what == act.login) {
                     act.adapter = new SimpleAdapter(act, act.getData(),
-                            R.layout.user_list_item, new String[] { "name",
-                                    "ip", "img" }, new int[] { R.id.userName,
+                            R.layout.user_item, new String[] { "name", "ip",
+                                    "img" }, new int[] { R.id.userName,
                                     R.id.userIP, R.id.unread });
                     Logger.info(this.toString(),
                             String.valueOf(act.app.hostList.size()));
                     act.isReady = true;
 
                     // 更新UI
-                    if (act.anim != null && act.anim.isRunning())
-                        act.anim.stop();
                     LinearLayout listConent = (LinearLayout) act
                             .findViewById(R.id.listContent);
                     LayoutInflater layoutInflater = act.getLayoutInflater();

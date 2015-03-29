@@ -10,11 +10,14 @@ import net.log.Logger;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import net.vo.GetTask;
+import net.vo.Progress;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -83,7 +86,7 @@ public class UdpDataMonitorService extends Service {
                     notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-                    app.getDate(), dp.getContent(), true);
+                    app.getDate(), "向你发来了一个文件", true);
             if (app.chatTempMap.containsKey(dp.getIp())) {
                 app.chatTempMap.get(dp.getIp()).add(entity);
             } else {
@@ -98,7 +101,11 @@ public class UdpDataMonitorService extends Service {
                     .setTicker("新消息").setContentTitle("点击查看")
                     .setContentText(dp.getSenderName() + "发来一条新消息")
                     .setContentIntent(contentIntent).build();
-            notification.flags = Notification.FLAG_AUTO_CANCEL;
+            notification.flags = Notification.FLAG_AUTO_CANCEL
+                    | Notification.FLAG_SHOW_LIGHTS;
+            notification.ledARGB = 0x00FF00;
+            notification.ledOffMS = 100;
+            notification.ledOnMS = 100;
             app.nManager.notify(R.id.chatName, notification);
 
             // 让界面显示未读消息的红点
@@ -113,7 +120,7 @@ public class UdpDataMonitorService extends Service {
             try {
 
                 UdpPacket = new DatagramPacket(new byte[1024], 1024);
-                UdpSocket = new DatagramSocket(app.textPort);
+                UdpSocket = new DatagramSocket(NetConfApplication.textPort);
                 while (tag) {
                     // 收到消息
                     UdpSocket.receive(UdpPacket);
@@ -145,9 +152,19 @@ public class UdpDataMonitorService extends Service {
                         Logger.info(this.toString(), "file send request");
                         // 振动提示
                         vibrator.vibrate(700);
+
+                        String[] s = dp.getContent().replaceAll("\\\\", "/")
+                                .split("/");
+                        String fileName = s[s.length - 1];
+                        int id = NetConfApplication.taskId++;
+                        NetConfApplication.getTaskList.put(id, new Progress(
+                                fileName, 0));
+
                         // accept file
                         new TransferFile(UdpDataMonitorService.this)
-                                .execute(dp);
+                                .executeOnExecutor(
+                                        AsyncTask.THREAD_POOL_EXECUTOR,
+                                        new GetTask(id, dp, fileName));
                         DataPacket dpClone = new DataPacket();
                         dpClone.setContent("向你发来了一个文件");
                         dpClone.setIp(dp.getIp());

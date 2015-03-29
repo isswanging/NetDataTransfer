@@ -42,13 +42,15 @@ public class SendFolder {
             @Override
             public void run() {
                 logger.info(filePath);
+
+                BufferedInputStream bis = null;
+                DataOutputStream dos = null;
                 try {
                     // 建立TCP连接
                     if (connect()) {
-                        BufferedInputStream bis = new BufferedInputStream(
-                                new FileInputStream(new File(filePath)));
-                        DataOutputStream dos = new DataOutputStream(
-                                socket.getOutputStream());
+                        bis = new BufferedInputStream(new FileInputStream(
+                                new File(filePath)));
+                        dos = new DataOutputStream(socket.getOutputStream());
 
                         logger.info("任务id：" + taskId + "文件编号：" + i + "路径："
                                 + filePath);
@@ -66,14 +68,19 @@ public class SendFolder {
                             dos.write(bytes, 0, len);
                             dos.flush();
                         }
-                        dos.flush();
-                        bis.close();
-                        dos.close();
-                        socket.close();
+
                         logger.info(filePath + " 发送完成");
                     }
                 } catch (IOException e) {
                     logger.error("exception: " + e);
+                } finally {
+                    try {
+                        bis.close();
+                        dos.close();
+                        socket.close();
+                    } catch (IOException e) {
+                        logger.error("exception: " + e);
+                    }
                 }
 
             }

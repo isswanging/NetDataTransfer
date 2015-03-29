@@ -49,38 +49,49 @@ public class FileMonitor implements Runnable {
 
         @Override
         public void run() {
+            DataOutputStream outer = null;
+            DataInputStream geter = null;
+            BufferedOutputStream bos = null;
+            BufferedInputStream bis = null;
+
             try {
-                DataOutputStream o = new DataOutputStream(
-                        socket.getOutputStream());
-                DataInputStream geter = new DataInputStream(
-                        socket.getInputStream());
+                outer = new DataOutputStream(socket.getOutputStream());
+                geter = new DataInputStream(socket.getInputStream());
                 DataPacket dp = JSON.parseObject(geter.readUTF(),
                         DataPacket.class);
 
                 if (dp.getTag() == SystemConf.fileConf) {
-                    BufferedInputStream bis = new BufferedInputStream(
-                            new FileInputStream(new File(dp.getContent())));
+                    bis = new BufferedInputStream(new FileInputStream(new File(
+                            dp.getContent())));
 
                     // 文件大小
                     long total = bis.available();
                     logger.info("size" + total);
-                    o.writeLong(total);
+                    outer.writeLong(total);
 
                     // 发文件
-                    BufferedOutputStream bos = new BufferedOutputStream(
-                            socket.getOutputStream());
+                    bos = new BufferedOutputStream(socket.getOutputStream());
                     int len;
                     byte[] bytes = new byte[1024];
                     while ((len = bis.read(bytes)) != -1) {
                         bos.write(bytes, 0, len);
                         bos.flush();
                     }
-                    bis.close();
-                    bos.close();
+
                 }
 
             } catch (IOException e) {
                 logger.error("exception: " + e);
+            } finally {
+                try {
+                    outer.close();
+                    geter.close();
+                    bis.close();
+                    bos.close();
+                } catch (IOException e) {
+                    logger.error("exception: " + e);
+                }
+
             }
         }
     }
