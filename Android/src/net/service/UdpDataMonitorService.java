@@ -120,7 +120,7 @@ public class UdpDataMonitorService extends Service {
             try {
 
                 UdpPacket = new DatagramPacket(new byte[1024], 1024);
-                UdpSocket = new DatagramSocket(app.textPort);
+                UdpSocket = new DatagramSocket(NetConfApplication.textPort);
                 while (tag) {
                     // 收到消息
                     UdpSocket.receive(UdpPacket);
@@ -156,8 +156,9 @@ public class UdpDataMonitorService extends Service {
                         String[] s = dp.getContent().replaceAll("\\\\", "/")
                                 .split("/");
                         String fileName = s[s.length - 1];
-                        int id = app.taskId++;
-                        app.getTaskList.put(id, new Progress(fileName, 0));
+                        int id = NetConfApplication.taskId++;
+                        NetConfApplication.getTaskList.put(id, new Progress(
+                                fileName, 0));
 
                         // accept file
                         new TransferFile(UdpDataMonitorService.this)

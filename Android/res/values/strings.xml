@@ -4,7 +4,7 @@
     <string name="app_name">NetDataTransfer</string>
     <string name="exit">退出</string>
     <string name="about">飞鸽传书android版</string>
-    <string name="version">版本号：beta 3.1</string>
+    <string name="version">版本号：beta 3.5</string>
     <string name="titleName">用户列表</string>
 	<string name="sendText">发送</string>
 	<string name="editText_hint">请输入</string>

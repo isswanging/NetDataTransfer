@@ -44,27 +44,30 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
         DataPacket dp = params[0].getDp();
         int taskId = params[0].getTaskId();
         fileName = params[0].getFileName();
-        try {
-            Socket socket = new Socket(dp.getIp(), NetConfApplication.filePort);
 
+        Socket socket = null;
+        DataInputStream in = null;
+        DataOutputStream toServer = null;
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        try {
+            socket = new Socket(dp.getIp(), NetConfApplication.filePort);
             String hostName = NetConfApplication.hostName;// 获取主机名
             String ip = NetConfApplication.hostIP;// 获取ip地址
 
             // 发送TCP消息建立文件传输连接
-            DataOutputStream toServer = new DataOutputStream(
-                    socket.getOutputStream());
+            toServer = new DataOutputStream(socket.getOutputStream());
             toServer.writeUTF(JSON.toJSONString(new DataPacket(ip, hostName, dp
                     .getContent(), NetConfApplication.fileConf)));
 
             // 设置文件大小
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+            in = new DataInputStream(socket.getInputStream());
             long total = in.readLong();
             Logger.info(this.toString(), "size" + total);
 
-            BufferedInputStream bis = new BufferedInputStream(
-                    socket.getInputStream());
-            BufferedOutputStream bos = new BufferedOutputStream(
-                    new FileOutputStream(new File(getFileSavePath(fileName))));
+            bis = new BufferedInputStream(socket.getInputStream());
+            bos = new BufferedOutputStream(new FileOutputStream(new File(
+                    getFileSavePath(fileName))));
 
             // 设置进度条和读文件
             int len;
@@ -76,22 +79,27 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
                 bos.write(bytes, 0, len);
                 bos.flush();
                 byteRead += len;
-                app.getTaskList.put(taskId, new Progress(fileName,
-                        (int) (byteRead * 100 / total)));
+                NetConfApplication.getTaskList.put(taskId, new Progress(
+                        fileName, (int) (byteRead * 100 / total)));
             }
 
-            in.close();
-            toServer.close();
-            bos.close();
-            bis.close();
-            socket.close();
             Logger.info(this.toString(), "end file");
 
         } catch (IOException e) {
             error = true;
             Logger.error(this.toString(), e.toString());
         } finally {
-            app.sendTaskList.remove(taskId);
+            NetConfApplication.sendTaskList.remove(taskId);
+            try {
+                in.close();
+                toServer.close();
+                bos.close();
+                bis.close();
+                socket.close();
+            } catch (IOException e) {
+                Logger.info(this.toString(), e.toString());
+            }
+
         }
         return null;
     }

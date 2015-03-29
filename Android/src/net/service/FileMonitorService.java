@@ -25,7 +25,6 @@ import com.alibaba.fastjson.JSON;
 public class FileMonitorService extends Service {
     Thread thread;
     boolean tag;
-    NetConfApplication app;
     ServerSocket server = null;
     DataInputStream geter;
 
@@ -36,7 +35,6 @@ public class FileMonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        app = (NetConfApplication) getApplication();
         Logger.info(this.toString(), "FileMonitorService started");
         tag = true;
         thread = new Thread(new ReceiveInfo());
@@ -57,7 +55,7 @@ public class FileMonitorService extends Service {
         @Override
         public void run() {
             try {
-                server = new ServerSocket(app.filePort);
+                server = new ServerSocket(NetConfApplication.filePort);
                 while (tag) {
                     Socket socket = server.accept();
                     Logger.info(this.toString(), "send file request");
@@ -69,15 +67,16 @@ public class FileMonitorService extends Service {
                     String[] sn = dp.getContent().replaceAll("\\\\", "/")
                             .split("/");
                     String fileName = sn[sn.length - 1];
-                    int id = app.taskId++;
-                    app.sendTaskList.put(id, new Progress(fileName, 0));
+                    int id = NetConfApplication.taskId++;
+                    NetConfApplication.sendTaskList.put(id, new Progress(
+                            fileName, 0));
 
                     new SendFileTask().executeOnExecutor(
                             AsyncTask.THREAD_POOL_EXECUTOR, new SendTask(id,
-                                    socket, fileName));
+                                    socket, fileName, dp));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Logger.info(this.toString(), e.toString());
             }
         }
     }
@@ -89,24 +88,27 @@ public class FileMonitorService extends Service {
             String fileName = params[0].getFileName();
             Socket s = params[0].getSocket();
             int taskId = params[0].getTaskId();
+            DataPacket dp = params[0].getDataPacket();
+
+            BufferedInputStream bis = null;
+            BufferedOutputStream bos = null;
+            DataOutputStream o = null;
+
             try {
                 geter = new DataInputStream(s.getInputStream());
-                DataPacket dp = JSON.parseObject(geter.readUTF(),
-                        DataPacket.class);
 
-                if (dp.getTag() == app.fileConf) {
-                    BufferedInputStream bis = new BufferedInputStream(
-                            new FileInputStream(new File(dp.getContent())));
+                if (dp.getTag() == NetConfApplication.fileConf) {
+                    bis = new BufferedInputStream(new FileInputStream(new File(
+                            dp.getContent())));
 
                     // 文件大小
                     long total = bis.available();
                     long byteRead = 0;
-                    DataOutputStream o = new DataOutputStream(
-                            s.getOutputStream());
+                    o = new DataOutputStream(s.getOutputStream());
                     o.writeLong(total);
+                    Logger.info(this.toString(), "file size:::" + total);
 
-                    BufferedOutputStream bos = new BufferedOutputStream(
-                            s.getOutputStream());
+                    bos = new BufferedOutputStream(s.getOutputStream());
                     int len;
                     byte[] bytes = new byte[1024];
                     while ((len = bis.read(bytes)) != -1) {
@@ -114,17 +116,26 @@ public class FileMonitorService extends Service {
                         bos.flush();
                         byteRead += len;
 
-                        app.sendTaskList.put(taskId, new Progress(fileName,
-                                (int) (byteRead * 100 / total)));
+                        NetConfApplication.sendTaskList.put(taskId,
+                                new Progress(fileName,
+                                        (int) (byteRead * 100 / total)));
                     }
-                    bis.close();
-                    bos.close();
+
                 }
 
             } catch (IOException e) {
                 Logger.info(this.toString(), e.toString());
             } finally {
-                app.getTaskList.remove(taskId);
+                NetConfApplication.getTaskList.remove(taskId);
+                try {
+                    bis.close();
+                    bos.close();
+                    o.close();
+                    s.close();
+                } catch (IOException e) {
+                    Logger.info(this.toString(), e.toString());
+                }
+
             }
 
             return null;
