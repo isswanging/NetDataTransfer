@@ -1,10 +1,10 @@
 package net.ui;
 
 import java.util.ArrayList;
-
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.Progress;
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -20,7 +20,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.example.netdatatransfer.R;
 
 public class ProgressBarListActivity extends Activity {
@@ -74,6 +73,7 @@ public class ProgressBarListActivity extends Activity {
         Logger.info(this.toString(), "data size" + data.size());
     }
 
+    @SuppressLint("InflateParams")
     private void initActionBar() {
         ActionBar title = getActionBar();
         title.setDisplayShowHomeEnabled(false);
@@ -124,6 +124,7 @@ public class ProgressBarListActivity extends Activity {
             return position;
         }
 
+        @SuppressLint("InflateParams")
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder v = null;

@@ -118,7 +118,6 @@ public class UdpDataMonitorService extends Service {
         @Override
         public void run() {
             try {
-
                 UdpPacket = new DatagramPacket(new byte[1024], 1024);
                 UdpSocket = new DatagramSocket(NetConfApplication.textPort);
                 while (tag) {
@@ -133,9 +132,7 @@ public class UdpDataMonitorService extends Service {
                     switch (dp.getTag()) {
 
                     case NetConfApplication.text:
-
                         app.playVoice();
-
                         Logger.info(this.toString(), "service::" + app.chatId);
                         dispatchMessage(info);
                         break;

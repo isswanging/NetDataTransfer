@@ -43,9 +43,10 @@ public class WelcomeActivity extends Activity {
             // 加载音乐
             app.loadVoice();
             // 创建接收文件的目录
-            app.saveFilePath = app.getSDPath() + "/NetDataTransfer/recFile";
-            Logger.info(this.toString(), app.saveFilePath);
-            File recFile = new File(app.saveFilePath);
+            NetConfApplication.saveFilePath = app.getSDPath()
+                    + "/NetDataTransfer/recFile";
+            Logger.info(this.toString(), NetConfApplication.saveFilePath);
+            File recFile = new File(NetConfApplication.saveFilePath);
             if (!recFile.exists()) {
                 Logger.info(this.toString(), "create dir");
                 recFile.mkdirs();
@@ -72,7 +73,7 @@ public class WelcomeActivity extends Activity {
 
     private void preCheck() {
         if (app.check(this).endsWith(app.SUCCESS)) {
-            app.hostIP = app.getHostIp(this);// 获取ip地址
+            NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         }
     }
 }

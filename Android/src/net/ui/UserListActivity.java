@@ -17,6 +17,7 @@ import net.service.FileMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.vo.Host;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -24,7 +25,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -213,13 +213,15 @@ public class UserListActivity extends Activity {
                     String userDomain = "Android";// 获取计算机域
 
                     // 加入在线列表
-                    Host host = new Host(userName, userDomain, app.hostIP,
-                            app.hostName, 1, 0);
+                    Host host = new Host(userName, userDomain,
+                            NetConfApplication.hostIP,
+                            NetConfApplication.hostName, 1, 0);
                     app.addHost(host);
 
                     app.sendUdpData(new DatagramSocket(),
-                            JSON.toJSONString(host), app.broadcastIP,
-                            app.broadcastPort);
+                            JSON.toJSONString(host),
+                            NetConfApplication.broadcastIP,
+                            NetConfApplication.broadcastPort);
                 } catch (SocketException e) {
                     e.printStackTrace();
                 }
@@ -238,6 +240,7 @@ public class UserListActivity extends Activity {
 
         findViewById(R.id.left_drawer).setOnTouchListener(
                 new OnTouchListener() {
+                    @SuppressLint("ClickableViewAccessibility")
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         // 吞掉点击事件使下拉刷新失效
@@ -336,6 +339,7 @@ public class UserListActivity extends Activity {
             refActvity = new WeakReference<UserListActivity>(activity);
         }
 
+        @SuppressLint("InflateParams")
         @Override
         public void handleMessage(Message msg) {
             final UserListActivity act = refActvity.get();
@@ -371,7 +375,8 @@ public class UserListActivity extends Activity {
                                     TextView ip = (TextView) view
                                             .findViewById(R.id.userIP);
 
-                                    if (ip.getText().equals(act.app.hostIP)) {
+                                    if (ip.getText().equals(
+                                            NetConfApplication.hostIP)) {
                                         act.drawerLayout
                                                 .openDrawer(Gravity.LEFT);
                                     } else {
@@ -400,14 +405,15 @@ public class UserListActivity extends Activity {
 
                                     // 加入在线列表
                                     Host host = new Host(userName, userDomain,
-                                            act.app.hostIP, hostName, 1, 0);
+                                            NetConfApplication.hostIP,
+                                            hostName, 1, 0);
                                     act.app.addHost(host);
                                     try {
                                         act.app.sendUdpData(
                                                 new DatagramSocket(),
                                                 JSON.toJSONString(host),
-                                                act.app.broadcastIP,
-                                                act.app.broadcastPort);
+                                                NetConfApplication.broadcastIP,
+                                                NetConfApplication.broadcastPort);
                                     } catch (SocketException e) {
                                         e.printStackTrace();
                                     }
