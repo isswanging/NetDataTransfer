@@ -85,6 +85,13 @@ public class NetConfApplication extends Application {
     // 记录聊天内容
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
 
+    // 文件格式
+    public final static String[] imageSupport = { "BMP", "JPG", "JPEG", "PNG",
+            "GIF" };
+    public final static String[] videoSupport = { "rmvb", "AVI", "mp4", "3gp",
+            "mpg" };
+    public final static String[] audioSupport = { "mp3", "wma", "wav", "amr" };
+
     // 检查端口
     public String check(Context userListActivity) {
         // 获取wifi服务

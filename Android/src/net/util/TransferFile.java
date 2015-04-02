@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -15,8 +16,13 @@ import net.vo.DataPacket;
 import net.vo.GetTask;
 import net.vo.Progress;
 import android.app.Service;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,10 +70,10 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
             in = new DataInputStream(socket.getInputStream());
             long total = in.readLong();
             Logger.info(this.toString(), "size" + total);
+            String path = getFileSavePath(fileName);
 
             bis = new BufferedInputStream(socket.getInputStream());
-            bos = new BufferedOutputStream(new FileOutputStream(new File(
-                    getFileSavePath(fileName))));
+            bos = new BufferedOutputStream(new FileOutputStream(new File(path)));
 
             // 设置进度条和读文件
             int len;
@@ -85,11 +91,14 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
 
             Logger.info(this.toString(), "end file");
 
+            // save in content
+            saveInContent(path);
+
         } catch (IOException e) {
             error = true;
             Logger.error(this.toString(), e.toString());
         } finally {
-            NetConfApplication.sendTaskList.remove(taskId);
+            NetConfApplication.getTaskList.remove(taskId);
             try {
                 in.close();
                 toServer.close();
@@ -102,6 +111,72 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
 
         }
         return null;
+    }
+
+    private void saveInContent(String path) {
+        Logger.info(this.toString(), fileName);
+        String[] sn = fileName.split("\\.");
+        String buffix = sn[sn.length - 1];
+
+        ContentResolver resolver = context.getContentResolver();
+
+        for (String s : NetConfApplication.imageSupport) {
+            if (s.equalsIgnoreCase(buffix)) {
+                // try {
+                // MediaStore.Images.Media.insertImage(
+                // context.getContentResolver(), path, fileName, null);
+                // } catch (FileNotFoundException e) {
+                // e.printStackTrace();
+                // }
+                ContentValues newValues = new ContentValues(6);
+                newValues.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+                newValues.put(MediaStore.Images.Media.DATA, path);
+                newValues.put(MediaStore.Images.Media.DATE_MODIFIED,
+                        System.currentTimeMillis() / 1000);
+                newValues.put(MediaStore.Images.Media.MIME_TYPE, "video/*");
+                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        newValues);
+
+                context.sendBroadcast(new Intent(
+                        Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+                                .parse("file://" + path)));
+            }
+        }
+
+        for (String s : NetConfApplication.audioSupport) {
+            if (s.equalsIgnoreCase(buffix)) {
+                ContentValues newValues = new ContentValues(6);
+                newValues.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
+                newValues.put(MediaStore.Audio.Media.DATA, path);
+                newValues.put(MediaStore.Audio.Media.DATE_MODIFIED,
+                        System.currentTimeMillis() / 1000);
+                newValues.put(MediaStore.Audio.Media.MIME_TYPE, "audio/*");
+                resolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        newValues);
+
+                context.sendBroadcast(new Intent(
+                        Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+                                .parse("file://" + path)));
+            }
+        }
+
+        for (String s : NetConfApplication.videoSupport) {
+            if (s.equalsIgnoreCase(buffix)) {
+                ContentValues newValues = new ContentValues(6);
+                newValues.put(MediaStore.Video.Media.DISPLAY_NAME, fileName);
+                newValues.put(MediaStore.Video.Media.DATA, path);
+                newValues.put(MediaStore.Video.Media.DATE_MODIFIED,
+                        System.currentTimeMillis() / 1000);
+                newValues.put(MediaStore.Video.Media.MIME_TYPE, "video/*");
+                resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                        newValues);
+
+                context.sendBroadcast(new Intent(
+                        Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+                                .parse("file://" + path)));
+            }
+        }
+
     }
 
     @Override

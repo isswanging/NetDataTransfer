@@ -175,7 +175,7 @@ public class ChatActivity extends Activity {
 
             case R.id.sendVideo:
                 sendFile.setVisibility(View.GONE);
-                showFileChooser("vedio/*", vedio);
+                showFileChooser("video/*", vedio);
                 break;
 
             case R.id.sendAudio:
