@@ -5,7 +5,7 @@ import android.util.Log;
 // 日志统一打印管理的工具类
 public class Logger {
     // log开关
-    static boolean tag = true;
+    public static boolean tag = true;
 
     public static void info(String className, String info) {
         if (tag) {

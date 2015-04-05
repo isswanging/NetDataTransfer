@@ -49,7 +49,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
     private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();

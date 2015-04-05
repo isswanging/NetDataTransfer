@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 
+import net.app.netdatatransfer.R;
 import net.vo.ChatMsgEntity;
 import net.vo.Host;
 import net.vo.Progress;
@@ -28,7 +29,6 @@ import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.util.SparseArray;
 
-import com.example.netdatatransfer.R;
 
 public class NetConfApplication extends Application {
     public int wifi = 0;

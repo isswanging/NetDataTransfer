@@ -20,7 +20,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class ProgressBarListActivity extends Activity {
     int send = 0;

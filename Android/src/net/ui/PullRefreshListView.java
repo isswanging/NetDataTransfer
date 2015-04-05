@@ -13,7 +13,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class PullRefreshListView extends LinearLayout implements
         OnTouchListener {

@@ -37,7 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class ChatActivity extends Activity {
     private ChatOnClickListener clickListener = new ChatOnClickListener();

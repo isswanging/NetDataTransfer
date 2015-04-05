@@ -26,7 +26,7 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class UdpDataMonitorService extends Service {
     DatagramSocket UdpSocket = null;
