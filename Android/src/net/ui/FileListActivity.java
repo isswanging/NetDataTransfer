@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.app.NetConfApplication;
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
@@ -17,8 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class FileListActivity extends Activity {
 
@@ -52,6 +51,7 @@ public class FileListActivity extends Activity {
         return fileList;
     }
 
+    @SuppressLint("InflateParams")
     private void initActionBar() {
         ActionBar title = getActionBar();
         title.setDisplayShowHomeEnabled(false);

@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 
+import net.app.netdatatransfer.R;
 import net.vo.ChatMsgEntity;
 import net.vo.Host;
 import net.vo.Progress;
@@ -28,7 +29,6 @@ import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.util.SparseArray;
 
-import com.example.netdatatransfer.R;
 
 public class NetConfApplication extends Application {
     public int wifi = 0;
@@ -53,7 +53,7 @@ public class NetConfApplication extends Application {
     public final String FAIL = "IOException";
 
     // 广播IP
-    public final String broadcastIP = "224.0.0.1";
+    public static final String broadcastIP = "224.0.0.1";
 
     // 信号
     public static final int text = 0;
@@ -84,6 +84,13 @@ public class NetConfApplication extends Application {
 
     // 记录聊天内容
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
+
+    // 文件格式
+    public final static String[] imageSupport = { "BMP", "JPG", "JPEG", "PNG",
+            "GIF" };
+    public final static String[] videoSupport = { "rmvb", "AVI", "mp4", "3gp",
+            "mpg" };
+    public final static String[] audioSupport = { "mp3", "wma", "wav", "amr" };
 
     // 检查端口
     public String check(Context userListActivity) {
@@ -130,7 +137,8 @@ public class NetConfApplication extends Application {
         for (int i = 0; i < hostList.size(); i++) {
             Host h = hostList.get(i);
             if ((h.getIp().equals(host.getIp()))
-                    && (h.getState() == host.getState())) {
+                    && (h.getState() == host.getState())
+                    && (h.getUserName().equals(host.getUserName()))) {
                 return true;
             }
         }
@@ -191,6 +199,7 @@ public class NetConfApplication extends Application {
     }
 
     // 播放消息提示音
+    @SuppressWarnings("deprecation")
     public void loadVoice() {
         soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
         soundPool.load(this, R.raw.msn, 1);

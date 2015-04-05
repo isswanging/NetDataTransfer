@@ -9,6 +9,7 @@ import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -36,7 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class ChatActivity extends Activity {
     private ChatOnClickListener clickListener = new ChatOnClickListener();
@@ -55,6 +56,7 @@ public class ChatActivity extends Activity {
 
     NetConfApplication app;
 
+    @SuppressLint("InflateParams")
     private void initActionBar() {
         ActionBar title = getActionBar();
         title.setDisplayShowHomeEnabled(false);
@@ -110,6 +112,7 @@ public class ChatActivity extends Activity {
 
         mListView.setOnTouchListener(new OnTouchListener() {
 
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 Logger.info(this.toString(), "touch .................");
@@ -141,8 +144,9 @@ public class ChatActivity extends Activity {
                     chatEditText.setText("");
                     mListView.setSelection(mListView.getCount() - 1);
 
-                    final DataPacket dp = new DataPacket(app.hostIP, hostName,
-                            chatText, app.text);
+                    final DataPacket dp = new DataPacket(
+                            NetConfApplication.hostIP, hostName, chatText,
+                            NetConfApplication.text);
 
                     new Thread(new Runnable() {
 
@@ -151,7 +155,7 @@ public class ChatActivity extends Activity {
                             try {
                                 app.sendUdpData(new DatagramSocket(),
                                         JSON.toJSONString(dp), targetIp,
-                                        app.textPort);
+                                        NetConfApplication.textPort);
                             } catch (SocketException e) {
                                 e.printStackTrace();
                             }
@@ -171,7 +175,7 @@ public class ChatActivity extends Activity {
 
             case R.id.sendVideo:
                 sendFile.setVisibility(View.GONE);
-                showFileChooser("vedio/*", vedio);
+                showFileChooser("video/*", vedio);
                 break;
 
             case R.id.sendAudio:
@@ -260,7 +264,7 @@ public class ChatActivity extends Activity {
 
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-           
+
             switch (requestCode) {
             case image:
             case vedio:
@@ -285,14 +289,15 @@ public class ChatActivity extends Activity {
     }
 
     public void sendnotifyMsg(String filePath) {
-        final DataPacket dp = new DataPacket(app.hostIP,
-                android.os.Build.MODEL, filePath, app.filePre);
+        final DataPacket dp = new DataPacket(NetConfApplication.hostIP,
+                android.os.Build.MODEL, filePath, NetConfApplication.filePre);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     app.sendUdpData(new DatagramSocket(),
-                            JSON.toJSONString(dp), targetIp, app.textPort);
+                            JSON.toJSONString(dp), targetIp,
+                            NetConfApplication.textPort);
                 } catch (SocketException e) {
                     e.printStackTrace();
                 }
@@ -343,6 +348,7 @@ public class ChatActivity extends Activity {
         else {
             String[] proj = { type };
             // 好像是android多媒体数据库的封装接口，具体的看Android文档
+            @SuppressWarnings("deprecation")
             Cursor cursor = managedQuery(uri, proj, null, null, null);
             // 按我个人理解 这个是获得用户选择的图片的索引值
             int column_index = cursor.getColumnIndexOrThrow(type);

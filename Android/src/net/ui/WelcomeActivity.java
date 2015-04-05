@@ -1,6 +1,7 @@
 package net.ui;
 
 import java.io.File;
+import java.util.List;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
@@ -11,12 +12,12 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Intent.ShortcutIconResource;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
-
-import com.example.netdatatransfer.R;
+import net.app.netdatatransfer.R;
 
 public class WelcomeActivity extends Activity {
     private NetConfApplication app;
@@ -28,8 +29,10 @@ public class WelcomeActivity extends Activity {
         app = (NetConfApplication) getApplication();
         app.nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // 创建快捷方式
+        createShortCut();
+        // 启动动画
         ImageView welcomeAnim = (ImageView) findViewById(R.id.welcome_img);
-
         welcomeAnim.setBackgroundResource(R.anim.welcome_anim);
         final AnimationDrawable anim = (AnimationDrawable) welcomeAnim
                 .getBackground();
@@ -43,9 +46,10 @@ public class WelcomeActivity extends Activity {
             // 加载音乐
             app.loadVoice();
             // 创建接收文件的目录
-            app.saveFilePath = app.getSDPath() + "/NetDataTransfer/recFile";
-            Logger.info(this.toString(), app.saveFilePath);
-            File recFile = new File(app.saveFilePath);
+            NetConfApplication.saveFilePath = app.getSDPath()
+                    + "/NetDataTransfer/recFile";
+            Logger.info(this.toString(), NetConfApplication.saveFilePath);
+            File recFile = new File(NetConfApplication.saveFilePath);
             if (!recFile.exists()) {
                 Logger.info(this.toString(), "create dir");
                 recFile.mkdirs();
@@ -64,6 +68,30 @@ public class WelcomeActivity extends Activity {
         }, 2400);
     }
 
+    private void createShortCut() {
+        // 调试版本不创建快捷方式
+        if (!Logger.tag) {
+            Intent shortcut = new Intent(
+                    "com.android.launcher.action.INSTALL_SHORTCUT");
+
+            // 快捷方式的名称
+            shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+                    getString(R.string.app_name));
+            // 快捷方式的图标
+            ShortcutIconResource iconRes = Intent.ShortcutIconResource
+                    .fromContext(this, R.drawable.ic_launcher);
+            shortcut.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconRes);
+            shortcut.putExtra("duplicate", false); // 不允许重复创建
+            Intent shortcutIntent = new Intent(Intent.ACTION_MAIN);
+            shortcutIntent.setClass(this, WelcomeActivity.class);
+            shortcutIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            shortcutIntent.setClass(this, WelcomeActivity.class);// 设置第一个页面
+            shortcut.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+
+            sendBroadcast(shortcut);
+        }
+    }
+
     private void listen() {
         this.startService(new Intent(this, UdpDataMonitorService.class));
         this.startService(new Intent(this, BroadcastMonitorService.class));
@@ -72,7 +100,7 @@ public class WelcomeActivity extends Activity {
 
     private void preCheck() {
         if (app.check(this).endsWith(app.SUCCESS)) {
-            app.hostIP = app.getHostIp(this);// 获取ip地址
+            NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         }
     }
 }

@@ -58,8 +58,10 @@ public class BroadcastMonitorService extends Service {
             try {
                 Logger.info(this.toString(), "start a service");
                 broadPacket = new DatagramPacket(new byte[512], 512);
-                broadSocket = new MulticastSocket(NetConfApplication.broadcastPort);
-                broadSocket.joinGroup(InetAddress.getByName(app.broadcastIP));
+                broadSocket = new MulticastSocket(
+                        NetConfApplication.broadcastPort);
+                broadSocket.joinGroup(InetAddress
+                        .getByName(NetConfApplication.broadcastIP));
                 while (tag) {
                     // 收到广播
                     broadSocket.receive(broadPacket);
@@ -88,7 +90,8 @@ public class BroadcastMonitorService extends Service {
                                     NetConfApplication.hostIP, hostName, 1, 1);
                             String hostInfo = JSON.toJSONString(res);
                             app.sendUdpData(broadSocket, hostInfo,
-                                    host.getIp(), NetConfApplication.broadcastPort);
+                                    host.getIp(),
+                                    NetConfApplication.broadcastPort);
 
                         }
                     }

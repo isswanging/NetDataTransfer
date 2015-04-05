@@ -126,7 +126,7 @@ public class FileMonitorService extends Service {
             } catch (IOException e) {
                 Logger.info(this.toString(), e.toString());
             } finally {
-                NetConfApplication.getTaskList.remove(taskId);
+                NetConfApplication.sendTaskList.remove(taskId);
                 try {
                     bis.close();
                     bos.close();
