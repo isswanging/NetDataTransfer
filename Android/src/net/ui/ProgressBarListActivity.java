@@ -66,7 +66,7 @@ public class ProgressBarListActivity extends Activity {
         int key;
         for (int i = 0, nsize = sa.size(); i < nsize; i++) {
             key = sa.keyAt(i);
-            if (key != -1) {
+            if (key > 0) {
                 data.add(sa.get(key));
             }
         }

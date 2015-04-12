@@ -77,7 +77,7 @@ public class UserListActivity extends Activity {
     private boolean isReady = false;
 
     // 更新消息提示的广播
-    newMsgReceiver msgReceiver;
+    NewMsgReceiver msgReceiver;
     IntentFilter filter;
 
     @Override
@@ -253,7 +253,7 @@ public class UserListActivity extends Activity {
         // 延迟一点加载列表
         if (app.wifi == 1) {
             // 注册广播
-            msgReceiver = new newMsgReceiver();
+            msgReceiver = new NewMsgReceiver();
             filter = new IntentFilter();
             filter.addAction("net.ui.newMsg");
             registerReceiver(msgReceiver, filter);
@@ -323,7 +323,7 @@ public class UserListActivity extends Activity {
         return userList;
     }
 
-    class newMsgReceiver extends BroadcastReceiver {
+    class NewMsgReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
