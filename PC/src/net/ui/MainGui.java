@@ -37,6 +37,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.MouseInputListener;
 import javax.swing.table.DefaultTableModel;
@@ -386,6 +387,12 @@ public class MainGui {
     }
 
     public static void main(String[] args) {
+        try {
+            UIManager
+                    .setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         new MainGui();
     }
 
