@@ -21,17 +21,17 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp" >
 
-        <ImageView
+        <net.ui.RoundImageView
             android:id="@+id/chatHead"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:background="@drawable/chat_head_left"
+            android:src="@drawable/chat_head_left"
             android:focusable="false" />
 
         <TextView

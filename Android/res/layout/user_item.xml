@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <ImageView
+    <net.ui.RoundImageView
         android:id="@+id/head"
         android:layout_width="@dimen/head_width"
         android:layout_height="@dimen/head_height"
@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginBottom="@dimen/head_margin"
         android:layout_marginTop="@dimen/head_margin"
-        android:src="@drawable/head" />
+        android:src="@drawable/head_ro" />
 
     <TextView
         android:id="@+id/userName"
@@ -32,15 +32,15 @@
         android:layout_toRightOf="@id/head"
         android:textColor="#000000"
         android:textSize="@dimen/ip_size" />
-    
-    <ImageView 
+
+    <ImageView
         android:id="@+id/unread"
         android:layout_width="@dimen/unread_size"
         android:layout_height="@dimen/unread_size"
-        android:layout_marginRight="@dimen/unread_margin"
-        android:layout_marginTop="@dimen/unread_margin"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="@null"/>
+        android:layout_marginRight="@dimen/unread_margin"
+        android:layout_marginTop="@dimen/unread_margin"
+        android:background="@null" />
 
 </RelativeLayout>
