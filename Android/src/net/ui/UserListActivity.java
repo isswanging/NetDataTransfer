@@ -16,6 +16,7 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
+import net.util.CreateQRImage;
 import net.vo.Host;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,12 +44,14 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+
 import net.app.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
@@ -77,7 +80,7 @@ public class UserListActivity extends Activity {
     private boolean isReady = false;
 
     // 更新消息提示的广播
-    newMsgReceiver msgReceiver;
+    NewMsgReceiver msgReceiver;
     IntentFilter filter;
 
     @Override
@@ -147,6 +150,12 @@ public class UserListActivity extends Activity {
             Intent intentGet = new Intent(this, ProgressBarListActivity.class);
             intentGet.setFlags(get);
             startActivity(intentGet);
+            break;
+
+        case R.id.scan:
+            Intent intentScan = new Intent(this, CaptureActivity.class);
+            intentScan.setFlags(get);
+            startActivity(intentScan);
             break;
         default:
             break;
@@ -253,7 +262,7 @@ public class UserListActivity extends Activity {
         // 延迟一点加载列表
         if (app.wifi == 1) {
             // 注册广播
-            msgReceiver = new newMsgReceiver();
+            msgReceiver = new NewMsgReceiver();
             filter = new IntentFilter();
             filter.addAction("net.ui.newMsg");
             registerReceiver(msgReceiver, filter);
@@ -303,6 +312,9 @@ public class UserListActivity extends Activity {
         t4.setText("：" + tm.getNetworkOperator());
         t5.setText("：" + manufacturerName);
 
+        ImageView QRImg = (ImageView) findViewById(R.id.QRCode);
+        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg);
+
     }
 
     private List<Map<String, Object>> getData() {
@@ -323,7 +335,7 @@ public class UserListActivity extends Activity {
         return userList;
     }
 
-    class newMsgReceiver extends BroadcastReceiver {
+    class NewMsgReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {

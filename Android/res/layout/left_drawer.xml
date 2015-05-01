@@ -134,5 +134,12 @@
                 android:textSize="17dp" />
         </TableRow>
     </TableLayout>
+    
+    <ImageView 
+        android:id="@+id/QRCode"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        />
 
 </LinearLayout>
