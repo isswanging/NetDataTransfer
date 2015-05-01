@@ -14,4 +14,5 @@
     <string name="send_progress">文件发送进度</string>
     <string name="get_progress">文件接收进度</string>
     <string name="open_folder">查看文件</string>
+    <string name="scan">扫一扫</string>
 </resources>

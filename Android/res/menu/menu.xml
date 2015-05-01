@@ -21,6 +21,12 @@
         android:showAsAction="never"
         android:title="@string/open_folder"/>
     <item
+        android:id="@+id/scan"
+        android:icon="@drawable/scan"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/scan"/>
+    <item
         android:id="@+id/exit"
         android:icon="@drawable/close"
         android:orderInCategory="100"

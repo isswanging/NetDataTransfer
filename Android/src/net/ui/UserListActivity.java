@@ -16,6 +16,7 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
+import net.util.CreateQRImage;
 import net.vo.Host;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,12 +44,14 @@ import android.view.ViewConfiguration;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+
 import net.app.netdatatransfer.R;
 
 public class UserListActivity extends Activity {
@@ -147,6 +150,12 @@ public class UserListActivity extends Activity {
             Intent intentGet = new Intent(this, ProgressBarListActivity.class);
             intentGet.setFlags(get);
             startActivity(intentGet);
+            break;
+
+        case R.id.scan:
+            Intent intentScan = new Intent(this, CaptureActivity.class);
+            intentScan.setFlags(get);
+            startActivity(intentScan);
             break;
         default:
             break;
@@ -302,6 +311,9 @@ public class UserListActivity extends Activity {
         t3.setText("：" + tm.getNetworkOperatorName());
         t4.setText("：" + tm.getNetworkOperator());
         t5.setText("：" + manufacturerName);
+
+        ImageView QRImg = (ImageView) findViewById(R.id.QRCode);
+        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg);
 
     }
 
