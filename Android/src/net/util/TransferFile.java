@@ -13,8 +13,8 @@ import java.net.Socket;
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.DataPacket;
-import net.vo.GetTask;
 import net.vo.Progress;
+import net.vo.SendTask;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -30,9 +30,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+
 import net.app.netdatatransfer.R;
 
-public class TransferFile extends AsyncTask<GetTask, Void, Void> {
+public class TransferFile extends AsyncTask<SendTask, Void, Void> {
     Context context;
     String fileName;
     NetConfApplication app;
@@ -44,10 +45,10 @@ public class TransferFile extends AsyncTask<GetTask, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(GetTask... params) {
+    protected Void doInBackground(SendTask... params) {
 
         Logger.info(this.toString(), "begin accept file");
-        DataPacket dp = params[0].getDp();
+        DataPacket dp = params[0].getDataPacket();
         int taskId = params[0].getTaskId();
         fileName = params[0].getFileName();
 

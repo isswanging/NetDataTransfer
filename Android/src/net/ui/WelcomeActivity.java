@@ -93,8 +93,8 @@ public class WelcomeActivity extends Activity {
     }
 
     private void listen() {
-        this.startService(new Intent(this, UdpDataMonitorService.class));
         this.startService(new Intent(this, BroadcastMonitorService.class));
+        this.startService(new Intent(this, UdpDataMonitorService.class));
         this.startService(new Intent(this, FileMonitorService.class));
     }
 

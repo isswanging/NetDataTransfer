@@ -21,7 +21,7 @@ public class BroadcastMonitorService extends Service {
     NetConfApplication app;
     Thread thread;
     boolean tag;
-    WifiManager.MulticastLock lock;
+    WifiManager.MulticastLock wifiLock;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -29,10 +29,16 @@ public class BroadcastMonitorService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         WifiManager manager = (WifiManager) this.getSystemService(WIFI_SERVICE);
-        lock = manager.createMulticastLock("wifi");
-        lock.acquire();
+        wifiLock = manager.createMulticastLock("wifi");
+        wifiLock.setReferenceCounted(true);
+        wifiLock.acquire();
 
         app = (NetConfApplication) getApplication();
         Logger.info(this.toString(), "BroadcastMonitor started");
@@ -44,7 +50,7 @@ public class BroadcastMonitorService extends Service {
 
     @Override
     public void onDestroy() {
-        lock.release();
+        wifiLock.release();
         tag = false;
         thread.interrupt();
         Logger.info(this.toString(), "service stop");
@@ -92,7 +98,6 @@ public class BroadcastMonitorService extends Service {
                             app.sendUdpData(broadSocket, hostInfo,
                                     host.getIp(),
                                     NetConfApplication.broadcastPort);
-
                         }
                     }
                 }
