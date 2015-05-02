@@ -86,7 +86,8 @@ public class UdpDataMonitorService extends Service {
                     notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-                    app.getDate(), "向你发来了一个文件", true);
+                    app.getDate(), JSON.parseObject(info, DataPacket.class)
+                            .getContent(), true);
             if (app.chatTempMap.containsKey(dp.getIp())) {
                 app.chatTempMap.get(dp.getIp()).add(entity);
             } else {
