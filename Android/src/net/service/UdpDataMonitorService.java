@@ -162,7 +162,7 @@ public class UdpDataMonitorService extends Service {
                         new TransferFile(UdpDataMonitorService.this)
                                 .executeOnExecutor(
                                         AsyncTask.THREAD_POOL_EXECUTOR,
-                                        new SendTask(id, null, fileName,dp));
+                                        new SendTask(id, null, fileName, dp));
                         DataPacket dpClone = new DataPacket();
                         dpClone.setContent("向你发来了一个文件");
                         dpClone.setIp(dp.getIp());

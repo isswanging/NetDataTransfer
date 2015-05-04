@@ -1,12 +1,13 @@
 package net.ui;
 
 import java.io.File;
-import java.util.List;
 
 import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
+import net.service.ScreenMonitorService;
 import net.service.UdpDataMonitorService;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -17,7 +18,6 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageView;
-import net.app.netdatatransfer.R;
 
 public class WelcomeActivity extends Activity {
     private NetConfApplication app;
@@ -96,6 +96,7 @@ public class WelcomeActivity extends Activity {
         this.startService(new Intent(this, BroadcastMonitorService.class));
         this.startService(new Intent(this, UdpDataMonitorService.class));
         this.startService(new Intent(this, FileMonitorService.class));
+        this.startService(new Intent(this, ScreenMonitorService.class));
     }
 
     private void preCheck() {

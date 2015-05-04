@@ -5,12 +5,12 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
 import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.vo.DataPacket;
 import net.vo.Progress;
@@ -30,8 +30,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-
-import net.app.netdatatransfer.R;
 
 public class TransferFile extends AsyncTask<SendTask, Void, Void> {
     Context context;
@@ -123,12 +121,6 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
 
         for (String s : NetConfApplication.imageSupport) {
             if (s.equalsIgnoreCase(buffix)) {
-                // try {
-                // MediaStore.Images.Media.insertImage(
-                // context.getContentResolver(), path, fileName, null);
-                // } catch (FileNotFoundException e) {
-                // e.printStackTrace();
-                // }
                 ContentValues newValues = new ContentValues(6);
                 newValues.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
                 newValues.put(MediaStore.Images.Media.DATA, path);

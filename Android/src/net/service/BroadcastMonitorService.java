@@ -37,7 +37,6 @@ public class BroadcastMonitorService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         WifiManager manager = (WifiManager) this.getSystemService(WIFI_SERVICE);
         wifiLock = manager.createMulticastLock("wifi");
-        wifiLock.setReferenceCounted(true);
         wifiLock.acquire();
 
         app = (NetConfApplication) getApplication();
