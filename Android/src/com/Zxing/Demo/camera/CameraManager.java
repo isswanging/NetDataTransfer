@@ -236,8 +236,11 @@ public final class CameraManager {
       } else if (height > MAX_FRAME_HEIGHT) {
         height = MAX_FRAME_HEIGHT;
       }
+      
+      
       int leftOffset = (screenResolution.x - width) / 2;
-      int topOffset = (screenResolution.y - height) / 2 - 100;
+      int topOffset = (screenResolution.y - height) / 2 - 
+              (int)(context.getResources().getDisplayMetrics().density*48 + 0.5f);
       framingRect = new Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);
       Log.d(TAG, "Calculated framing rect: " + framingRect);
     }

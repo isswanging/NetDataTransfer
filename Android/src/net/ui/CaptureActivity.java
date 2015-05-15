@@ -186,9 +186,17 @@ public class CaptureActivity extends Activity implements Callback {
                                     public void onClick(DialogInterface dialog,
                                             int which) {
                                         setResult(RESULT_OK);// 确定按钮事件
-                                        finish();
+
+                                        // 继续扫描
+                                        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+                                        SurfaceHolder surfaceHolder = surfaceView
+                                                .getHolder();
+                                        initCamera(surfaceHolder);
+                                        if (handler != null)
+                                            handler.restartPreviewAndDecode();
                                     }
                                 }).show();
+
             }
         }
     }
