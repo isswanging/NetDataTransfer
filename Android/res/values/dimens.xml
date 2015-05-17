@@ -31,4 +31,5 @@
     <dimen name="unread_margin">15dp</dimen>
     <dimen name="left_drawer">248dp</dimen>
     <dimen name="file_img_size">50dp</dimen>
+    <dimen name="corner_length">12dp</dimen>
 </resources>
