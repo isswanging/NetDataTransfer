@@ -29,7 +29,6 @@ import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.util.SparseArray;
 
-
 public class NetConfApplication extends Application {
     public int wifi = 0;
     public String chatId = "none";

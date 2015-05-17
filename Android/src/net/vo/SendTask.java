@@ -8,7 +8,7 @@ public class SendTask {
     String fileName;
     DataPacket dataPacket;
 
-    public SendTask(int id, Socket s, String name,DataPacket dp) {
+    public SendTask(int id, Socket s, String name, DataPacket dp) {
         taskId = id;
         socket = s;
         fileName = name;

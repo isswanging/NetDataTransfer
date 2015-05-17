@@ -6,12 +6,13 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
-import net.vo.GetTask;
 import net.vo.Progress;
+import net.vo.SendTask;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -26,7 +27,6 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import net.app.netdatatransfer.R;
 
 public class UdpDataMonitorService extends Service {
     DatagramSocket UdpSocket = null;
@@ -86,7 +86,8 @@ public class UdpDataMonitorService extends Service {
                     notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-                    app.getDate(), "向你发来了一个文件", true);
+                    app.getDate(), JSON.parseObject(info, DataPacket.class)
+                            .getContent(), true);
             if (app.chatTempMap.containsKey(dp.getIp())) {
                 app.chatTempMap.get(dp.getIp()).add(entity);
             } else {
@@ -161,7 +162,7 @@ public class UdpDataMonitorService extends Service {
                         new TransferFile(UdpDataMonitorService.this)
                                 .executeOnExecutor(
                                         AsyncTask.THREAD_POOL_EXECUTOR,
-                                        new GetTask(id, dp, fileName));
+                                        new SendTask(id, null, fileName, dp));
                         DataPacket dpClone = new DataPacket();
                         dpClone.setContent("向你发来了一个文件");
                         dpClone.setIp(dp.getIp());

@@ -20,12 +20,15 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import net.app.netdatatransfer.R;
+import net.app.netdatatransfer.R.color;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -43,7 +46,7 @@ public final class ViewfinderView extends View {
 
     private static final int[] SCANNER_ALPHA = { 0, 64, 128, 192, 255, 192,
             128, 64 };
-    private static final long ANIMATION_DELAY = 100L;
+    private static final long ANIMATION_DELAY = 10L;
     private static final int OPAQUE = 0xFF;
 
     private final Paint paint;
@@ -56,6 +59,15 @@ public final class ViewfinderView extends View {
     private int scannerAlpha;
     private Collection<ResultPoint> possibleResultPoints;
     private Collection<ResultPoint> lastPossibleResultPoints;
+    private final int cornerLength;
+    private boolean isFirst = true;
+
+    private static final int CORNER_WIDTH = 6;// 四个绿色边角对应的宽度
+    private int slideTop; // 中间滑动线的最顶端位置
+    private int slideBottom; // 中间滑动线的最底端位置
+    private static final int MIDDLE_LINE_WIDTH = 6; // 扫描框中的中间线的宽度
+    private static final int MIDDLE_LINE_PADDING = 5; // 扫描框中的中间线的与扫描框左右的间隙
+    private static final int SPEEN_DISTANCE = 5; // 中间那条线每次刷新移动的距离
 
     // This constructor is used when the class is built from an XML resource.
     public ViewfinderView(Context context, AttributeSet attrs) {
@@ -72,6 +84,7 @@ public final class ViewfinderView extends View {
         resultPointColor = resources.getColor(R.color.possible_result_points);
         scannerAlpha = 0;
         possibleResultPoints = new HashSet<ResultPoint>(5);
+        cornerLength = (int) resources.getDimension(R.dimen.corner_length);
     }
 
     @Override
@@ -82,6 +95,12 @@ public final class ViewfinderView extends View {
         }
         int width = canvas.getWidth();
         int height = canvas.getHeight();
+
+        if (isFirst) {
+            isFirst = false;
+            slideTop = frame.top;
+            slideBottom = frame.bottom;
+        }
 
         // Draw the exterior (i.e. outside the framing rect) darkened
         paint.setColor(resultBitmap != null ? resultColor : maskColor);
@@ -108,14 +127,39 @@ public final class ViewfinderView extends View {
             canvas.drawRect(frame.left, frame.bottom - 1, frame.right + 1,
                     frame.bottom + 1, paint);
 
+            // Draw four green corner
+            paint.setColor(Color.GREEN);
+            canvas.drawRect(frame.left + 1, frame.top + 1, frame.left + 1
+                    + cornerLength, frame.top + 1 + CORNER_WIDTH, paint);
+            canvas.drawRect(frame.right - cornerLength, frame.top + 1,
+                    frame.right, frame.top + 1 + CORNER_WIDTH, paint);
+            canvas.drawRect(frame.left + 1, frame.bottom - CORNER_WIDTH,
+                    frame.left + 1 + cornerLength, frame.bottom, paint);
+            canvas.drawRect(frame.right - cornerLength, frame.bottom
+                    - CORNER_WIDTH, frame.right, frame.bottom, paint);
+            canvas.drawRect(frame.left + 1, frame.top + 1, frame.left + 1
+                    + CORNER_WIDTH, frame.top + 1 + cornerLength, paint);
+            canvas.drawRect(frame.right - CORNER_WIDTH, frame.top + 1,
+                    frame.right, frame.top + 1 + cornerLength, paint);
+            canvas.drawRect(frame.left + 1, frame.bottom - cornerLength,
+                    frame.left + 1 + CORNER_WIDTH, frame.bottom, paint);
+            canvas.drawRect(frame.right - CORNER_WIDTH, frame.bottom
+                    - cornerLength, frame.right, frame.bottom, paint);
+
             // Draw a red "laser scanner" line through the middle to show
             // decoding is active
-            paint.setColor(laserColor);
-            paint.setAlpha(SCANNER_ALPHA[scannerAlpha]);
-            scannerAlpha = (scannerAlpha + 1) % SCANNER_ALPHA.length;
-            int middle = frame.height() / 2 + frame.top;
-            canvas.drawRect(frame.left + 2, middle - 1, frame.right - 1,
-                    middle + 2, paint);
+            slideTop += SPEEN_DISTANCE;
+            if (slideTop >= frame.bottom) {
+                slideTop = frame.top;
+            }
+            Rect lineRect = new Rect();
+            lineRect.left = frame.left;
+            lineRect.right = frame.right;
+            lineRect.top = slideTop;
+            lineRect.bottom = slideTop + 18;
+            canvas.drawBitmap(((BitmapDrawable) (getResources()
+                    .getDrawable(R.drawable.qrcode_scan_line))).getBitmap(),
+                    null, lineRect, paint);
 
             Collection<ResultPoint> currentPossible = possibleResultPoints;
             Collection<ResultPoint> currentLast = lastPossibleResultPoints;
