@@ -13,7 +13,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 public class CreateQRImage {
     private static ImageView sweepIV;
-    private int QR_WIDTH = 200, QR_HEIGHT = 200;
+    private int QR_WIDTH = 300, QR_HEIGHT = 300;
 
     public CreateQRImage(String uri,ImageView img) {
         sweepIV = img;

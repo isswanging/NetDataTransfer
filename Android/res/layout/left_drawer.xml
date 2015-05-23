@@ -3,7 +3,7 @@
     android:layout_width="@dimen/left_drawer"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="@drawable/left_bg"
+    android:background="#ffffff"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -137,9 +137,10 @@
     
     <ImageView 
         android:id="@+id/QRCode"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:paddingTop="45dp"
         />
 
 </LinearLayout>
