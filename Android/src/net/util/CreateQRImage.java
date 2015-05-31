@@ -2,7 +2,11 @@ package net.util;
 
 import java.util.Hashtable;
 
+import net.app.netdatatransfer.R;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.widget.ImageView;
 
 import com.google.zxing.BarcodeFormat;
@@ -13,10 +17,13 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 public class CreateQRImage {
     private static ImageView sweepIV;
-    private int QR_WIDTH = 300, QR_HEIGHT = 300;
+    private Context context;
+    private final int QR_WIDTH = 300, QR_HEIGHT = 300;
+    private int imageW, imageH;
 
-    public CreateQRImage(String uri,ImageView img) {
+    public CreateQRImage(String uri, ImageView img, Context context) {
         sweepIV = img;
+        this.context = context;
         createQRImage(uri);
     }
 
@@ -27,6 +34,21 @@ public class CreateQRImage {
             if (url == null || "".equals(url) || url.length() < 1) {
                 return;
             }
+            Bitmap[] bitmaps = new Bitmap[2];
+
+            BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+            bmpFactoryOptions.inJustDecodeBounds = true;
+            bitmaps[1] = BitmapFactory.decodeResource(context.getResources(),
+                    R.drawable.qr_logo, bmpFactoryOptions);// logo图标
+            bmpFactoryOptions.inSampleSize = 2;
+            bmpFactoryOptions.inJustDecodeBounds = false;
+            bitmaps[1] = BitmapFactory.decodeResource(context.getResources(),
+                    R.drawable.qr_logo, bmpFactoryOptions);// logo图标
+            imageW = bitmaps[1].getWidth();
+            imageH = bitmaps[1].getHeight();
+            int startW = QR_WIDTH / 2 - imageW / 2;
+            int starH = QR_HEIGHT / 2 - imageH / 2;
+
             Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
             hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
             // 图像数据转换，使用了矩阵转换
@@ -48,10 +70,31 @@ public class CreateQRImage {
             Bitmap bitmap = Bitmap.createBitmap(QR_WIDTH, QR_HEIGHT,
                     Bitmap.Config.ARGB_8888);
             bitmap.setPixels(pixels, 0, QR_WIDTH, 0, 0, QR_WIDTH, QR_HEIGHT);
+            bitmaps[0] = bitmap;
+
             // 显示到一个ImageView上面
-            sweepIV.setImageBitmap(bitmap);
+            sweepIV.setImageBitmap(addLogo(bitmaps, startW, starH));
         } catch (WriterException e) {
             e.printStackTrace();
         }
+    }
+
+    // 添加logo
+    public Bitmap addLogo(Bitmap[] bitmaps, int w, int h) {
+
+        Bitmap newBitmap = Bitmap.createBitmap(bitmaps[0].getWidth(),
+                bitmaps[0].getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas cv = new Canvas(newBitmap);
+
+        for (int i = 0; i < bitmaps.length; i++) {
+            if (i == 0) {
+                cv.drawBitmap(bitmaps[0], 0, 0, null);
+            } else {
+                cv.drawBitmap(bitmaps[i], w, h, null);
+            }
+            cv.save(Canvas.ALL_SAVE_FLAG);
+            cv.restore();
+        }
+        return newBitmap;
     }
 }
