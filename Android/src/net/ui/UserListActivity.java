@@ -101,6 +101,7 @@ public class UserListActivity extends Activity {
         super.onResume();
     }
 
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         app = (NetConfApplication) getApplication();
@@ -313,7 +314,7 @@ public class UserListActivity extends Activity {
         t5.setText("：" + manufacturerName);
 
         ImageView QRImg = (ImageView) findViewById(R.id.QRCode);
-        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg);
+        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg,this);
 
     }
 

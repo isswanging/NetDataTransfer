@@ -44,7 +44,8 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" 
+            android:logo="@drawable/left_img">
             <intent-filter>
                 <action android:name="net.ui.userList" />
 
