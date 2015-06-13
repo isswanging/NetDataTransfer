@@ -1,6 +1,9 @@
 package net.ui;
 
 import java.util.ArrayList;
+
+import com.daimajia.numberprogressbar.NumberProgressBar;
+
 import net.app.NetConfApplication;
 import net.log.Logger;
 import net.vo.Progress;
@@ -100,7 +103,7 @@ public class ProgressBarListActivity extends Activity {
 
     class ViewHolder {
         public TextView fileName;
-        public ProgressBar progerss;
+        public NumberProgressBar progerss;
     }
 
     class ProgressAdapter extends BaseAdapter {
@@ -137,8 +140,8 @@ public class ProgressBarListActivity extends Activity {
                 convertView = mInflater.inflate(R.layout.progress_item, null);
                 v.fileName = (TextView) convertView
                         .findViewById(R.id.traFileName);
-                v.progerss = (ProgressBar) convertView
-                        .findViewById(R.id.progressBar);
+                v.progerss = (NumberProgressBar) convertView
+                        .findViewById(R.id.number_progress_bar);
                 convertView.setTag(v);
                 v.progerss.setMax(100);
             } else {

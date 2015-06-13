@@ -18,12 +18,14 @@ import com.google.zxing.qrcode.QRCodeWriter;
 public class CreateQRImage {
     private static ImageView sweepIV;
     private Context context;
-    private final int QR_WIDTH = 300, QR_HEIGHT = 300;
+    private int QR_WIDTH = 200, QR_HEIGHT = 200;
     private int imageW, imageH;
 
     public CreateQRImage(String uri, ImageView img, Context context) {
         sweepIV = img;
         this.context = context;
+        QR_WIDTH = dip2px(context, QR_WIDTH);
+        QR_HEIGHT = dip2px(context, QR_HEIGHT);
         createQRImage(uri);
     }
 
@@ -96,5 +98,10 @@ public class CreateQRImage {
             cv.restore();
         }
         return newBitmap;
+    }
+
+    public int dip2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 }
