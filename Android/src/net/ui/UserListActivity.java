@@ -14,6 +14,7 @@ import net.app.NetConfApplication;
 import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
+import net.service.ScreenMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.util.CreateQRImage;
@@ -178,6 +179,7 @@ public class UserListActivity extends Activity {
         stopService(new Intent(this, BroadcastMonitorService.class));
         stopService(new Intent(this, UdpDataMonitorService.class));
         stopService(new Intent(this, FileMonitorService.class));
+        stopService(new Intent(this, ScreenMonitorService.class));
         super.onDestroy();
     }
 
@@ -226,12 +228,14 @@ public class UserListActivity extends Activity {
                     Host host = new Host(userName, userDomain,
                             NetConfApplication.hostIP,
                             NetConfApplication.hostName, 1, 0);
-                    app.addHost(host);
-
+                    
                     app.sendUdpData(new DatagramSocket(),
                             JSON.toJSONString(host),
                             NetConfApplication.broadcastIP,
                             NetConfApplication.broadcastPort);
+                    
+                    app.addHost(host);
+                    host.setState(0);
                 } catch (SocketException e) {
                     e.printStackTrace();
                 }
@@ -314,7 +318,8 @@ public class UserListActivity extends Activity {
         t5.setText("：" + manufacturerName);
 
         ImageView QRImg = (ImageView) findViewById(R.id.QRCode);
-        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg,this);
+        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg,
+                this);
 
     }
 

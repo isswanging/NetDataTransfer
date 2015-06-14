@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -43,9 +44,9 @@
             android:name="net.ui.UserListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
+            android:logo="@drawable/left_img"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" 
-            android:logo="@drawable/left_img">
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
             <intent-filter>
                 <action android:name="net.ui.userList" />
 
@@ -96,13 +97,21 @@
             </intent-filter>
         </activity>
 
-        <service android:name="net.service.BroadcastMonitorService" >
+        <service
+            android:name="net.service.BroadcastMonitorService"
+            android:persistent="true" >
         </service>
-        <service android:name="net.service.UdpDataMonitorService" >
+        <service
+            android:name="net.service.UdpDataMonitorService"
+            android:persistent="true" >
         </service>
-        <service android:name="net.service.FileMonitorService" >
+        <service
+            android:name="net.service.FileMonitorService"
+            android:persistent="true" >
         </service>
-        <service android:name="net.service.ScreenMonitorService" >
+        <service
+            android:name="net.service.ScreenMonitorService"
+            android:persistent="true" >
         </service>
     </application>
 

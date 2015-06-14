@@ -59,6 +59,9 @@ public class NetConfApplication extends Application {
     public static final int filePre = 1;
     public static final int fileConf = 2;
     public static final int refuse = 3;
+    // PC上使用的两个标志位
+    // public final static int folderPre = 4;
+    // public final static int folderConf = 5;
     public static final int end = 6;
 
     public int getText() {
