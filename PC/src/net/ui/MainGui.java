@@ -110,13 +110,13 @@ public class MainGui {
             // 加入在线列表
             Host host = new Host(userName, userDomain, ip, hostName, 1, 0);
             String hostInfo = JSON.toJSONString(host);
-            NetDomain.addHost(host);
-
-            logger.info("主机" + ip + "登录成功");
 
             // 广播登录信息
             NetDomain.sendUdpData(new DatagramSocket(), hostInfo,
                     SystemConf.broadcastIP, SystemConf.broadcastPort);
+            NetDomain.addHost(host);
+            host.setState(0);
+            logger.info("主机" + ip + "登录成功");
 
         } catch (IOException e) {
             logger.error("exception: " + e);

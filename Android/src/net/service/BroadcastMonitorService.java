@@ -76,9 +76,8 @@ public class BroadcastMonitorService extends Service {
                             broadPacket.getLength());
                     Host host = JSON.parseObject(info, Host.class);
                     host.setState(0);
-                    Logger.info(this.toString(), "host: " + host.getHostName());
+                    Logger.info(this.toString(), "from ip: " + host.getIp());
 
-                    Logger.info(this.toString(), "receive a host");
                     if (!app.containHost(host)) {
                         host.setState(1);
                         app.addHost(host);
