@@ -81,8 +81,6 @@ public class ChatMsgAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.sendTime = (TextView) convertView
                     .findViewById(R.id.sendTime);
-            viewHolder.chatName = (TextView) convertView
-                    .findViewById(R.id.chatName);
             viewHolder.content = (TextView) convertView
                     .findViewById(R.id.chatContent);
             viewHolder.isComMsg = isComMsg;
@@ -92,7 +90,6 @@ public class ChatMsgAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         viewHolder.sendTime.setText(entity.getDate());
-        viewHolder.chatName.setText(entity.getName());
         viewHolder.content.setText(entity.getText());
 
         return convertView;
@@ -101,7 +98,6 @@ public class ChatMsgAdapter extends BaseAdapter {
     // 通过ViewHolder显示项的内容
     class ViewHolder {
         public TextView sendTime;
-        public TextView chatName;
         public TextView content;
         public boolean isComMsg;
     }

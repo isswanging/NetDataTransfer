@@ -221,21 +221,12 @@ public class UserListActivity extends Activity {
             @Override
             public void run() {
                 try {
-                    String userName = android.os.Build.MODEL;// 获取用户名
-                    String userDomain = "Android";// 获取计算机域
-
                     // 加入在线列表
-                    Host host = new Host(userName, userDomain,
-                            NetConfApplication.hostIP,
-                            NetConfApplication.hostName, 1, 0);
-                    
                     app.sendUdpData(new DatagramSocket(),
-                            JSON.toJSONString(host),
+                            JSON.toJSONString(app.hostList.get(0)),
                             NetConfApplication.broadcastIP,
                             NetConfApplication.broadcastPort);
                     
-                    app.addHost(host);
-                    host.setState(0);
                 } catch (SocketException e) {
                     e.printStackTrace();
                 }

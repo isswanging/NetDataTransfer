@@ -9,6 +9,7 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.ScreenMonitorService;
 import net.service.UdpDataMonitorService;
+import net.vo.Host;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -41,6 +42,13 @@ public class WelcomeActivity extends Activity {
         // 检查端口
         preCheck();
         if (app.wifi == 1) {
+            String userName = android.os.Build.MODEL;// 获取用户名
+            String userDomain = "Android";// 获取计算机域
+            Host host = new Host(userName, userDomain,
+                    NetConfApplication.hostIP,
+                    NetConfApplication.hostName, 1, 0);
+            app.addHost(host);
+            host.setState(0);
             // 建立监听
             listen();
             // 加载音乐

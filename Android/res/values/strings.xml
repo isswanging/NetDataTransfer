@@ -15,4 +15,6 @@
     <string name="get_progress">文件接收进度</string>
     <string name="open_folder">查看文件</string>
     <string name="scan">扫一扫</string>
+    <string name="me">我</string>
+    <string name="close_chat">退出聊天</string>
 </resources>
