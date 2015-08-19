@@ -5,12 +5,14 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import com.nineoldandroids.view.ViewHelper;
 
-public class HideMenuView extends HorizontalScrollView {
+public class SideslipMenuView extends HorizontalScrollView {
 
     /**
      * 屏幕宽度
@@ -33,18 +35,25 @@ public class HideMenuView extends HorizontalScrollView {
     private ViewGroup mMenu;
     private ViewGroup mContent;
 
-    public HideMenuView(Context context, AttributeSet attrs) {
+    private Context context;
+    private EditText eText;
+    InputMethodManager imm;
+
+    public SideslipMenuView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
 
     }
 
-    public HideMenuView(Context context, AttributeSet attrs, int defStyle) {
+    public SideslipMenuView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mScreenWidth = ScreenUtils.getScreenWidth(context);
-        mMenuRightPadding = dip2px(context, 200);
+        mMenuRightPadding = dip2px(context, 150);
+        this.context = context;
+        imm = (InputMethodManager) this.context
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 
-    public HideMenuView(Context context) {
+    public SideslipMenuView(Context context) {
         this(context, null, 0);
     }
 
@@ -57,6 +66,8 @@ public class HideMenuView extends HorizontalScrollView {
             LinearLayout wrapper = (LinearLayout) getChildAt(0);
             mMenu = (ViewGroup) wrapper.getChildAt(0);
             mContent = (ViewGroup) wrapper.getChildAt(1);
+            eText = (EditText) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
+                    .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
 
             mMenuWidth = mScreenWidth - mMenuRightPadding;
             mHalfMenuWidth = mMenuWidth / 2;
@@ -86,50 +97,24 @@ public class HideMenuView extends HorizontalScrollView {
         case MotionEvent.ACTION_UP:
             int scrollX = getScrollX();
             if (scrollX > mHalfMenuWidth) {
-                this.smoothScrollTo(mMenuWidth, 0);
                 isOpen = false;
+                closeSoftkeyboard();
+                this.smoothScrollTo(mMenuWidth, 0);
+
             } else {
-                this.smoothScrollTo(0, 0);
                 isOpen = true;
+                closeSoftkeyboard();
+                this.smoothScrollTo(0, 0);
+
             }
             return true;
         }
         return super.onTouchEvent(ev);
     }
 
-    /**
-     * 打开菜单
-     */
-    public void openMenu() {
-        if (isOpen)
-            return;
-        this.smoothScrollTo(0, 0);
-        isOpen = true;
-    }
-
-    /**
-     * 关闭菜单
-     */
-    public void closeMenu() {
-        if (isOpen) {
-            this.smoothScrollTo(mMenuWidth, 0);
-            isOpen = false;
-        }
-    }
-
-    /**
-     * 切换菜单状态
-     */
-    public void toggle() {
-        if (isOpen) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-    }
-
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        closeSoftkeyboard();
         super.onScrollChanged(l, t, oldl, oldt);
         float scale = l * 1.0f / mMenuWidth;
         float leftScale = 1 - 0.3f * scale;
@@ -149,5 +134,15 @@ public class HideMenuView extends HorizontalScrollView {
     public int dip2px(Context context, float dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
+    }
+
+    public void closeSoftkeyboard() {
+        imm.hideSoftInputFromWindow(this.getWindowToken(), 0); // 强制隐藏键盘
+
+        if (isOpen) {
+            eText.setEnabled(false);
+        } else {
+            eText.setEnabled(true);
+        }
     }
 }
