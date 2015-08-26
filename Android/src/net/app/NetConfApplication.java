@@ -52,7 +52,7 @@ public class NetConfApplication extends Application {
     public final String FAIL = "IOException";
 
     // 广播IP
-    public static final String broadcastIP = "224.0.0.1";
+    public static final String broadcastIP = "255.255.255.255";
 
     // 信号
     public static final int text = 0;

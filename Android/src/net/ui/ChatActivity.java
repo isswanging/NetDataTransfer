@@ -86,6 +86,11 @@ public class ChatActivity extends Activity {
         findViewById(R.id.closeCurChat).setOnClickListener(clickListener);
         findViewById(R.id.closeChat).setOnClickListener(clickListener);
 
+        TextView otherName = (TextView) findViewById(R.id.otherName);
+        TextView otherIP = (TextView) findViewById(R.id.otherIP);
+        otherName.setText(targetName);
+        otherIP.setText(targetIp);
+
         // 注册广播接收者
         chatReceiver = new ChatReceiver();
         filter = new IntentFilter();

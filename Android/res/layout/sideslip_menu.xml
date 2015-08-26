@@ -4,26 +4,71 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/otherName"
+    <ImageView
+        android:id="@+id/imgInfo"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/android_img" />
+
+    <TableLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textSize="10dp" />
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp" >
+
+        <TextView
+            android:id="@+id/deviceName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="对方信息\n"
+            android:textColor="#ffffff"
+            android:textSize="20dp" />
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="用户名： "
+                android:textColor="#ffffff"
+                android:textSize="17dp" />
+
+            <TextView
+                android:id="@+id/otherName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:textSize="17dp" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="IP地址： "
+                android:textColor="#ffffff"
+                android:textSize="17dp" />
+
+            <TextView
+                android:id="@+id/otherIP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:textSize="17dp" />
+        </TableRow>
+    </TableLayout>
 
     <TextView
-        android:id="@+id/otherIP"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textSize="10dp" />
-
-    <Button
         android:id="@+id/closeChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
         android:text="@string/close_chat"
-        android:textSize="10dp" />
+        android:textColor="#ffffff"
+        android:textSize="20dp" />
 
 </LinearLayout>

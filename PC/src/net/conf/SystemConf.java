@@ -28,7 +28,7 @@ public class SystemConf {
     public final static String FAIL = "IOException";
 
     // 广播IP
-    public final static String broadcastIP = "224.0.0.1";
+    public final static String broadcastIP = "255.255.255.255";
 
     // 广播端口
     public final static int broadcastPort = 2325;

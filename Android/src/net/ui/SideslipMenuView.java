@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.nineoldandroids.view.ViewHelper;
@@ -37,6 +38,7 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     private Context context;
     private EditText eText;
+    private ImageView backImg;
     InputMethodManager imm;
 
     public SideslipMenuView(Context context, AttributeSet attrs) {
@@ -68,6 +70,8 @@ public class SideslipMenuView extends HorizontalScrollView {
             mContent = (ViewGroup) wrapper.getChildAt(1);
             eText = (EditText) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
                     .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
+            backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
+                    .getChildAt(0)).getChildAt(0)).getChildAt(2)).getChildAt(0);
 
             mMenuWidth = mScreenWidth - mMenuRightPadding;
             mHalfMenuWidth = mMenuWidth / 2;
@@ -141,8 +145,10 @@ public class SideslipMenuView extends HorizontalScrollView {
 
         if (isOpen) {
             eText.setEnabled(false);
+            backImg.setVisibility(GONE);
         } else {
             eText.setEnabled(true);
+            backImg.setVisibility(VISIBLE);
         }
     }
 }

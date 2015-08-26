@@ -2,21 +2,21 @@ package net.listener;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.Map;
-
-import net.conf.SystemConf;
-import net.util.NetDomain;
-import net.vo.Host;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.alibaba.fastjson.JSON;
 
+import net.conf.SystemConf;
+import net.util.NetDomain;
+import net.vo.Host;
+
 public class BroadcastMonitor implements Runnable {
-    MulticastSocket broadSocket = null;
+    DatagramSocket broadSocket = null;
     private final Log logger = LogFactory.getLog(this.getClass());
 
     @Override
@@ -24,9 +24,7 @@ public class BroadcastMonitor implements Runnable {
 
         try {
             DatagramPacket broadPacket = new DatagramPacket(new byte[512], 512);
-            broadSocket = new MulticastSocket(SystemConf.broadcastPort);
-            broadSocket
-                    .joinGroup(InetAddress.getByName(SystemConf.broadcastIP));
+            broadSocket = new DatagramSocket(SystemConf.broadcastPort);
             while (true) {
                 // 收到广播
                 broadSocket.receive(broadPacket);
