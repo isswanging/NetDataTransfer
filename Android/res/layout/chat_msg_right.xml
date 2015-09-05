@@ -50,6 +50,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:singleLine="true"
+            android:text="@string/me"
             android:layout_alignParentRight="true"
             android:layout_below="@id/chatHead"
             android:layout_toRightOf="@id/chatContent" />

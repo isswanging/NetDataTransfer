@@ -2,8 +2,7 @@ package net.service;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.net.DatagramSocket;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
@@ -16,7 +15,7 @@ import android.os.IBinder;
 import com.alibaba.fastjson.JSON;
 
 public class BroadcastMonitorService extends Service {
-    MulticastSocket broadSocket = null;
+    DatagramSocket broadSocket = null;
     DatagramPacket broadPacket = null;
     NetConfApplication app;
     Thread thread;
@@ -63,10 +62,7 @@ public class BroadcastMonitorService extends Service {
             try {
                 Logger.info(this.toString(), "start a service");
                 broadPacket = new DatagramPacket(new byte[512], 512);
-                broadSocket = new MulticastSocket(
-                        NetConfApplication.broadcastPort);
-                broadSocket.joinGroup(InetAddress
-                        .getByName(NetConfApplication.broadcastIP));
+                broadSocket = new DatagramSocket(NetConfApplication.broadcastPort);
                 while (tag) {
                     // 收到广播
                     broadSocket.receive(broadPacket);

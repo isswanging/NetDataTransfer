@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,13 +23,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -37,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import net.app.netdatatransfer.R;
 
 public class ChatActivity extends Activity {
     private ChatOnClickListener clickListener = new ChatOnClickListener();
@@ -56,23 +53,6 @@ public class ChatActivity extends Activity {
 
     NetConfApplication app;
 
-    @SuppressLint("InflateParams")
-    private void initActionBar() {
-        ActionBar title = getActionBar();
-        title.setDisplayShowHomeEnabled(false);
-        title.setDisplayShowTitleEnabled(false);
-
-        View actionbarLayout = LayoutInflater.from(this).inflate(
-                R.layout.common_title, null);
-        title.setDisplayShowCustomEnabled(true);
-        title.setCustomView(actionbarLayout);
-        ((TextView) findViewById(R.id.titleName)).setText(targetName);
-
-        ImageButton back = (ImageButton) findViewById(R.id.back);
-        back.setOnClickListener(clickListener);
-
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         app = (NetConfApplication) getApplication();
@@ -84,10 +64,9 @@ public class ChatActivity extends Activity {
         app.chatId = targetIp;
         Logger.info(this.toString(), "create::" + app.chatId);
 
-        // 设置actionBar
-        initActionBar();
-
         // 设置聊天列表
+        TextView chatCurName = (TextView) findViewById(R.id.chatCurName);
+        chatCurName.setText(targetName);
         chatEditText = (EditText) findViewById(R.id.editText);
         mListView = (ListView) findViewById(R.id.charContentList);
         mAdapter = new ChatMsgAdapter(this, mDataArrays);
@@ -104,6 +83,13 @@ public class ChatActivity extends Activity {
         sendImg.setOnClickListener(clickListener);
         sendVideo.setOnClickListener(clickListener);
         sendAudio.setOnClickListener(clickListener);
+        findViewById(R.id.closeCurChat).setOnClickListener(clickListener);
+        findViewById(R.id.closeChat).setOnClickListener(clickListener);
+
+        TextView otherName = (TextView) findViewById(R.id.otherName);
+        TextView otherIP = (TextView) findViewById(R.id.otherIP);
+        otherName.setText(targetName);
+        otherIP.setText(targetIp);
 
         // 注册广播接收者
         chatReceiver = new ChatReceiver();
@@ -128,7 +114,8 @@ public class ChatActivity extends Activity {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-            case R.id.back:
+            case R.id.closeChat:
+            case R.id.closeCurChat:
                 finish();
                 break;
 

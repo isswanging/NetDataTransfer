@@ -60,6 +60,7 @@ public class UserListActivity extends Activity {
 
     private final int login = 0;
     private final int refresh = 1;
+    private final int retry = 2;
 
     private SimpleAdapter adapter;
     private PullRefreshListView pullRefreshListView;
@@ -214,6 +215,13 @@ public class UserListActivity extends Activity {
     }
 
     private void login() {
+        NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
+        String userName = android.os.Build.MODEL;// 获取用户名
+        String userDomain = "Android";// 获取计算机域
+        Host host = new Host(userName, userDomain, NetConfApplication.hostIP,
+                NetConfApplication.hostName, 1, 0);
+        app.addHost(host);
+        host.setState(0);
 
         // 广播登录信息
         new Thread(new Runnable() {
@@ -221,21 +229,12 @@ public class UserListActivity extends Activity {
             @Override
             public void run() {
                 try {
-                    String userName = android.os.Build.MODEL;// 获取用户名
-                    String userDomain = "Android";// 获取计算机域
-
                     // 加入在线列表
-                    Host host = new Host(userName, userDomain,
-                            NetConfApplication.hostIP,
-                            NetConfApplication.hostName, 1, 0);
-                    
                     app.sendUdpData(new DatagramSocket(),
-                            JSON.toJSONString(host),
+                            JSON.toJSONString(app.hostList.get(0)),
                             NetConfApplication.broadcastIP,
                             NetConfApplication.broadcastPort);
-                    
-                    app.addHost(host);
-                    host.setState(0);
+
                 } catch (SocketException e) {
                     e.printStackTrace();
                 }
@@ -244,9 +243,6 @@ public class UserListActivity extends Activity {
     }
 
     private void initUI() {
-        // 主机登录
-        login();
-
         // 显示menu
         forceShowOverflowMenu();
         setContentView(R.layout.user_list);
@@ -266,26 +262,13 @@ public class UserListActivity extends Activity {
 
         // 延迟一点加载列表
         if (app.wifi == 1) {
-            // 注册广播
-            msgReceiver = new NewMsgReceiver();
-            filter = new IntentFilter();
-            filter.addAction("net.ui.newMsg");
-            registerReceiver(msgReceiver, filter);
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Message msg = handler.obtainMessage();
-                    msg.what = login;
-                    handler.sendMessageDelayed(msg, 2000);
-                }
-            }).start();
+            loadUserList();
         } else {
             // 弹出警告框并退出
             new AlertDialog.Builder(this)
                     .setTitle("错误")
                     .setMessage("wifi未连接或端口异常，启动失败")
-                    .setPositiveButton("确定",
+                    .setPositiveButton("退出",
                             new DialogInterface.OnClickListener() {
 
                                 @Override
@@ -294,8 +277,40 @@ public class UserListActivity extends Activity {
                                     setResult(RESULT_OK);// 确定按钮事件
                                     finish();
                                 }
+                            })
+                    .setNegativeButton("重试",
+                            new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                        int which) {
+                                    app.check(UserListActivity.this);
+                                    Message msg = handler.obtainMessage();
+                                    msg.what = retry;
+                                    handler.sendMessageDelayed(msg, 2000);
+                                }
                             }).setCancelable(false).show();
         }
+    }
+
+    private void loadUserList() {
+        // 主机登录
+        login();
+
+        // 注册广播
+        msgReceiver = new NewMsgReceiver();
+        filter = new IntentFilter();
+        filter.addAction("net.ui.newMsg");
+        registerReceiver(msgReceiver, filter);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Message msg = handler.obtainMessage();
+                msg.what = login;
+                handler.sendMessageDelayed(msg, 2000);
+            }
+        }).start();
     }
 
     private void getDeviceInfo() {
@@ -440,12 +455,44 @@ public class UserListActivity extends Activity {
                                     act.handler.sendMessageDelayed(msg, 2000);
                                 }
                             });
-                }
-
-                if (msg.what == act.refresh) {
+                } else if (msg.what == act.refresh) {
                     act.pullRefreshListView.finishRefreshing();
                     act.getData();
                     act.adapter.notifyDataSetChanged();
+                } else if (msg.what == act.retry) {
+                    if (act.app.wifi == 1) {
+                        // wifi打开
+                        act.loadUserList();
+                    } else {
+                        // wifi关闭,给出提示
+                        new AlertDialog.Builder(act)
+                                .setTitle("错误")
+                                .setMessage("wifi未连接或端口异常，启动失败")
+                                .setPositiveButton("退出",
+                                        new DialogInterface.OnClickListener() {
+
+                                            @Override
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                act.setResult(RESULT_OK);// 确定按钮事件
+                                                act.finish();
+                                            }
+                                        })
+                                .setNegativeButton("重试",
+                                        new DialogInterface.OnClickListener() {
+
+                                            @Override
+                                            public void onClick(
+                                                    DialogInterface dialog,
+                                                    int which) {
+                                                act.app.check(act);
+                                                Message msg = obtainMessage();
+                                                msg.what = act.retry;
+                                                sendMessageDelayed(msg, 2000);
+                                            }
+                                        }).setCancelable(false).show();
+                    }
                 }
             }
         }
