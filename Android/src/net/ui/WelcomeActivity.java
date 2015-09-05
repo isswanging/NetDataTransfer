@@ -38,31 +38,8 @@ public class WelcomeActivity extends Activity {
         final AnimationDrawable anim = (AnimationDrawable) welcomeAnim
                 .getBackground();
         anim.start();
-
         // 检查端口
         preCheck();
-        if (app.wifi == 1) {
-            String userName = android.os.Build.MODEL;// 获取用户名
-            String userDomain = "Android";// 获取计算机域
-            Host host = new Host(userName, userDomain,
-                    NetConfApplication.hostIP,
-                    NetConfApplication.hostName, 1, 0);
-            app.addHost(host);
-            host.setState(0);
-            // 建立监听
-            listen();
-            // 加载音乐
-            app.loadVoice();
-            // 创建接收文件的目录
-            NetConfApplication.saveFilePath = app.getSDPath()
-                    + "/NetDataTransfer/recFile";
-            Logger.info(this.toString(), NetConfApplication.saveFilePath);
-            File recFile = new File(NetConfApplication.saveFilePath);
-            if (!recFile.exists()) {
-                Logger.info(this.toString(), "create dir");
-                recFile.mkdirs();
-            }
-        }
 
         new Handler().postDelayed(new Runnable() {
 
@@ -109,7 +86,19 @@ public class WelcomeActivity extends Activity {
 
     private void preCheck() {
         if (app.check(this).endsWith(app.SUCCESS)) {
-            NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
+            // 建立监听
+            listen();
+            // 加载音乐
+            app.loadVoice();
+            // 创建接收文件的目录
+            NetConfApplication.saveFilePath = app.getSDPath()
+                    + "/NetDataTransfer/recFile";
+            Logger.info(this.toString(), NetConfApplication.saveFilePath);
+            File recFile = new File(NetConfApplication.saveFilePath);
+            if (!recFile.exists()) {
+                Logger.info(this.toString(), "create dir");
+                recFile.mkdirs();
+            }
         }
     }
 }
