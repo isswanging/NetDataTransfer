@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import net.app.netdatatransfer.R;
+import net.log.Logger;
 import net.vo.ChatMsgEntity;
 import net.vo.Host;
 import net.vo.Progress;
@@ -84,7 +85,7 @@ public class NetConfApplication extends Application {
     public static SparseArray<Progress> sendTaskList = new SparseArray<Progress>();
     public static SparseArray<Progress> getTaskList = new SparseArray<Progress>();
 
-    // 记录聊天内容
+    // 记录聊天内容(未读的消息)
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
 
     // 文件格式
@@ -221,5 +222,16 @@ public class NetConfApplication extends Application {
             sdDir = Environment.getExternalStorageDirectory();
         }
         return sdDir.toString();
+    }
+
+    public int getUnreadMsgNum() {
+        int num = 0;
+        if (!chatTempMap.isEmpty()) {
+            for (String s : chatTempMap.keySet()) {
+                num += chatTempMap.get(s).size();
+            }
+        }
+        Logger.info("unread msg num::::", " "+num);
+        return num;
     }
 }

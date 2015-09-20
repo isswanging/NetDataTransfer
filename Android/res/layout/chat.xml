@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/id_menu"
     android:layout_width="wrap_content"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
     android:background="@drawable/hide_menu"
     android:scrollbars="none" >
 
@@ -72,16 +72,6 @@
                             android:background="@drawable/add" />
                     </RelativeLayout>
 
-                    <ListView
-                        android:id="@+id/charContentList"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_above="@id/chatBottom"
-                        android:background="@drawable/chat_bg"
-                        android:divider="@null"
-                        android:transcriptMode="alwaysScroll" >
-                    </ListView>
-
                     <RelativeLayout
                         android:id="@+id/chatTop"
                         android:layout_width="match_parent"
@@ -89,7 +79,7 @@
                         android:layout_alignParentTop="true"
                         android:background="#222222" >
 
-                        <ImageButton
+                        <ImageView
                             android:id="@+id/closeCurChat"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -106,6 +96,17 @@
                             android:textColor="#FFFFFF"
                             android:textSize="20dp" />
                     </RelativeLayout>
+
+                    <ListView
+                        android:id="@+id/charContentList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_above="@id/chatBottom"
+                        android:layout_below="@id/chatTop"
+                        android:background="@drawable/chat_bg"
+                        android:divider="@null"
+                        android:transcriptMode="alwaysScroll" >
+                    </ListView>
                 </RelativeLayout>
 
                 <LinearLayout

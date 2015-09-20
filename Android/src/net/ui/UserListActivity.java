@@ -112,7 +112,6 @@ public class UserListActivity extends Activity {
 
         // 建立界面
         initUI();
-
     }
 
     @Override
@@ -216,12 +215,9 @@ public class UserListActivity extends Activity {
 
     private void login() {
         NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
-        String userName = android.os.Build.MODEL;// 获取用户名
-        String userDomain = "Android";// 获取计算机域
-        Host host = new Host(userName, userDomain, NetConfApplication.hostIP,
-                NetConfApplication.hostName, 1, 0);
-        app.addHost(host);
+        Host host = app.hostList.get(0);
         host.setState(0);
+        host.setIp(NetConfApplication.hostIP);
 
         // 广播登录信息
         new Thread(new Runnable() {

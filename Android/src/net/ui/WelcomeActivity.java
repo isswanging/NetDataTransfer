@@ -86,6 +86,12 @@ public class WelcomeActivity extends Activity {
 
     private void preCheck() {
         if (app.check(this).endsWith(app.SUCCESS)) {
+            String userName = android.os.Build.MODEL;// 获取用户名
+            String userDomain = "Android";// 获取计算机域
+            Host host = new Host(userName, userDomain, "0.0.0.0",
+                    NetConfApplication.hostName, 1, 0);
+            app.addHost(host);
+            
             // 建立监听
             listen();
             // 加载音乐

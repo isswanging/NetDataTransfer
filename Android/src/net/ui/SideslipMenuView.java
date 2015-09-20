@@ -71,7 +71,7 @@ public class SideslipMenuView extends HorizontalScrollView {
             eText = (EditText) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
                     .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
             backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
-                    .getChildAt(0)).getChildAt(0)).getChildAt(2)).getChildAt(0);
+                    .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
 
             mMenuWidth = mScreenWidth - mMenuRightPadding;
             mHalfMenuWidth = mMenuWidth / 2;

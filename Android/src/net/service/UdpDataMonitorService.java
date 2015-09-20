@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
+import net.util.BadgeUtil;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
@@ -108,6 +109,10 @@ public class UdpDataMonitorService extends Service {
             notification.ledOffMS = 100;
             notification.ledOnMS = 100;
             app.nManager.notify(R.id.chatName, notification);
+
+            // 快捷方式显示数字(部分品牌有效)
+            BadgeUtil.setBadgeCount(getApplicationContext(),
+                    app.getUnreadMsgNum());
 
             // 让界面显示未读消息的红点
             Intent unReadIntent = new Intent("net.ui.newMsg");
