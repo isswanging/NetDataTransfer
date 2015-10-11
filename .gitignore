@@ -2,3 +2,10 @@
 /Android/gen/
 /PC/target/
 /PC/SysLogs.log
+/Android.gradle
+/Android/local.properties
+/Android/.idea/workspace.xml
+/Android/.idea/libraries
+/Android.DS_Store
+/Android/build
+/Android/captures

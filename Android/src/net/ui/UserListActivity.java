@@ -27,6 +27,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -313,25 +315,35 @@ public class UserListActivity extends Activity {
         String manufacturerName = android.os.Build.MANUFACTURER;
         String systemVersion = android.os.Build.VERSION.RELEASE;
         String deviceName = android.os.Build.HARDWARE;
+        String appVersion = "";
 
         TelephonyManager tm = (TelephonyManager) this
                 .getSystemService(Context.TELEPHONY_SERVICE);
+
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(),0);
+            appVersion = info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         TextView t1 = (TextView) findViewById(R.id.device_name);
         TextView t2 = (TextView) findViewById(R.id.system_version);
         TextView t3 = (TextView) findViewById(R.id.operate_name);
         TextView t4 = (TextView) findViewById(R.id.mcc_mnc);
         TextView t5 = (TextView) findViewById(R.id.manufacturer_name);
+        TextView t6 = (TextView) findViewById(R.id.appVersion);
+
         t1.setText("：" + deviceName);
         t2.setText("：Android " + systemVersion);
         t3.setText("：" + tm.getNetworkOperatorName());
         t4.setText("：" + tm.getNetworkOperator());
         t5.setText("：" + manufacturerName);
+        t6.setText("版本号："+appVersion);
 
         ImageView QRImg = (ImageView) findViewById(R.id.QRCode);
         new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg,
                 this);
-
     }
 
     private List<Map<String, Object>> getData() {
