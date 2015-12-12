@@ -1,24 +1,5 @@
 package net.ui;
 
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import net.app.NetConfApplication;
-import net.log.Logger;
-import net.service.BroadcastMonitorService;
-import net.service.FileMonitorService;
-import net.service.ScreenMonitorService;
-import net.service.UdpDataMonitorService;
-import net.ui.PullRefreshListView.PullToRefreshListener;
-import net.util.CreateQRImage;
-import net.vo.Host;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,33 +10,55 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewConfiguration;
-import android.view.Window;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 
+import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.log.Logger;
+import net.service.BroadcastMonitorService;
+import net.service.FileMonitorService;
+import net.service.ScreenMonitorService;
+import net.service.UdpDataMonitorService;
+import net.ui.PullRefreshListView.PullToRefreshListener;
+import net.util.CreateQRImage;
+import net.vo.ChatMsgEntity;
+import net.vo.Host;
+
+import java.lang.ref.WeakReference;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class UserListActivity extends Activity {
     private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
@@ -71,11 +74,8 @@ public class UserListActivity extends Activity {
     private Handler handler = new ListHandler(this);
     private NetConfApplication app;
 
-    @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
-        setOverflowIconVisible(featureId, menu);
-        return super.onMenuOpened(featureId, menu);
-    }
+    private FrameLayout root;
+    private LinearLayout listConent;
 
     // 按两次退出的计时
     private long exitTime = 0;
@@ -87,12 +87,36 @@ public class UserListActivity extends Activity {
     NewMsgReceiver msgReceiver;
     IntentFilter filter;
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
+    // 屏幕长宽
+    int screenWidth;
+    int screenHeight;
+    int statusBarHeight;
+
+    // 菜单是否显示
+    boolean isMenuOpen = false;
+    int menuWidth = 180;//单位dp
+    LinearLayout menu;
+    View.OnClickListener onMenuClickListener;
+    ScaleAnimation hideMenuAnim;
+    ScaleAnimation showMenuAnim;
+    AlphaAnimation hidePreviewAnim;
+    AlphaAnimation showPreviewAnim;
+
+    int send = 0;
+    int get = 1;
+
+    ForceTouchViewGroup touchView;
+    ChatMsgAdapter chatAdapter;
+    List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
+    ListView previewContent;
+    ListView answerList;
+    float yDown;
+    float yMove;
+    float yTemp;
+    int topMargin;
+    RelativeLayout.LayoutParams previewParams;
+    int moveTopMargin;
+    LinearLayout preview;
 
     @Override
     protected void onResume() {
@@ -108,9 +132,64 @@ public class UserListActivity extends Activity {
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        app = (NetConfApplication) getApplication();
-        getActionBar().setTitle(getResources().getString(R.string.titleName));
         super.onCreate(savedInstanceState);
+        app = (NetConfApplication) getApplication();
+
+        // 获取屏幕长宽和状态栏高度
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenWidth = dm.widthPixels;// 获取屏幕分辨率宽度
+        screenHeight = dm.heightPixels;
+        Rect frame = new Rect();
+        getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+        statusBarHeight = frame.top;
+
+        showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
+                1f, Animation.RELATIVE_TO_SELF, 0f);
+        hideMenuAnim = new ScaleAnimation(1f, 0f, 1f, 0f, Animation.RELATIVE_TO_SELF,
+                1f, Animation.RELATIVE_TO_SELF, 0f);
+        showPreviewAnim = new AlphaAnimation(0f, 1f);
+        hidePreviewAnim = new AlphaAnimation(1f, 0f);
+        showMenuAnim.setDuration(100);
+        hideMenuAnim.setDuration(100);
+        showPreviewAnim.setDuration(300);
+        hidePreviewAnim.setDuration(200);
+
+        onMenuClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.exit:
+                        finish();
+                        break;
+
+                    case R.id.openFolder:
+                        startActivity(new Intent(UserListActivity.this, FileListActivity.class));
+                        break;
+
+                    case R.id.sendProgress:
+                        Intent intentSend = new Intent(UserListActivity.this, ProgressBarListActivity.class);
+                        intentSend.setFlags(send);
+                        startActivity(intentSend);
+                        break;
+
+                    case R.id.getProgress:
+                        Intent intentGet = new Intent(UserListActivity.this, ProgressBarListActivity.class);
+                        intentGet.setFlags(get);
+                        startActivity(intentGet);
+                        break;
+
+                    case R.id.scan:
+                        Intent intentScan = new Intent(UserListActivity.this, CaptureActivity.class);
+                        intentScan.setFlags(get);
+                        startActivity(intentScan);
+                        break;
+                    default:
+                        break;
+                }
+                hideMenu();
+            }
+        };
 
         // 建立界面
         initUI();
@@ -132,42 +211,6 @@ public class UserListActivity extends Activity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int send = 0;
-        int get = 1;
-
-        switch (item.getItemId()) {
-        case R.id.exit:
-            finish();
-            break;
-        case R.id.openFolder:
-            startActivity(new Intent(this, FileListActivity.class));
-            break;
-
-        case R.id.sendProgress:
-            Intent intentSend = new Intent(this, ProgressBarListActivity.class);
-            intentSend.setFlags(send);
-            startActivity(intentSend);
-            break;
-
-        case R.id.getProgress:
-            Intent intentGet = new Intent(this, ProgressBarListActivity.class);
-            intentGet.setFlags(get);
-            startActivity(intentGet);
-            break;
-
-        case R.id.scan:
-            Intent intentScan = new Intent(this, CaptureActivity.class);
-            intentScan.setFlags(get);
-            startActivity(intentScan);
-            break;
-        default:
-            break;
-        }
-        return false;
-    }
-
-    @Override
     protected void onPause() {
         if (isReady) {
             unregisterReceiver(msgReceiver);
@@ -183,36 +226,6 @@ public class UserListActivity extends Activity {
         stopService(new Intent(this, FileMonitorService.class));
         stopService(new Intent(this, ScreenMonitorService.class));
         super.onDestroy();
-    }
-
-    // 在物理菜单键存在时仍然显示溢出菜单
-    private void forceShowOverflowMenu() {
-        try {
-            ViewConfiguration config = ViewConfiguration.get(this);
-            Field menuKeyField = ViewConfiguration.class
-                    .getDeclaredField("sHasPermanentMenuKey");
-            if (menuKeyField != null) {
-                menuKeyField.setAccessible(true);
-                menuKeyField.setBoolean(config, false);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // 利用反射让隐藏在Overflow中的MenuItem显示Icon图标
-    private void setOverflowIconVisible(int featureId, Menu menu) {
-        if (featureId == Window.FEATURE_ACTION_BAR && menu != null) {
-            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
-                try {
-                    Method m = menu.getClass().getDeclaredMethod(
-                            "setOptionalIconsVisible", Boolean.TYPE);
-                    m.setAccessible(true);
-                    m.invoke(menu, true);
-                } catch (Exception e) {
-                }
-            }
-        }
     }
 
     private void login() {
@@ -241,10 +254,21 @@ public class UserListActivity extends Activity {
     }
 
     private void initUI() {
-        // 显示menu
-        forceShowOverflowMenu();
         setContentView(R.layout.user_list);
+        root = (FrameLayout) findViewById(R.id.mainContent);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        listConent = (LinearLayout) findViewById(R.id.listContent);
+
+        root.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (isMenuOpen) {
+                    hideMenu();
+                    return true;
+                } else return false;
+            }
+        });
+
 
         findViewById(R.id.left_drawer).setOnTouchListener(
                 new OnTouchListener() {
@@ -258,30 +282,59 @@ public class UserListActivity extends Activity {
 
         getDeviceInfo();
 
+        ImageView moreMenu = (ImageView) findViewById(R.id.moreMenu);
+        moreMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isMenuOpen) {
+                    if (menu == null) {
+                        Logger.info(this.toString(), "creat a new menu");
+                        LayoutInflater layoutInflater = getLayoutInflater();
+                        menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
+                        FrameLayout.LayoutParams params = new FrameLayout.
+                                LayoutParams((int) dp2px(menuWidth),
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+                        params.topMargin = (int) (dp2px(48) + statusBarHeight + 2);
+                        params.leftMargin = (int) (screenWidth - dp2px(menuWidth) - 4);
+                        menu.setLayoutParams(params);
+
+                        root.addView(menu);
+                        findViewById(R.id.getProgress).setOnClickListener(onMenuClickListener);
+                        findViewById(R.id.sendProgress).setOnClickListener(onMenuClickListener);
+                        findViewById(R.id.exit).setOnClickListener(onMenuClickListener);
+                        findViewById(R.id.scan).setOnClickListener(onMenuClickListener);
+                        findViewById(R.id.openFolder).setOnClickListener(onMenuClickListener);
+                    } else {
+                        root.addView(menu);
+                    }
+
+                    showMenu();
+                    isMenuOpen = true;
+                    if (pullRefreshListView != null)
+                        pullRefreshListView.setCanRefresh(false);
+                }
+            }
+        });
+
         // 延迟一点加载列表
         if (app.wifi == 1) {
             loadUserList();
         } else {
             // 弹出警告框并退出
-            new AlertDialog.Builder(this)
-                    .setTitle("错误")
+            new AlertDialog.Builder(this).setTitle("错误")
                     .setMessage("wifi未连接或端口异常，启动失败")
                     .setPositiveButton("退出",
                             new DialogInterface.OnClickListener() {
-
                                 @Override
-                                public void onClick(DialogInterface dialog,
-                                        int which) {
+                                public void onClick(DialogInterface dialog, int which) {
                                     setResult(RESULT_OK);// 确定按钮事件
                                     finish();
                                 }
                             })
                     .setNegativeButton("重试",
                             new DialogInterface.OnClickListener() {
-
                                 @Override
-                                public void onClick(DialogInterface dialog,
-                                        int which) {
+                                public void onClick(DialogInterface dialog, int which) {
                                     app.check(UserListActivity.this);
                                     Message msg = handler.obtainMessage();
                                     msg.what = retry;
@@ -289,6 +342,18 @@ public class UserListActivity extends Activity {
                                 }
                             }).setCancelable(false).show();
         }
+    }
+
+    private void showMenu() {
+        menu.startAnimation(showMenuAnim);
+    }
+
+    private void hideMenu() {
+        menu.startAnimation(hideMenuAnim);
+        root.removeView(menu);
+        if (pullRefreshListView != null)
+            pullRefreshListView.setCanRefresh(true);
+        isMenuOpen = false;
     }
 
     private void loadUserList() {
@@ -321,7 +386,7 @@ public class UserListActivity extends Activity {
                 .getSystemService(Context.TELEPHONY_SERVICE);
 
         try {
-            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(),0);
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
             appVersion = info.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -339,7 +404,7 @@ public class UserListActivity extends Activity {
         t3.setText("：" + tm.getNetworkOperatorName());
         t4.setText("：" + tm.getNetworkOperator());
         t5.setText("：" + manufacturerName);
-        t6.setText("版本号："+appVersion);
+        t6.setText("版本号：" + appVersion);
 
         ImageView QRImg = (ImageView) findViewById(R.id.QRCode);
         new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg,
@@ -360,7 +425,6 @@ public class UserListActivity extends Activity {
 
             userList.add(item);
         }
-
         return userList;
     }
 
@@ -373,7 +437,80 @@ public class UserListActivity extends Activity {
         }
     }
 
-    static class ListHandler extends Handler {
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (touchView != null && !touchView.isLock()) {
+            Logger.info(this.toString(), "activity touch event");
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    Logger.info(this.toString(), "in activity touch DOWN");
+                    break;
+                case MotionEvent.ACTION_UP:
+                    Logger.info(this.toString(), "in activity touch UP");
+                    if (!touchView.isShow()) {
+                        root.removeView(touchView);
+                        touchView = null;
+                    } else {
+                        previewParams.topMargin = topMargin - touchView.getNeedMove();
+                        preview.setLayoutParams(previewParams);
+                        touchView.setIsLock(true);
+                    }
+                    yTemp = 0;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    yMove = event.getRawY();
+                    if (yTemp == 0) {
+                        yTemp = yMove;
+                    }
+                    float gap = yMove - yTemp;
+
+                    // view位于超过显示部分的位置
+                    if ((moveTopMargin + gap) <= (topMargin - touchView.getNeedMove())) {
+                        Logger.info(this.toString(), "slow up");
+                        // 向上滑减速
+                        if (gap < 0) {
+                            moveTopMargin = (int) (moveTopMargin + gap * 0.3);
+                        }
+                        // 向下滑速度正常
+                        else {
+                            moveTopMargin = (int) (moveTopMargin + gap);
+                        }
+                        if (!touchView.isShow()) {
+                            touchView.showAnswerList();
+                            touchView.setIsShow(true);
+                        }
+                    }
+                    // view处于下压并且继续下拉的状态
+                    else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
+                        Logger.info(this.toString(), "slow down");
+                        moveTopMargin = (int) (moveTopMargin + gap * 0.2);
+                    } else {
+                        Logger.info(this.toString(), "normal move");
+                        moveTopMargin = (int) (moveTopMargin + gap);
+                        if (touchView.isShow()) {
+                            touchView.hideAnswerList();
+                            touchView.setIsShow(false);
+                        }
+                    }
+                    yTemp = yMove;
+                    previewParams.topMargin = moveTopMargin;
+                    preview.setLayoutParams(previewParams);
+            }
+            return true;
+        } else {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                yDown = event.getRawY();
+            }
+            return super.dispatchTouchEvent(event);
+        }
+    }
+
+    public float dp2px(float dp) {
+        final float scale = getResources().getDisplayMetrics().density;
+        return dp * scale + 0.5f;
+    }
+
+    class ListHandler extends Handler {
         WeakReference<UserListActivity> refActvity;
 
         ListHandler(UserListActivity activity) {
@@ -386,91 +523,115 @@ public class UserListActivity extends Activity {
             final UserListActivity act = refActvity.get();
             if (act != null) {
                 if (msg.what == act.login) {
-                    act.adapter = new SimpleAdapter(act, act.getData(),
-                            R.layout.user_item, new String[] { "name", "ip",
-                                    "img" }, new int[] { R.id.userName,
-                                    R.id.userIP, R.id.unread });
+                    adapter = new SimpleAdapter(act, getData(),
+                            R.layout.user_item, new String[]{"name", "ip",
+                            "img"}, new int[]{R.id.userName,
+                            R.id.userIP, R.id.unread});
                     Logger.info(this.toString(),
-                            String.valueOf(act.app.hostList.size()));
-                    act.isReady = true;
+                            String.valueOf(app.hostList.size()));
+                    isReady = true;
 
                     // 更新UI
-                    LinearLayout listConent = (LinearLayout) act
-                            .findViewById(R.id.listContent);
-                    LayoutInflater layoutInflater = act.getLayoutInflater();
-                    act.pullRefreshListView = (PullRefreshListView) layoutInflater
+                    LayoutInflater layoutInflater = getLayoutInflater();
+                    pullRefreshListView = (PullRefreshListView) layoutInflater
                             .inflate(R.layout.users, null);
 
-                    listConent.removeView(act.findViewById(R.id.wait));
-                    listConent.addView(act.pullRefreshListView);
+                    listConent.removeView(findViewById(R.id.wait));
+                    listConent.addView(pullRefreshListView, new RelativeLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
 
-                    act.pullRefreshListView.getListView().setAdapter(
-                            act.adapter);
-                    act.pullRefreshListView.getListView()
-                            .setOnItemClickListener(new OnItemClickListener() {
+                    pullRefreshListView.getListView().setAdapter(adapter);
+                    pullRefreshListView.getListView().setOnItemClickListener(new OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            TextView name = (TextView) view.findViewById(R.id.userName);
+                            TextView ip = (TextView) view.findViewById(R.id.userIP);
+
+                            if (ip.getText().equals(NetConfApplication.hostIP)) {
+                                drawerLayout.openDrawer(Gravity.LEFT);
+                            } else {
+                                Bundle bundle = new Bundle();
+                                bundle.putString("name", name.getText().toString());
+                                bundle.putString("ip", ip.getText().toString());
+                                Intent intent = new Intent(act, ChatActivity.class);
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                            }
+                        }
+                    });
+                    // 模仿iphone的3D Touch效果
+                    pullRefreshListView.getListView().
+                            setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                                 @Override
-                                public void onItemClick(AdapterView<?> parent,
-                                        View view, int position, long id) {
-                                    TextView name = (TextView) view
-                                            .findViewById(R.id.userName);
-                                    TextView ip = (TextView) view
-                                            .findViewById(R.id.userIP);
+                                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                                    Logger.info(this.toString(), "in 3d touch effect");
+                                    TextView name = (TextView) view.findViewById(R.id.userName);
+                                    TextView ip = (TextView) view.findViewById(R.id.userIP);
 
-                                    if (ip.getText().equals(
-                                            NetConfApplication.hostIP)) {
-                                        act.drawerLayout
-                                                .openDrawer(Gravity.LEFT);
-                                    } else {
-                                        Bundle bundle = new Bundle();
-                                        bundle.putString("name", name.getText()
-                                                .toString());
-                                        bundle.putString("ip", ip.getText()
-                                                .toString());
-                                        Intent intent = new Intent(act,
-                                                ChatActivity.class);
-                                        intent.putExtras(bundle);
-                                        act.startActivity(intent);
+                                    // 组装需要显示的界面
+                                    LinearLayout custPreview = (LinearLayout) LayoutInflater.from(act).inflate(R.layout.touch_content, null);
+                                    previewContent = (ListView) custPreview.getChildAt(1);
+                                    ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(name.getText());
+                                    String targetIp = ip.getText().toString();
+                                    chatAdapter = new ChatMsgAdapter(act, mDataArrays);
+                                    previewContent.setAdapter(chatAdapter);
+                                    // 填充数据
+                                    if (app.chatTempMap.containsKey(targetIp)) {
+                                        Logger.info(this.toString(), "get new massage");
+                                        app.nManager.cancelAll();
+                                        mDataArrays.addAll(app.chatTempMap.get(targetIp));
+                                        chatAdapter.notifyDataSetChanged();
                                     }
+                                    // 显示3D touch菜单
+                                    touchView = new ForceTouchViewGroup.Builder(act).
+                                            setBackground(root).
+                                            setPreContent(ip.getText().toString()).
+                                            setView(custPreview).
+                                            setRoot(root).create();
+                                    root.addView(touchView);
+                                    touchView.startAnimation(showPreviewAnim);
+                                    answerList = (ListView) findViewById(R.id.answer);
+                                    preview = (LinearLayout) findViewById(R.id.preview);
+                                    previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
+                                    moveTopMargin = previewParams.topMargin;
+                                    topMargin = previewParams.topMargin;
+                                    return true;
                                 }
                             });
 
-                    act.pullRefreshListView
-                            .setPullListener(new PullToRefreshListener() {
+                    pullRefreshListView.setPullListener(new PullToRefreshListener() {
 
-                                @Override
-                                public void onRefresh() {
-                                    act.app.hostList.clear();
-                                    String userName = android.os.Build.MODEL;// 获取用户名
-                                    String hostName = "Android";// 获取主机名
-                                    String userDomain = "Android";// 获取计算机域
+                        @Override
+                        public void onRefresh() {
+                            app.hostList.clear();
+                            String userName = android.os.Build.MODEL;// 获取用户名
+                            String hostName = "Android";// 获取主机名
+                            String userDomain = "Android";// 获取计算机域
 
-                                    // 加入在线列表
-                                    Host host = new Host(userName, userDomain,
-                                            NetConfApplication.hostIP,
-                                            hostName, 1, 0);
-                                    act.app.addHost(host);
-                                    try {
-                                        act.app.sendUdpData(
-                                                new DatagramSocket(),
-                                                JSON.toJSONString(host),
-                                                NetConfApplication.broadcastIP,
-                                                NetConfApplication.broadcastPort);
-                                    } catch (SocketException e) {
-                                        e.printStackTrace();
-                                    }
-                                    Message msg = act.handler.obtainMessage();
-                                    msg.what = act.refresh;
-                                    act.handler.sendMessageDelayed(msg, 2000);
-                                }
-                            });
-                } else if (msg.what == act.refresh) {
-                    act.pullRefreshListView.finishRefreshing();
-                    act.getData();
-                    act.adapter.notifyDataSetChanged();
-                } else if (msg.what == act.retry) {
-                    if (act.app.wifi == 1) {
+                            // 加入在线列表
+                            Host host = new Host(userName, userDomain,
+                                    NetConfApplication.hostIP, hostName, 1, 0);
+                            app.addHost(host);
+                            try {
+                                app.sendUdpData(new DatagramSocket(), JSON.toJSONString(host),
+                                        NetConfApplication.broadcastIP, NetConfApplication.broadcastPort);
+                            } catch (SocketException e) {
+                                e.printStackTrace();
+                            }
+                            Message msg = handler.obtainMessage();
+                            msg.what = refresh;
+                            handler.sendMessageDelayed(msg, 2000);
+                        }
+                    });
+                } else if (msg.what == refresh) {
+                    pullRefreshListView.finishRefreshing();
+                    getData();
+                    adapter.notifyDataSetChanged();
+                } else if (msg.what == retry) {
+                    if (app.wifi == 1) {
                         // wifi打开
-                        act.loadUserList();
+                        loadUserList();
                     } else {
                         // wifi关闭,给出提示
                         new AlertDialog.Builder(act)
@@ -483,8 +644,8 @@ public class UserListActivity extends Activity {
                                             public void onClick(
                                                     DialogInterface dialog,
                                                     int which) {
-                                                act.setResult(RESULT_OK);// 确定按钮事件
-                                                act.finish();
+                                                setResult(RESULT_OK);// 确定按钮事件
+                                                finish();
                                             }
                                         })
                                 .setNegativeButton("重试",
@@ -494,9 +655,9 @@ public class UserListActivity extends Activity {
                                             public void onClick(
                                                     DialogInterface dialog,
                                                     int which) {
-                                                act.app.check(act);
+                                                app.check(act);
                                                 Message msg = obtainMessage();
-                                                msg.what = act.retry;
+                                                msg.what = retry;
                                                 sendMessageDelayed(msg, 2000);
                                             }
                                         }).setCancelable(false).show();
@@ -505,4 +666,9 @@ public class UserListActivity extends Activity {
             }
         }
     }
+
+    // TODO: 2015/12/10
+    /*
+     * 版本号获取的bug
+     */
 }

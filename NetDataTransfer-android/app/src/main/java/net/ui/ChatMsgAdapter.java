@@ -1,8 +1,5 @@
 package net.ui;
 
-import java.util.List;
-
-import net.vo.ChatMsgEntity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,6 +9,9 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import net.app.netdatatransfer.R;
+import net.vo.ChatMsgEntity;
+
+import java.util.List;
 
 @SuppressLint("InflateParams")
 public class ChatMsgAdapter extends BaseAdapter {
@@ -20,7 +20,7 @@ public class ChatMsgAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
 
     // ListView视图的内容由MsgViewType决定
-    public static interface MsgViewType {
+    public interface MsgViewType {
         // 对方发来的信息
         int get_msg = 0;
         // 自己发出的信息

@@ -1,15 +1,5 @@
 package net.ui;
 
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
-
-import net.app.NetConfApplication;
-import net.app.netdatatransfer.R;
-import net.log.Logger;
-import net.vo.ChatMsgEntity;
-import net.vo.DataPacket;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -35,6 +25,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+
+import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
+import net.log.Logger;
+import net.vo.ChatMsgEntity;
+import net.vo.DataPacket;
+
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatActivity extends Activity {
     private ChatOnClickListener clickListener = new ChatOnClickListener();
@@ -258,14 +259,14 @@ public class ChatActivity extends Activity {
                 Logger.info(this.toString(), "image uri::::" + uri.toString());
                 filePath = uri2filePath(uri, images, imageID, imageUri, this);
                 Logger.info(this.toString(), "path::::" + filePath);
-                sendnotifyMsg(filePath);
+                sendNotifyMsg(filePath);
                 break;
 
             case audio:
                 Logger.info(this.toString(), "audio uri::::" + uri.toString());
                 filePath = uri2filePath(uri, audios, audioID, audioUri, this);
                 Logger.info(this.toString(), "path::::" + filePath);
-                sendnotifyMsg(filePath);
+                sendNotifyMsg(filePath);
                 break;
 
             default:
@@ -275,7 +276,7 @@ public class ChatActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void sendnotifyMsg(String filePath) {
+    public void sendNotifyMsg(String filePath) {
         final DataPacket dp = new DataPacket(NetConfApplication.hostIP,
                 android.os.Build.MODEL, filePath, NetConfApplication.filePre);
         new Thread(new Runnable() {

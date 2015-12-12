@@ -1,12 +1,11 @@
 package net.util;
-import java.lang.reflect.Field;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
-import android.widget.Toast;
+
+import java.lang.reflect.Field;
 
 /**
  * 应用启动图标未读消息数显示 工具类  (效果如：QQ、微信、未读短信 等应用图标)<br/>
@@ -35,7 +34,7 @@ public class BadgeUtil {
         } else if (Build.MANUFACTURER.toLowerCase().contains("samsung")) {
             sendToSamsumg(context, count);
         } else {
-            Toast.makeText(context, "Not Support", Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, "Not Support", Toast.LENGTH_LONG).show();
         }
     }
 

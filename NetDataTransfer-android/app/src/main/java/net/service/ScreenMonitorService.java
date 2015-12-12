@@ -1,11 +1,5 @@
 package net.service;
 
-import java.net.DatagramSocket;
-import java.net.SocketException;
-
-import net.app.NetConfApplication;
-import net.log.Logger;
-import net.vo.Host;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,6 +14,13 @@ import android.os.PowerManager.WakeLock;
 
 import com.alibaba.fastjson.JSON;
 
+import net.app.NetConfApplication;
+import net.log.Logger;
+import net.vo.Host;
+
+import java.net.DatagramSocket;
+import java.net.SocketException;
+
 public class ScreenMonitorService extends Service {
     Host host;
     NetConfApplication app;
@@ -31,6 +32,7 @@ public class ScreenMonitorService extends Service {
     private static final int SCREEN_Off = 0;
     private static final int SCREEN_ON = 1;
     private WakeLock wakeLock;
+    private ScreenListener screenListener;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -46,11 +48,12 @@ public class ScreenMonitorService extends Service {
                 NetConfApplication.hostName, 1, 1);
 
         acquireWakeLock();
-        
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
-        registerReceiver(new ScreenListener(), filter);
+        screenListener = new ScreenListener();
+        registerReceiver(screenListener, filter);
 
         isClosed = false;
         sendHostInfo = new SendHostInfo();
@@ -65,6 +68,7 @@ public class ScreenMonitorService extends Service {
         releaseWakeLock();
         isClosed = false;
         thread.interrupt();
+        unregisterReceiver(screenListener);
         Logger.info(this.toString(), "service stop");
         super.onDestroy();
     }
@@ -76,18 +80,18 @@ public class ScreenMonitorService extends Service {
 
             Logger.info(this.toString(), "receive a screen broadcast");
             switch (intent.getAction()) {
-            case Intent.ACTION_SCREEN_OFF:
-                Logger.info(this.toString(), "screen is off");
-                sendHostInfo.getHandler().sendEmptyMessage(SCREEN_Off);
-                break;
+                case Intent.ACTION_SCREEN_OFF:
+                    Logger.info(this.toString(), "screen is off");
+                    sendHostInfo.getHandler().sendEmptyMessage(SCREEN_Off);
+                    break;
 
-            case Intent.ACTION_SCREEN_ON:
-                Logger.info(this.toString(), "screen is on");
-                sendHostInfo.getHandler().sendEmptyMessage(SCREEN_ON);
-                break;
+                case Intent.ACTION_SCREEN_ON:
+                    Logger.info(this.toString(), "screen is on");
+                    sendHostInfo.getHandler().sendEmptyMessage(SCREEN_ON);
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
     }
@@ -124,16 +128,16 @@ public class ScreenMonitorService extends Service {
                 public void handleMessage(Message msg) {
 
                     switch (msg.what) {
-                    case SCREEN_Off:
-                        isClosed = true;
-                        this.postDelayed(sendSelfInfo, 1000);
-                        break;
-                    case SCREEN_ON:
-                        isClosed = false;
-                        this.removeCallbacks(sendHostInfo);
-                        break;
-                    default:
-                        break;
+                        case SCREEN_Off:
+                            isClosed = true;
+                            this.postDelayed(sendSelfInfo, 1000);
+                            break;
+                        case SCREEN_ON:
+                            isClosed = false;
+                            this.removeCallbacks(sendHostInfo);
+                            break;
+                        default:
+                            break;
                     }
                 }
             };

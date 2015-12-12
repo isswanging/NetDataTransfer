@@ -1,19 +1,5 @@
 package net.service;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.util.ArrayList;
-
-import net.app.NetConfApplication;
-import net.app.netdatatransfer.R;
-import net.log.Logger;
-import net.util.BadgeUtil;
-import net.util.TransferFile;
-import net.vo.ChatMsgEntity;
-import net.vo.DataPacket;
-import net.vo.Progress;
-import net.vo.SendTask;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -28,6 +14,21 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+
+import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
+import net.log.Logger;
+import net.util.BadgeUtil;
+import net.util.TransferFile;
+import net.vo.ChatMsgEntity;
+import net.vo.DataPacket;
+import net.vo.Progress;
+import net.vo.SendTask;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.util.ArrayList;
 
 public class UdpDataMonitorService extends Service {
     DatagramSocket UdpSocket = null;

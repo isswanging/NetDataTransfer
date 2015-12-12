@@ -1,5 +1,24 @@
 package net.app;
 
+import android.annotation.TargetApi;
+import android.app.Application;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.media.SoundPool;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.os.Environment;
+import android.util.SparseArray;
+
+import net.app.netdatatransfer.R;
+import net.log.Logger;
+import net.vo.ChatMsgEntity;
+import net.vo.Host;
+import net.vo.Progress;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -13,28 +32,12 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 
-import net.app.netdatatransfer.R;
-import net.log.Logger;
-import net.vo.ChatMsgEntity;
-import net.vo.Host;
-import net.vo.Progress;
-import android.app.Application;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.SoundPool;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Environment;
-import android.util.SparseArray;
-
 public class NetConfApplication extends Application {
     public int wifi = 0;
     public String chatId = "none";
     public SoundPool soundPool;
     public NotificationManager nManager;
+    public int soundID;
 
     // 发送普通信息端口
     public final static int textPort = 2324;
@@ -89,11 +92,11 @@ public class NetConfApplication extends Application {
     public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
 
     // 文件格式
-    public final static String[] imageSupport = { "BMP", "JPG", "JPEG", "PNG",
-            "GIF" };
-    public final static String[] videoSupport = { "rmvb", "AVI", "mp4", "3gp",
-            "mpg" };
-    public final static String[] audioSupport = { "mp3", "wma", "wav", "amr" };
+    public final static String[] imageSupport = {"BMP", "JPG", "JPEG", "PNG",
+            "GIF"};
+    public final static String[] videoSupport = {"rmvb", "AVI", "mp4", "3gp",
+            "mpg"};
+    public final static String[] audioSupport = {"mp3", "wma", "wav", "amr"};
 
     // 检查端口
     public String check(Context userListActivity) {
@@ -150,7 +153,7 @@ public class NetConfApplication extends Application {
 
     // 发送UDP消息
     public void sendUdpData(DatagramSocket broadSocket, String obj,
-            String targetIp, int port) {
+                            String targetIp, int port) {
         byte[] info = obj.getBytes();
 
         DatagramPacket broadPacket;
@@ -180,6 +183,7 @@ public class NetConfApplication extends Application {
     @Override
     public void onCreate() {
         hostIP = getHostIp(this);
+        super.onCreate();
     }
 
     private String intToIp(int i) {
@@ -202,15 +206,15 @@ public class NetConfApplication extends Application {
     }
 
     // 播放消息提示音
-    @SuppressWarnings("deprecation")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void loadVoice() {
-        soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
-        soundPool.load(this, R.raw.msn, 1);
+        soundPool = new SoundPool.Builder().setMaxStreams(10).build();
+        soundID = soundPool.load(this, R.raw.msn, 1);
     }
 
     public void playVoice() {
         // 播放消息提示音乐
-        soundPool.play(1, 1, 1, 0, 0, 1);
+        soundPool.play(soundID, 1, 1, 0, 0, 1);
     }
 
     // 获取sd卡路径
@@ -231,7 +235,8 @@ public class NetConfApplication extends Application {
                 num += chatTempMap.get(s).size();
             }
         }
-        Logger.info("unread msg num::::", " "+num);
+        Logger.info("unread msg num::::", " " + num);
         return num;
     }
+
 }

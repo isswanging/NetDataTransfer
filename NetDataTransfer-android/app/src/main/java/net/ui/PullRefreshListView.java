@@ -1,6 +1,5 @@
 package net.ui;
 
-import net.log.Logger;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
@@ -14,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import net.app.netdatatransfer.R;
+import net.log.Logger;
 
 public class PullRefreshListView extends LinearLayout implements
         OnTouchListener {
@@ -69,6 +69,17 @@ public class PullRefreshListView extends LinearLayout implements
     private int speed = -15;
 
     private PullToRefreshListener pullListener;
+
+    boolean canRefresh = true;
+
+    public void setCanRefresh(boolean canRefresh) {
+        this.canRefresh = canRefresh;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return !canRefresh;
+    }
 
     // 初始化操作
     public PullRefreshListView(Context context, AttributeSet attrs) {

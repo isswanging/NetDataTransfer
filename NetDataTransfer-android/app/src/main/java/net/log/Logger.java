@@ -9,13 +9,13 @@ public class Logger {
 
     public static void info(String className, String info) {
         if (tag) {
-            Log.i(className, info);
+            Log.i(className, "xyz:::" + info);
         }
     }
 
     public static void error(String className, String info) {
         if (tag) {
-            Log.e(className, info);
+            Log.e(className, "xyz:::" + info);
         }
     }
 }

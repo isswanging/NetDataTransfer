@@ -4,11 +4,11 @@
     package="net.app.netdatatransfer"
     android:persistent="true"
     android:versionCode="4"
-    android:versionName="4.0" >
+    android:versionName="4.0">
 
     <uses-sdk
         android:minSdkVersion="16"
-        android:targetSdkVersion="21" />
+        android:targetSdkVersion="23" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
@@ -31,11 +31,11 @@
         android:name="net.app.NetConfApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
+        android:label="@string/app_name">
         <activity
             android:name="net.ui.WelcomeActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,9 +46,8 @@
             android:name="net.ui.UserListActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
-            android:logo="@drawable/left_img"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
+            android:theme="@android:style/Theme.Holo.Light.NoActionBar">
             <intent-filter>
                 <action android:name="net.ui.userList" />
 
@@ -59,7 +58,7 @@
             android:name="net.ui.ChatActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden" >
+            android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
                 <action android:name="net.ui.chatting" />
 
@@ -70,7 +69,7 @@
             android:name="net.ui.FileListActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden" >
+            android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
                 <action android:name="net.ui.FileListActivity" />
 
@@ -81,7 +80,7 @@
             android:name="net.ui.ProgressBarListActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden" >
+            android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
                 <action android:name="net.ui.ProgressBarListActivity" />
 
@@ -91,7 +90,7 @@
         <activity
             android:name="net.ui.CaptureActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
             <intent-filter>
                 <action android:name="net.ui.CaptureActivity" />
 
@@ -101,20 +100,16 @@
 
         <service
             android:name="net.service.BroadcastMonitorService"
-            android:persistent="true" >
-        </service>
+            android:persistent="true"/>
         <service
             android:name="net.service.UdpDataMonitorService"
-            android:persistent="true" >
-        </service>
+            android:persistent="true"/>
         <service
             android:name="net.service.FileMonitorService"
-            android:persistent="true" >
-        </service>
+            android:persistent="true"/>
         <service
             android:name="net.service.ScreenMonitorService"
-            android:persistent="true" >
-        </service>
+            android:persistent="true"/>
     </application>
 
 </manifest>
