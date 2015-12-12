@@ -62,6 +62,7 @@ import java.util.Map;
 
 public class UserListActivity extends Activity {
     private List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+    private List<Map<String, Object>> answerListData = new ArrayList<Map<String, Object>>();
 
     private final int login = 0;
     private final int refresh = 1;
@@ -117,12 +118,13 @@ public class UserListActivity extends Activity {
     RelativeLayout.LayoutParams previewParams;
     int moveTopMargin;
     LinearLayout preview;
+    String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
 
     @Override
     protected void onResume() {
         if (isReady) {
             registerReceiver(msgReceiver, filter);
-            getData();
+            getUsertData();
             adapter.notifyDataSetChanged();
         }
 
@@ -190,6 +192,12 @@ public class UserListActivity extends Activity {
                 hideMenu();
             }
         };
+
+        for (int i = 0; i < answerData.length; i++) {
+            Map item = new HashMap();
+            item.put("text", answerData[i]);
+            answerListData.add(item);
+        }
 
         // 建立界面
         initUI();
@@ -411,7 +419,7 @@ public class UserListActivity extends Activity {
                 this);
     }
 
-    private List<Map<String, Object>> getData() {
+    private List<Map<String, Object>> getUsertData() {
         userList.clear();
         for (Host host : app.hostList) {
             Map<String, Object> item = new HashMap<String, Object>();
@@ -432,7 +440,7 @@ public class UserListActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            getData();
+            getUsertData();
             adapter.notifyDataSetChanged();
         }
     }
@@ -475,9 +483,8 @@ public class UserListActivity extends Activity {
                         else {
                             moveTopMargin = (int) (moveTopMargin + gap);
                         }
-                        if (!touchView.isShow()) {
+                        if (!touchView.isShow() && !touchView.running) {
                             touchView.showAnswerList();
-                            touchView.setIsShow(true);
                         }
                     }
                     // view处于下压并且继续下拉的状态
@@ -487,9 +494,8 @@ public class UserListActivity extends Activity {
                     } else {
                         Logger.info(this.toString(), "normal move");
                         moveTopMargin = (int) (moveTopMargin + gap);
-                        if (touchView.isShow()) {
+                        if (touchView.isShow() && !touchView.running) {
                             touchView.hideAnswerList();
-                            touchView.setIsShow(false);
                         }
                     }
                     yTemp = yMove;
@@ -523,7 +529,7 @@ public class UserListActivity extends Activity {
             final UserListActivity act = refActvity.get();
             if (act != null) {
                 if (msg.what == act.login) {
-                    adapter = new SimpleAdapter(act, getData(),
+                    adapter = new SimpleAdapter(act, getUsertData(),
                             R.layout.user_item, new String[]{"name", "ip",
                             "img"}, new int[]{R.id.userName,
                             R.id.userIP, R.id.unread});
@@ -588,6 +594,7 @@ public class UserListActivity extends Activity {
                                             setBackground(root).
                                             setPreContent(ip.getText().toString()).
                                             setView(custPreview).
+                                            setData(answerListData).
                                             setRoot(root).create();
                                     root.addView(touchView);
                                     touchView.startAnimation(showPreviewAnim);
@@ -626,7 +633,7 @@ public class UserListActivity extends Activity {
                     });
                 } else if (msg.what == refresh) {
                     pullRefreshListView.finishRefreshing();
-                    getData();
+                    getUsertData();
                     adapter.notifyDataSetChanged();
                 } else if (msg.what == retry) {
                     if (app.wifi == 1) {

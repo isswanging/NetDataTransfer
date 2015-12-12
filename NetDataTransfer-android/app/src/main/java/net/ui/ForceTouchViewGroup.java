@@ -16,11 +16,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import net.app.NetConfApplication;
@@ -29,6 +30,8 @@ import net.log.Logger;
 import net.util.ScreenUtils;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 模仿iphone的3D touch效果
@@ -38,11 +41,12 @@ public class ForceTouchViewGroup extends LinearLayout {
     LinearLayout preview;
     RelativeLayout.LayoutParams previewParams;
     ListView answerList;
-    ArrayAdapter answerAdapter;
+    SimpleAdapter answerAdapter;
 
     NetConfApplication app;
     boolean isShow = false;// 判断菜单是否显示
     boolean isLock = false;// 屏蔽activity的事件分发
+    boolean running = false;// 动画是否运行
     float yDown;
     float yMove;
     float yTemp;
@@ -66,9 +70,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         title = (TextView) findViewById(R.id.preview_username);
         preview = (LinearLayout) findViewById(R.id.preview);
         answerList = (ListView) findViewById(R.id.answer);
-        answerAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, getData());
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
-        answerList.setAdapter(answerAdapter);
         yTemp = 0;
 
         // 居中
@@ -85,6 +87,44 @@ public class ForceTouchViewGroup extends LinearLayout {
         showAnswerList.setDuration(400);
         hideAnswerList = new TranslateAnimation(1f, 1f, answerListTop, answerListBottom);
         hideAnswerList.setDuration(400);
+
+        showAnswerList.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                running = true;
+                answerList.setVisibility(VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                isShow = true;
+                running = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        hideAnswerList.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                running = true;
+                isShow = false;
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                answerList.setVisibility(INVISIBLE);
+                running = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     public int dp2px(float dp) {
@@ -133,6 +173,9 @@ public class ForceTouchViewGroup extends LinearLayout {
         root = builder.pRoot;
         preview.addView(builder.preview,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        answerAdapter = new SimpleAdapter(app, builder.answerListData,
+                R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
+        answerList.setAdapter(answerAdapter);
 
         answerHeight = 0;
         for (int i = 0; i < answerAdapter.getCount(); i++) {
@@ -142,7 +185,9 @@ public class ForceTouchViewGroup extends LinearLayout {
                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
             answerHeight += mView.getMeasuredHeight();
         }
-        needMove = answerHeight - topMargin + dp2px(30);
+
+        Logger.info(this.toString(), "answerHeight:::" + answerHeight);
+        needMove = answerHeight - topMargin + dp2px(50);
     }
 
     @Override
@@ -181,9 +226,8 @@ public class ForceTouchViewGroup extends LinearLayout {
                     else {
                         moveTopMargin = (int) (moveTopMargin + gap);
                     }
-                    if (!isShow) {
+                    if (!isShow && !running) {
                         showAnswerList();
-                        isShow = true;
                     }
                 }
                 // view处于下压并且继续下拉的状态
@@ -193,9 +237,8 @@ public class ForceTouchViewGroup extends LinearLayout {
                 } else {
                     Logger.info(this.toString(), "normal move");
                     moveTopMargin = (int) (moveTopMargin + gap);
-                    if (isShow) {
+                    if (isShow && !running) {
                         hideAnswerList();
-                        isShow = false;
                     }
                 }
                 yTemp = yMove;
@@ -212,6 +255,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         float scale = 0.1f;
         ViewGroup pRoot;
         View preview;
+        List<Map<String, Object>> answerListData;
 
         public Builder(Context c) {
             context = c;
@@ -289,21 +333,19 @@ public class ForceTouchViewGroup extends LinearLayout {
             rs.destroy();
             return outBitmap;
         }
+
+        public Builder setData(List<Map<String, Object>> answerListData) {
+            this.answerListData = answerListData;
+            return this;
+        }
     }
 
     public void showAnswerList() {
-        answerList.setVisibility(VISIBLE);
         answerList.startAnimation(showAnswerList);
     }
 
     public void hideAnswerList() {
         answerList.startAnimation(hideAnswerList);
-        answerList.setVisibility(INVISIBLE);
     }
 
-    // TODO: 2015/12/10
-    /*
-     * answerList的内容定制
-     * answerList的文字居中，文字颜色设置
-     */
 }
