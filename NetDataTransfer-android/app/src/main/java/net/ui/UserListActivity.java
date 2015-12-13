@@ -70,7 +70,7 @@ public class UserListActivity extends Activity {
     private final int retry = 2;
     private final int answer = 3;
 
-    private SimpleAdapter adapter;
+    private SimpleAdapter userInfoAdapter;
     private PullRefreshListView pullRefreshListView;
     private DrawerLayout drawerLayout;
 
@@ -128,8 +128,8 @@ public class UserListActivity extends Activity {
     protected void onResume() {
         if (isReady) {
             registerReceiver(msgReceiver, filter);
-            getUsertData();
-            adapter.notifyDataSetChanged();
+            getUserData();
+            userInfoAdapter.notifyDataSetChanged();
         }
 
         super.onResume();
@@ -200,7 +200,6 @@ public class UserListActivity extends Activity {
         for (int i = 0; i < answerData.length; i++) {
             Map item = new HashMap();
             item.put("text", answerData[i]);
-            item.put("tag", answer);
             answerListData.add(item);
         }
 
@@ -423,7 +422,7 @@ public class UserListActivity extends Activity {
                 this);
     }
 
-    private List<Map<String, Object>> getUsertData() {
+    private List<Map<String, Object>> getUserData() {
         userList.clear();
         for (Host host : app.hostList) {
             Map<String, Object> item = new HashMap<String, Object>();
@@ -434,7 +433,6 @@ public class UserListActivity extends Activity {
             } else {
                 item.put("img", 0);
             }
-
             userList.add(item);
         }
         return userList;
@@ -444,8 +442,8 @@ public class UserListActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            getUsertData();
-            adapter.notifyDataSetChanged();
+            getUserData();
+            userInfoAdapter.notifyDataSetChanged();
         }
     }
 
@@ -531,181 +529,196 @@ public class UserListActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             final UserListActivity act = refActvity.get();
+
             if (act != null) {
-                if (msg.what == act.login) {
-                    adapter = new SimpleAdapter(act, getUsertData(),
-                            R.layout.user_item, new String[]{"name", "ip",
-                            "img"}, new int[]{R.id.userName,
-                            R.id.userIP, R.id.unread});
-                    Logger.info(this.toString(),
-                            String.valueOf(app.hostList.size()));
-                    isReady = true;
+                switch (msg.what) {
+                    case login:
+                        userInfoAdapter = new SimpleAdapter(act, getUserData(),
+                                R.layout.user_item, new String[]{"name", "ip",
+                                "img"}, new int[]{R.id.userName,
+                                R.id.userIP, R.id.unread});
+                        Logger.info(this.toString(),
+                                String.valueOf(app.hostList.size()));
+                        isReady = true;
 
-                    // 更新UI
-                    LayoutInflater layoutInflater = getLayoutInflater();
-                    pullRefreshListView = (PullRefreshListView) layoutInflater
-                            .inflate(R.layout.users, null);
+                        // 更新UI
+                        LayoutInflater layoutInflater = getLayoutInflater();
+                        pullRefreshListView = (PullRefreshListView) layoutInflater
+                                .inflate(R.layout.users, null);
 
-                    listConent.removeView(findViewById(R.id.wait));
-                    listConent.addView(pullRefreshListView, new RelativeLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
+                        listConent.removeView(findViewById(R.id.wait));
+                        listConent.addView(pullRefreshListView, new RelativeLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT));
 
-                    pullRefreshListView.getListView().setAdapter(adapter);
-                    pullRefreshListView.getListView().setOnItemClickListener(new OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            TextView name = (TextView) view.findViewById(R.id.userName);
-                            TextView ip = (TextView) view.findViewById(R.id.userIP);
-
-                            if (ip.getText().equals(NetConfApplication.hostIP)) {
-                                drawerLayout.openDrawer(Gravity.LEFT);
-                            } else {
-                                Bundle bundle = new Bundle();
-                                bundle.putString("name", name.getText().toString());
-                                bundle.putString("ip", ip.getText().toString());
-                                Intent intent = new Intent(act, ChatActivity.class);
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-                    // 模仿iphone的3D Touch效果
-                    pullRefreshListView.getListView().
-                            setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                                @Override
-                                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                                    Logger.info(this.toString(), "in 3d touch effect");
-                                    TextView name = (TextView) view.findViewById(R.id.userName);
-                                    TextView ip = (TextView) view.findViewById(R.id.userIP);
-
-                                    // 组装需要显示的界面
-                                    targetIp = ip.getText().toString();
-                                    targetName = name.getText().toString();
-                                    LinearLayout custPreview = (LinearLayout) LayoutInflater.from(act).inflate(R.layout.touch_content, null);
-                                    previewContent = (ListView) custPreview.getChildAt(1);
-                                    ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(name.getText());
-                                    chatAdapter = new ChatMsgAdapter(act, mDataArrays);
-                                    previewContent.setAdapter(chatAdapter);
-                                    // 填充数据
-                                    if (app.chatTempMap.containsKey(targetIp)) {
-                                        Logger.info(this.toString(), "get new massage");
-                                        app.nManager.cancelAll();
-                                        mDataArrays.addAll(app.chatTempMap.get(targetIp));
-                                        chatAdapter.notifyDataSetChanged();
-                                    }
-                                    // 显示3D touch菜单
-                                    touchView = new ForceTouchViewGroup.Builder(act).
-                                            setBackground(root).
-                                            setIP(ip.getText().toString()).
-                                            setView(custPreview).
-                                            setData(answerListData).
-                                            setHandler(handler).
-                                            setRoot(root).create();
-                                    root.addView(touchView);
-                                    touchView.startAnimation(showPreviewAnim);
-                                    answerList = (ListView) findViewById(R.id.answer);
-                                    preview = (LinearLayout) findViewById(R.id.preview);
-                                    previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
-                                    moveTopMargin = previewParams.topMargin;
-                                    topMargin = previewParams.topMargin;
-                                    return true;
-                                }
-                            });
-
-                    pullRefreshListView.setPullListener(new PullToRefreshListener() {
-
-                        @Override
-                        public void onRefresh() {
-                            app.hostList.clear();
-                            String userName = android.os.Build.MODEL;// 获取用户名
-                            String hostName = "Android";// 获取主机名
-                            String userDomain = "Android";// 获取计算机域
-
-                            // 加入在线列表
-                            Host host = new Host(userName, userDomain,
-                                    NetConfApplication.hostIP, hostName, 1, 0);
-                            app.addHost(host);
-                            try {
-                                app.sendUdpData(new DatagramSocket(), JSON.toJSONString(host),
-                                        NetConfApplication.broadcastIP, NetConfApplication.broadcastPort);
-                            } catch (SocketException e) {
-                                e.printStackTrace();
-                            }
-                            Message msg = handler.obtainMessage();
-                            msg.what = refresh;
-                            handler.sendMessageDelayed(msg, 2000);
-                        }
-                    });
-                } else if (msg.what == refresh) {
-                    pullRefreshListView.finishRefreshing();
-                    getUsertData();
-                    adapter.notifyDataSetChanged();
-                } else if (msg.what == retry) {
-                    if (app.wifi == 1) {
-                        // wifi打开
-                        loadUserList();
-                    } else {
-                        // wifi关闭,给出提示
-                        new AlertDialog.Builder(act)
-                                .setTitle("错误")
-                                .setMessage("wifi未连接或端口异常，启动失败")
-                                .setPositiveButton("退出",
-                                        new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                setResult(RESULT_OK);// 确定按钮事件
-                                                finish();
-                                            }
-                                        })
-                                .setNegativeButton("重试",
-                                        new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(
-                                                    DialogInterface dialog,
-                                                    int which) {
-                                                app.check(act);
-                                                Message msg = obtainMessage();
-                                                msg.what = retry;
-                                                sendMessageDelayed(msg, 2000);
-                                            }
-                                        }).setCancelable(false).show();
-                    }
-                } else if (msg.what == answer) {
-                    Logger.info(this.toString(),"get answer from 3d touch");
-                    // 获取数组的索引
-                    int i = msg.arg1;
-                    if ((i + 1) != answerData.length) {
-                        // 直接回复
-                        final DataPacket dp = new DataPacket(
-                                NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
-                                NetConfApplication.text);
-
-                        new Thread(new Runnable() {
+                        pullRefreshListView.getListView().setAdapter(userInfoAdapter);
+                        pullRefreshListView.getListView().setOnItemClickListener(new OnItemClickListener() {
                             @Override
-                            public void run() {
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                TextView name = (TextView) view.findViewById(R.id.userName);
+                                TextView ip = (TextView) view.findViewById(R.id.userIP);
+
+                                if (ip.getText().equals(NetConfApplication.hostIP)) {
+                                    drawerLayout.openDrawer(Gravity.LEFT);
+                                } else {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("name", name.getText().toString());
+                                    bundle.putString("ip", ip.getText().toString());
+                                    Intent intent = new Intent(act, ChatActivity.class);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                }
+                            }
+                        });
+                        // 模仿iphone的3D Touch效果
+                        pullRefreshListView.getListView().
+                                setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                                    @Override
+                                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                                        Logger.info(this.toString(), "in 3d touch effect");
+                                        TextView name = (TextView) view.findViewById(R.id.userName);
+                                        TextView ip = (TextView) view.findViewById(R.id.userIP);
+
+                                        // 组装需要显示的界面
+                                        targetIp = ip.getText().toString();
+                                        targetName = name.getText().toString();
+                                        LinearLayout custPreview = (LinearLayout) LayoutInflater.from(act).inflate(R.layout.touch_content, null);
+                                        previewContent = (ListView) custPreview.getChildAt(1);
+                                        ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(name.getText());
+                                        chatAdapter = new ChatMsgAdapter(act, mDataArrays);
+                                        previewContent.setAdapter(chatAdapter);
+                                        mDataArrays.clear();
+                                        // 填充数据
+                                        if (app.chatTempMap.containsKey(targetIp)) {
+                                            Logger.info(this.toString(), "get new massage");
+                                            app.nManager.cancelAll();
+                                            mDataArrays.addAll(app.chatTempMap.get(targetIp));
+                                            chatAdapter.notifyDataSetChanged();
+                                            previewContent.setSelection(chatAdapter.getCount() - 1);
+                                        }
+                                        // 显示3D touch菜单
+                                        touchView = new ForceTouchViewGroup.Builder(act).
+                                                setBackground(root).
+                                                setIP(ip.getText().toString()).
+                                                setView(custPreview).
+                                                setData(answerListData).
+                                                setHandler(handler,answer).
+                                                setRoot(root).create();
+                                        root.addView(touchView);
+                                        touchView.startAnimation(showPreviewAnim);
+                                        answerList = (ListView) findViewById(R.id.answer);
+                                        preview = (LinearLayout) findViewById(R.id.preview);
+                                        previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
+                                        moveTopMargin = previewParams.topMargin;
+                                        topMargin = previewParams.topMargin;
+                                        return true;
+                                    }
+                                });
+
+                        pullRefreshListView.setPullListener(new PullToRefreshListener() {
+
+                            @Override
+                            public void onRefresh() {
+                                app.hostList.clear();
+                                String userName = android.os.Build.MODEL;// 获取用户名
+                                String hostName = "Android";// 获取主机名
+                                String userDomain = "Android";// 获取计算机域
+
+                                // 加入在线列表
+                                Host host = new Host(userName, userDomain,
+                                        NetConfApplication.hostIP, hostName, 1, 0);
+                                app.addHost(host);
                                 try {
-                                    app.sendUdpData(new DatagramSocket(),
-                                            JSON.toJSONString(dp), targetIp,
-                                            NetConfApplication.textPort);
+                                    app.sendUdpData(new DatagramSocket(), JSON.toJSONString(host),
+                                            NetConfApplication.broadcastIP, NetConfApplication.broadcastPort);
                                 } catch (SocketException e) {
                                     e.printStackTrace();
                                 }
+                                Message msg = handler.obtainMessage();
+                                msg.what = refresh;
+                                handler.sendMessageDelayed(msg, 2000);
                             }
-                        }).start();
-                    } else {
-                        // 启动聊天窗口
-                        Bundle bundle = new Bundle();
-                        bundle.putString("name", targetName);
-                        bundle.putString("ip", targetIp);
-                        Intent intent = new Intent(act, ChatActivity.class);
-                        intent.putExtras(bundle);
-                        startActivity(intent);
-                    }
+                        });
+                        break;
+                    case refresh:
+                        pullRefreshListView.finishRefreshing();
+                        getUserData();
+                        userInfoAdapter.notifyDataSetChanged();
+                        break;
+                    case retry:
+                        if (app.wifi == 1) {
+                            // wifi打开
+                            loadUserList();
+                        } else {
+                            // wifi关闭,给出提示
+                            new AlertDialog.Builder(act)
+                                    .setTitle("错误")
+                                    .setMessage("wifi未连接或端口异常，启动失败")
+                                    .setPositiveButton("退出",
+                                            new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(
+                                                        DialogInterface dialog,
+                                                        int which) {
+                                                    setResult(RESULT_OK);// 确定按钮事件
+                                                    finish();
+                                                }
+                                            })
+                                    .setNegativeButton("重试",
+                                            new DialogInterface.OnClickListener() {
+
+                                                @Override
+                                                public void onClick(
+                                                        DialogInterface dialog,
+                                                        int which) {
+                                                    app.check(act);
+                                                    Message msg = obtainMessage();
+                                                    msg.what = retry;
+                                                    sendMessageDelayed(msg, 2000);
+                                                }
+                                            }).setCancelable(false).show();
+                        }
+                        break;
+                    case answer:
+                        Logger.info(this.toString(), "get answer from 3d touch");
+                        // 获取数组的索引
+                        int i = msg.arg1;
+                        if ((i + 1) != answerData.length) {
+                            // 直接回复
+                            final DataPacket dp = new DataPacket(
+                                    NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
+                                    NetConfApplication.text);
+                            // 清理操作
+                            app.chatTempMap.remove(targetIp);
+                            getUserData();
+                            userInfoAdapter.notifyDataSetChanged();
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        app.sendUdpData(new DatagramSocket(),
+                                                JSON.toJSONString(dp), targetIp,
+                                                NetConfApplication.textPort);
+                                    } catch (SocketException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();
+                        } else {
+                            // 启动聊天窗口
+                            Bundle bundle = new Bundle();
+                            bundle.putString("name", targetName);
+                            bundle.putString("ip", targetIp);
+                            Intent intent = new Intent(act, ChatActivity.class);
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        }
+                        break;
+                    default:
+                        Logger.error(this.toString(), "error======no event match=======");
+                        break;
                 }
             }
         }

@@ -1,9 +1,9 @@
 package net.app;
 
-import android.annotation.TargetApi;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -206,9 +206,13 @@ public class NetConfApplication extends Application {
     }
 
     // 播放消息提示音
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void loadVoice() {
-        soundPool = new SoundPool.Builder().setMaxStreams(10).build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            soundPool = new SoundPool.Builder().setMaxStreams(10).build();
+        } else {
+            soundPool = new SoundPool(2, AudioManager.STREAM_SYSTEM, 5);
+        }
+
         soundID = soundPool.load(this, R.raw.msn, 1);
     }
 

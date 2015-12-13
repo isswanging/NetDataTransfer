@@ -58,7 +58,6 @@ public class ForceTouchViewGroup extends LinearLayout {
     int needMove;// 菜单显示需要上拉的距离
     int answerListTop;
     int answerListBottom;
-    Handler mHandler;
 
     // 动画
     TranslateAnimation showAnswerList;
@@ -150,7 +149,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         return isLock;
     }
 
-    public void show(Builder builder) {
+    public void show(final Builder builder) {
         // 设置模糊背景
         Drawable drawable = new BitmapDrawable(getResources(), builder.blurBg);
         drawable.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
@@ -162,8 +161,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         preview.addView(builder.preview,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         answerAdapter = new SimpleAdapter(app, builder.answerListData,
-                R.layout.answer_item, new String[]{"text", "tag"},
-                new int[]{R.id.answer_text, R.id.answer_tag});
+                R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
         answerList.setAdapter(answerAdapter);
 
         // 计算list高度和滑动的距离
@@ -179,13 +177,12 @@ public class ForceTouchViewGroup extends LinearLayout {
         needMove = answerHeight - topMargin + dp2px(50);
 
         // 注册点击事件
-        mHandler = builder.pHandler;
         answerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Logger.info(this.toString(), "in item click event");
-                Message msg = mHandler.obtainMessage();
-                msg.what = Integer.valueOf(((TextView) view.findViewById(R.id.answer_tag)).getText().toString());
+                Message msg = builder.pHandler.obtainMessage();
+                msg.what = builder.pWhat;
                 msg.arg1 = position;
                 msg.sendToTarget();
                 root.removeView(ForceTouchViewGroup.this);
@@ -263,6 +260,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         String pTargetIP;
         ViewGroup pRoot;
         Handler pHandler;
+        int pWhat;
         float scale = 0.1f;
         View preview;
         List<Map<String, Object>> answerListData;
@@ -348,8 +346,9 @@ public class ForceTouchViewGroup extends LinearLayout {
             return this;
         }
 
-        public Builder setHandler(Handler handler) {
+        public Builder setHandler(Handler handler, int what) {
             pHandler = handler;
+            pWhat = what;
             return this;
         }
     }
