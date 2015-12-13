@@ -8,6 +8,8 @@ import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Message;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -29,7 +32,6 @@ import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.util.ScreenUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +44,6 @@ public class ForceTouchViewGroup extends LinearLayout {
     RelativeLayout.LayoutParams previewParams;
     ListView answerList;
     SimpleAdapter answerAdapter;
-
     NetConfApplication app;
     boolean isShow = false;// 判断菜单是否显示
     boolean isLock = false;// 屏蔽activity的事件分发
@@ -57,6 +58,7 @@ public class ForceTouchViewGroup extends LinearLayout {
     int needMove;// 菜单显示需要上拉的距离
     int answerListTop;
     int answerListBottom;
+    Handler mHandler;
 
     // 动画
     TranslateAnimation showAnswerList;
@@ -140,14 +142,6 @@ public class ForceTouchViewGroup extends LinearLayout {
         return isShow;
     }
 
-    public void setIsShow(boolean isShow) {
-        this.isShow = isShow;
-    }
-
-    public RelativeLayout.LayoutParams getPreviewParams() {
-        return previewParams;
-    }
-
     public void setIsLock(boolean isLock) {
         this.isLock = isLock;
     }
@@ -156,27 +150,23 @@ public class ForceTouchViewGroup extends LinearLayout {
         return isLock;
     }
 
-    public ArrayList getData() {
-        ArrayList<String> list = new ArrayList<>();
-        list.add("好");
-        list.add("谢谢");
-        list.add("晚点再说");
-        list.add("自定义");
-
-        return list;
-    }
-
     public void show(Builder builder) {
+        // 设置模糊背景
         Drawable drawable = new BitmapDrawable(getResources(), builder.blurBg);
         drawable.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
         setBackground(drawable);
+
         root = builder.pRoot;
+
+        // 填充view和list数据
         preview.addView(builder.preview,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         answerAdapter = new SimpleAdapter(app, builder.answerListData,
-                R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
+                R.layout.answer_item, new String[]{"text", "tag"},
+                new int[]{R.id.answer_text, R.id.answer_tag});
         answerList.setAdapter(answerAdapter);
 
+        // 计算list高度和滑动的距离
         answerHeight = 0;
         for (int i = 0; i < answerAdapter.getCount(); i++) {
             View mView = answerAdapter.getView(i, null, answerList);
@@ -185,9 +175,23 @@ public class ForceTouchViewGroup extends LinearLayout {
                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
             answerHeight += mView.getMeasuredHeight();
         }
-
         Logger.info(this.toString(), "answerHeight:::" + answerHeight);
         needMove = answerHeight - topMargin + dp2px(50);
+
+        // 注册点击事件
+        mHandler = builder.pHandler;
+        answerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Logger.info(this.toString(), "in item click event");
+                Message msg = mHandler.obtainMessage();
+                msg.what = Integer.valueOf(((TextView) view.findViewById(R.id.answer_tag)).getText().toString());
+                msg.arg1 = position;
+                msg.sendToTarget();
+                root.removeView(ForceTouchViewGroup.this);
+            }
+        });
+
     }
 
     @Override
@@ -196,6 +200,9 @@ public class ForceTouchViewGroup extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 yDown = event.getRawY();
                 moveTopMargin = previewParams.topMargin;
+                if (isShow) {
+                    super.dispatchTouchEvent(event);
+                }
                 Logger.info(this.toString(), "in forceTouchView touch DOWN moveTopMargin::" + moveTopMargin);
                 break;
             case MotionEvent.ACTION_UP:
@@ -205,8 +212,9 @@ public class ForceTouchViewGroup extends LinearLayout {
                 } else {
                     previewParams.topMargin = topMargin - needMove;
                     preview.setLayoutParams(previewParams);
+                    yTemp = 0;
+                    super.dispatchTouchEvent(event);
                 }
-                yTemp = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
                 yMove = event.getRawY();
@@ -244,6 +252,7 @@ public class ForceTouchViewGroup extends LinearLayout {
                 yTemp = yMove;
                 previewParams.topMargin = moveTopMargin;
                 preview.setLayoutParams(previewParams);
+                break;
         }
         return true;
     }
@@ -252,8 +261,9 @@ public class ForceTouchViewGroup extends LinearLayout {
         Context context;
         Bitmap blurBg;
         String pTargetIP;
-        float scale = 0.1f;
         ViewGroup pRoot;
+        Handler pHandler;
+        float scale = 0.1f;
         View preview;
         List<Map<String, Object>> answerListData;
 
@@ -277,7 +287,7 @@ public class ForceTouchViewGroup extends LinearLayout {
             return this;
         }
 
-        public Builder setPreContent(String ip) {
+        public Builder setIP(String ip) {
             pTargetIP = ip;
             return this;
         }
@@ -304,9 +314,8 @@ public class ForceTouchViewGroup extends LinearLayout {
         private Bitmap scaleBitmap(Bitmap bitmap) {
             Matrix matrix = new Matrix();
             matrix.postScale(scale, scale); //长和宽放大缩小的比例
-            Bitmap resizeBmp = Bitmap.createBitmap(bitmap, 0, 0,
+            return Bitmap.createBitmap(bitmap, 0, 0,
                     bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            return resizeBmp;
         }
 
         //高斯模糊效果
@@ -336,6 +345,11 @@ public class ForceTouchViewGroup extends LinearLayout {
 
         public Builder setData(List<Map<String, Object>> answerListData) {
             this.answerListData = answerListData;
+            return this;
+        }
+
+        public Builder setHandler(Handler handler) {
+            pHandler = handler;
             return this;
         }
     }

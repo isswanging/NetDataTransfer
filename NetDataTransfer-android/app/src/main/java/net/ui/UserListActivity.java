@@ -50,6 +50,7 @@ import net.service.UdpDataMonitorService;
 import net.ui.PullRefreshListView.PullToRefreshListener;
 import net.util.CreateQRImage;
 import net.vo.ChatMsgEntity;
+import net.vo.DataPacket;
 import net.vo.Host;
 
 import java.lang.ref.WeakReference;
@@ -67,6 +68,7 @@ public class UserListActivity extends Activity {
     private final int login = 0;
     private final int refresh = 1;
     private final int retry = 2;
+    private final int answer = 3;
 
     private SimpleAdapter adapter;
     private PullRefreshListView pullRefreshListView;
@@ -119,6 +121,8 @@ public class UserListActivity extends Activity {
     int moveTopMargin;
     LinearLayout preview;
     String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
+    String targetIp;
+    String targetName;
 
     @Override
     protected void onResume() {
@@ -196,6 +200,7 @@ public class UserListActivity extends Activity {
         for (int i = 0; i < answerData.length; i++) {
             Map item = new HashMap();
             item.put("text", answerData[i]);
+            item.put("tag", answer);
             answerListData.add(item);
         }
 
@@ -223,7 +228,6 @@ public class UserListActivity extends Activity {
         if (isReady) {
             unregisterReceiver(msgReceiver);
         }
-
         super.onPause();
     }
 
@@ -576,10 +580,11 @@ public class UserListActivity extends Activity {
                                     TextView ip = (TextView) view.findViewById(R.id.userIP);
 
                                     // 组装需要显示的界面
+                                    targetIp = ip.getText().toString();
+                                    targetName = name.getText().toString();
                                     LinearLayout custPreview = (LinearLayout) LayoutInflater.from(act).inflate(R.layout.touch_content, null);
                                     previewContent = (ListView) custPreview.getChildAt(1);
                                     ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(name.getText());
-                                    String targetIp = ip.getText().toString();
                                     chatAdapter = new ChatMsgAdapter(act, mDataArrays);
                                     previewContent.setAdapter(chatAdapter);
                                     // 填充数据
@@ -592,9 +597,10 @@ public class UserListActivity extends Activity {
                                     // 显示3D touch菜单
                                     touchView = new ForceTouchViewGroup.Builder(act).
                                             setBackground(root).
-                                            setPreContent(ip.getText().toString()).
+                                            setIP(ip.getText().toString()).
                                             setView(custPreview).
                                             setData(answerListData).
+                                            setHandler(handler).
                                             setRoot(root).create();
                                     root.addView(touchView);
                                     touchView.startAnimation(showPreviewAnim);
@@ -668,6 +674,37 @@ public class UserListActivity extends Activity {
                                                 sendMessageDelayed(msg, 2000);
                                             }
                                         }).setCancelable(false).show();
+                    }
+                } else if (msg.what == answer) {
+                    Logger.info(this.toString(),"get answer from 3d touch");
+                    // 获取数组的索引
+                    int i = msg.arg1;
+                    if ((i + 1) != answerData.length) {
+                        // 直接回复
+                        final DataPacket dp = new DataPacket(
+                                NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
+                                NetConfApplication.text);
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    app.sendUdpData(new DatagramSocket(),
+                                            JSON.toJSONString(dp), targetIp,
+                                            NetConfApplication.textPort);
+                                } catch (SocketException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
+                    } else {
+                        // 启动聊天窗口
+                        Bundle bundle = new Bundle();
+                        bundle.putString("name", targetName);
+                        bundle.putString("ip", targetIp);
+                        Intent intent = new Intent(act, ChatActivity.class);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
                     }
                 }
             }
