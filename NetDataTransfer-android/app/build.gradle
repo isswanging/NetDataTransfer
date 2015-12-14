@@ -8,8 +8,6 @@ android {
         applicationId "net.app.netdatatransfer"
         minSdkVersion 17
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
     }
     buildTypes {
         release {

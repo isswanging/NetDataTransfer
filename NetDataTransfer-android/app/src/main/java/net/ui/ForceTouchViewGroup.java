@@ -55,7 +55,7 @@ public class ForceTouchViewGroup extends LinearLayout {
     int topMargin;
     int moveTopMargin;
     int answerHeight;
-    int needMove;// 菜单显示需要上拉的距离
+    int needMove = 0;// 菜单显示需要上拉的距离
     int answerListTop;
     int answerListBottom;
 
@@ -163,18 +163,16 @@ public class ForceTouchViewGroup extends LinearLayout {
         answerAdapter = new SimpleAdapter(app, builder.answerListData,
                 R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
         answerList.setAdapter(answerAdapter);
-
+        root.addView(this);
         // 计算list高度和滑动的距离
-        answerHeight = 0;
-        for (int i = 0; i < answerAdapter.getCount(); i++) {
-            View mView = answerAdapter.getView(i, null, answerList);
-            mView.measure(
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-            answerHeight += mView.getMeasuredHeight();
-        }
-        Logger.info(this.toString(), "answerHeight:::" + answerHeight);
-        needMove = answerHeight - topMargin + dp2px(50);
+        answerList.post(new Runnable() {
+            @Override
+            public void run() {
+                answerHeight = answerList.getHeight();
+                needMove = answerHeight - topMargin + dp2px(10);
+                Logger.info(this.toString(), "answerList height====" + answerHeight);
+            }
+        });
 
         // 注册点击事件
         answerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -238,7 +236,7 @@ public class ForceTouchViewGroup extends LinearLayout {
                 // view处于下压并且继续下拉的状态
                 else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
                     Logger.info(this.toString(), "slow down");
-                    moveTopMargin = (int) (moveTopMargin + gap * 0.2);
+                    moveTopMargin = (int) (moveTopMargin + gap * 0.1);
                 } else {
                     Logger.info(this.toString(), "normal move");
                     moveTopMargin = (int) (moveTopMargin + gap);

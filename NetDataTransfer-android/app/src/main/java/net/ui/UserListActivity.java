@@ -112,7 +112,6 @@ public class UserListActivity extends Activity {
     ChatMsgAdapter chatAdapter;
     List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
     ListView previewContent;
-    ListView answerList;
     float yDown;
     float yMove;
     float yTemp;
@@ -468,41 +467,44 @@ public class UserListActivity extends Activity {
                     yTemp = 0;
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    yMove = event.getRawY();
-                    if (yTemp == 0) {
-                        yTemp = yMove;
-                    }
-                    float gap = yMove - yTemp;
+                    // needMove可能还没准备好
+                    if (touchView.getNeedMove() != 0) {
+                        yMove = event.getRawY();
+                        if (yTemp == 0) {
+                            yTemp = yMove;
+                        }
+                        float gap = yMove - yTemp;
 
-                    // view位于超过显示部分的位置
-                    if ((moveTopMargin + gap) <= (topMargin - touchView.getNeedMove())) {
-                        Logger.info(this.toString(), "slow up");
-                        // 向上滑减速
-                        if (gap < 0) {
-                            moveTopMargin = (int) (moveTopMargin + gap * 0.3);
+                        // view位于超过显示部分的位置
+                        if ((moveTopMargin + gap) <= (topMargin - touchView.getNeedMove())) {
+                            Logger.info(this.toString(), "slow up");
+                            // 向上滑减速
+                            if (gap < 0) {
+                                moveTopMargin = (int) (moveTopMargin + gap * 0.3);
+                            }
+                            // 向下滑速度正常
+                            else {
+                                moveTopMargin = (int) (moveTopMargin + gap);
+                            }
+                            if (!touchView.isShow() && !touchView.running) {
+                                touchView.showAnswerList();
+                            }
                         }
-                        // 向下滑速度正常
-                        else {
+                        // view处于下压并且继续下拉的状态
+                        else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
+                            Logger.info(this.toString(), "slow down");
+                            moveTopMargin = (int) (moveTopMargin + gap * 0.1);
+                        } else {
+                            Logger.info(this.toString(), "normal move");
                             moveTopMargin = (int) (moveTopMargin + gap);
+                            if (touchView.isShow() && !touchView.running) {
+                                touchView.hideAnswerList();
+                            }
                         }
-                        if (!touchView.isShow() && !touchView.running) {
-                            touchView.showAnswerList();
-                        }
+                        yTemp = yMove;
+                        previewParams.topMargin = moveTopMargin;
+                        preview.setLayoutParams(previewParams);
                     }
-                    // view处于下压并且继续下拉的状态
-                    else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
-                        Logger.info(this.toString(), "slow down");
-                        moveTopMargin = (int) (moveTopMargin + gap * 0.2);
-                    } else {
-                        Logger.info(this.toString(), "normal move");
-                        moveTopMargin = (int) (moveTopMargin + gap);
-                        if (touchView.isShow() && !touchView.running) {
-                            touchView.hideAnswerList();
-                        }
-                    }
-                    yTemp = yMove;
-                    previewParams.topMargin = moveTopMargin;
-                    preview.setLayoutParams(previewParams);
             }
             return true;
         } else {
@@ -602,11 +604,9 @@ public class UserListActivity extends Activity {
                                                 setIP(ip.getText().toString()).
                                                 setView(custPreview).
                                                 setData(answerListData).
-                                                setHandler(handler,answer).
+                                                setHandler(handler, answer).
                                                 setRoot(root).create();
-                                        root.addView(touchView);
                                         touchView.startAnimation(showPreviewAnim);
-                                        answerList = (ListView) findViewById(R.id.answer);
                                         preview = (LinearLayout) findViewById(R.id.preview);
                                         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
                                         moveTopMargin = previewParams.topMargin;
@@ -726,6 +726,7 @@ public class UserListActivity extends Activity {
 
     // TODO: 2015/12/10
     /*
-     * 版本号获取的bug
+     * 有的机器上，消息的声音不响
+     * 沉浸式菜单
      */
 }
