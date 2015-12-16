@@ -210,15 +210,14 @@ public class NetConfApplication extends Application {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             soundPool = new SoundPool.Builder().setMaxStreams(10).build();
         } else {
-            soundPool = new SoundPool(2, AudioManager.STREAM_SYSTEM, 5);
+            soundPool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
         }
-
-        soundID = soundPool.load(this, R.raw.msn, 1);
+        soundID = soundPool.load(this, R.raw.notificationsound, 1);
     }
 
     public void playVoice() {
         // 播放消息提示音乐
-        soundPool.play(soundID, 1, 1, 0, 0, 1);
+        soundPool.play(soundID, 1f, 1f, 0, 0, 1f);
     }
 
     // 获取sd卡路径

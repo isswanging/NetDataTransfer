@@ -19,7 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -48,6 +48,7 @@ public class ForceTouchViewGroup extends LinearLayout {
     boolean isShow = false;// 判断菜单是否显示
     boolean isLock = false;// 屏蔽activity的事件分发
     boolean running = false;// 动画是否运行
+    boolean isMove = true;
     float yDown;
     float yMove;
     float yTemp;
@@ -58,10 +59,11 @@ public class ForceTouchViewGroup extends LinearLayout {
     int needMove = 0;// 菜单显示需要上拉的距离
     int answerListTop;
     int answerListBottom;
+    int screenheight;
 
     // 动画
-    TranslateAnimation showAnswerList;
-    TranslateAnimation hideAnswerList;
+    Animation showAnswerList;
+    Animation hideAnswerList;
 
     public ForceTouchViewGroup(Context context) {
         super(context);
@@ -77,55 +79,10 @@ public class ForceTouchViewGroup extends LinearLayout {
         // 居中
         int height = dp2px(500);
         int stateHeight = ScreenUtils.getStatusHeight(context);
-        int screenheight = ScreenUtils.getScreenHeight(context);
+        screenheight = ScreenUtils.getScreenHeight(context);
         topMargin = (screenheight - stateHeight - height) / 2;
         previewParams.topMargin = topMargin;
         preview.setLayoutParams(previewParams);
-
-        answerListTop = ((RelativeLayout.LayoutParams) answerList.getLayoutParams()).topMargin;
-        answerListBottom = screenheight - dp2px(10);
-        showAnswerList = new TranslateAnimation(1f, 1f, answerListBottom, answerListTop);
-        showAnswerList.setDuration(400);
-        hideAnswerList = new TranslateAnimation(1f, 1f, answerListTop, answerListBottom);
-        hideAnswerList.setDuration(400);
-
-        showAnswerList.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                running = true;
-                answerList.setVisibility(VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                isShow = true;
-                running = false;
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
-        hideAnswerList.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                running = true;
-                isShow = false;
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                answerList.setVisibility(INVISIBLE);
-                running = false;
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
     }
 
     public int dp2px(float dp) {
@@ -169,8 +126,52 @@ public class ForceTouchViewGroup extends LinearLayout {
             @Override
             public void run() {
                 answerHeight = answerList.getHeight();
-                needMove = answerHeight - topMargin + dp2px(10);
+                needMove = answerHeight - topMargin + dp2px(20);
+                answerListTop = screenheight - dp2px(10) - answerHeight;
+                answerListBottom = screenheight - dp2px(10);
+                showAnswerList = AnimationUtils.loadAnimation(app, R.anim.show_answerlist_anim);
+                hideAnswerList = AnimationUtils.loadAnimation(app, R.anim.hide_answerlist_anim);
+
                 Logger.info(this.toString(), "answerList height====" + answerHeight);
+                Logger.info(this.toString(), "answerListTop==" + answerListTop + "===answerListBottom" + answerListBottom);
+
+                showAnswerList.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        running = true;
+                        answerList.setVisibility(VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        isShow = true;
+                        running = false;
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                hideAnswerList.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        running = true;
+                        isShow = false;
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        answerList.setVisibility(INVISIBLE);
+                        running = false;
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
             }
         });
 
@@ -195,10 +196,11 @@ public class ForceTouchViewGroup extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 yDown = event.getRawY();
                 moveTopMargin = previewParams.topMargin;
-                if (isShow) {
-                    super.dispatchTouchEvent(event);
-                }
-                Logger.info(this.toString(), "in forceTouchView touch DOWN moveTopMargin::" + moveTopMargin);
+                Logger.info(this.toString(), "yDown====" + yDown + "===answerListTop====" + answerListTop);
+                if (yDown > answerListTop && isShow)
+                    isMove = false;
+                else
+                    isMove = true;
                 break;
             case MotionEvent.ACTION_UP:
                 Logger.info(this.toString(), "in forceTouchView touch UP");
@@ -208,48 +210,46 @@ public class ForceTouchViewGroup extends LinearLayout {
                     previewParams.topMargin = topMargin - needMove;
                     preview.setLayoutParams(previewParams);
                     yTemp = 0;
-                    super.dispatchTouchEvent(event);
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                yMove = event.getRawY();
-                if (yTemp == 0) {
-                    yTemp = yMove;
-                }
-                float gap = yMove - yTemp;
+                if (isMove) {
+                    yMove = event.getRawY();
+                    if (yTemp == 0) {
+                        yTemp = yMove;
+                    }
+                    float gap = yMove - yTemp;
 
-                // view位于超过显示部分的位置
-                if ((moveTopMargin + gap) <= (topMargin - needMove)) {
-                    // 向上滑减速
-                    if (gap < 0) {
-                        Logger.info(this.toString(), "slow up");
-                        moveTopMargin = (int) (moveTopMargin + gap * 0.3);
+                    // view位于超过显示部分的位置
+                    if ((moveTopMargin + gap) <= (topMargin - needMove)) {
+                        // 向上滑减速
+                        if (gap < 0) {
+                            moveTopMargin = (int) (moveTopMargin + gap * 0.3);
+                        }
+                        // 向下滑速度正常
+                        else {
+                            moveTopMargin = (int) (moveTopMargin + gap);
+                        }
+                        if (!isShow && !running) {
+                            showAnswerList();
+                        }
                     }
-                    // 向下滑速度正常
-                    else {
+                    // view处于下压并且继续下拉的状态
+                    else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
+                        moveTopMargin = (int) (moveTopMargin + gap * 0.1);
+                    } else {
                         moveTopMargin = (int) (moveTopMargin + gap);
+                        if (isShow && !running) {
+                            hideAnswerList();
+                        }
                     }
-                    if (!isShow && !running) {
-                        showAnswerList();
-                    }
+                    yTemp = yMove;
+                    previewParams.topMargin = moveTopMargin;
+                    preview.setLayoutParams(previewParams);
                 }
-                // view处于下压并且继续下拉的状态
-                else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
-                    Logger.info(this.toString(), "slow down");
-                    moveTopMargin = (int) (moveTopMargin + gap * 0.1);
-                } else {
-                    Logger.info(this.toString(), "normal move");
-                    moveTopMargin = (int) (moveTopMargin + gap);
-                    if (isShow && !running) {
-                        hideAnswerList();
-                    }
-                }
-                yTemp = yMove;
-                previewParams.topMargin = moveTopMargin;
-                preview.setLayoutParams(previewParams);
                 break;
         }
-        return true;
+        return super.dispatchTouchEvent(event);
     }
 
     static class Builder {
@@ -317,7 +317,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         //高斯模糊效果
         public Bitmap blurBitmap(Bitmap bitmap) {
             //Let's create an empty bitmap with the same size of the bitmap we want to blur
-            Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_4444);
+            Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             //Instantiate a new Renderscript
             RenderScript rs = RenderScript.create(context);
             //Create an Intrinsic Blur Script using the Renderscript

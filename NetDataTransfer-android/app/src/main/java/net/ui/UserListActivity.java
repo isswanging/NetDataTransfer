@@ -14,6 +14,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -122,6 +123,8 @@ public class UserListActivity extends Activity {
     String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
     String targetIp;
     String targetName;
+    long[] pattern = {100, 200};
+    Vibrator vibrator;
 
     @Override
     protected void onResume() {
@@ -201,7 +204,7 @@ public class UserListActivity extends Activity {
             item.put("text", answerData[i]);
             answerListData.add(item);
         }
-
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         // 建立界面
         initUI();
     }
@@ -278,7 +281,6 @@ public class UserListActivity extends Activity {
                 } else return false;
             }
         });
-
 
         findViewById(R.id.left_drawer).setOnTouchListener(
                 new OnTouchListener() {
@@ -598,6 +600,10 @@ public class UserListActivity extends Activity {
                                             chatAdapter.notifyDataSetChanged();
                                             previewContent.setSelection(chatAdapter.getCount() - 1);
                                         }
+
+                                        // 振动提示
+                                        vibrator.vibrate(pattern, -1);
+
                                         // 显示3D touch菜单
                                         touchView = new ForceTouchViewGroup.Builder(act).
                                                 setBackground(root).

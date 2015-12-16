@@ -38,6 +38,7 @@ public class UdpDataMonitorService extends Service {
     boolean tag;
     NetConfApplication app;
     Vibrator vibrator;
+    long[] pattern = {100, 200};
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -89,7 +90,7 @@ public class UdpDataMonitorService extends Service {
 
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                     app.getDate(), JSON.parseObject(info, DataPacket.class)
-                            .getContent(), true);
+                    .getContent(), true);
             if (app.chatTempMap.containsKey(dp.getIp())) {
                 app.chatTempMap.get(dp.getIp()).add(entity);
             } else {
@@ -138,47 +139,46 @@ public class UdpDataMonitorService extends Service {
 
                     switch (dp.getTag()) {
 
-                    case NetConfApplication.text:
-                        app.playVoice();
-                        Logger.info(this.toString(), "service::" + app.chatId);
-                        dispatchMessage(info);
-                        break;
+                        case NetConfApplication.text:
+                            app.playVoice();
+                            Logger.info(this.toString(), "service::" + app.chatId);
+                            dispatchMessage(info);
+                            break;
 
-                    case NetConfApplication.refuse:
-                        Looper.prepare();
-                        Toast.makeText(UdpDataMonitorService.this,
-                                dp.getIp() + "拒绝了文件传输", Toast.LENGTH_SHORT)
-                                .show();
-                        Looper.loop();
-                        break;
+                        case NetConfApplication.refuse:
+                            Looper.prepare();
+                            Toast.makeText(UdpDataMonitorService.this,
+                                    dp.getIp() + "拒绝了文件传输", Toast.LENGTH_SHORT)
+                                    .show();
+                            Looper.loop();
+                            break;
 
-                    case NetConfApplication.filePre:
-                        Logger.info(this.toString(), "file send request");
-                        // 振动提示
-                        vibrator.vibrate(700);
+                        case NetConfApplication.filePre:
+                            Logger.info(this.toString(), "file send request");
+                            // 振动提示
+                            vibrator.vibrate(pattern, -1);
 
-                        String[] s = dp.getContent().replaceAll("\\\\", "/")
-                                .split("/");
-                        String fileName = s[s.length - 1];
-                        int id = NetConfApplication.taskId++;
-                        NetConfApplication.getTaskList.put(id, new Progress(
-                                fileName, 0));
+                            String[] s = dp.getContent().replaceAll("\\\\", "/")
+                                    .split("/");
+                            String fileName = s[s.length - 1];
+                            int id = NetConfApplication.taskId++;
+                            NetConfApplication.getTaskList.put(id, new Progress(fileName, 0));
 
-                        // accept file
-                        new TransferFile(UdpDataMonitorService.this)
-                                .executeOnExecutor(
-                                        AsyncTask.THREAD_POOL_EXECUTOR,
-                                        new SendTask(id, null, fileName, dp));
-                        DataPacket dpClone = new DataPacket();
-                        dpClone.setContent("向你发来了一个文件");
-                        dpClone.setIp(dp.getIp());
-                        dpClone.setSenderName(dp.getSenderName());
-                        dpClone.setTag(dp.getTag());
-                        dispatchMessage(JSON.toJSONString(dpClone));
-                        break;
+                            // accept file
+                            new TransferFile(UdpDataMonitorService.this)
+                                    .executeOnExecutor(
+                                            AsyncTask.THREAD_POOL_EXECUTOR,
+                                            new SendTask(id, null, fileName, dp));
+                            DataPacket dpClone = new DataPacket();
+                            dpClone.setContent("向你发来了一个文件");
+                            dpClone.setIp(dp.getIp());
+                            dpClone.setSenderName(dp.getSenderName());
+                            dpClone.setTag(dp.getTag());
+                            dispatchMessage(JSON.toJSONString(dpClone));
+                            break;
 
-                    default:
-                        break;
+                        default:
+                            break;
                     }
                 }
 
