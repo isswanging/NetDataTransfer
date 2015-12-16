@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<net.ui.SideslipMenuView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/id_menu"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@drawable/hide_menu"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+
+        <include layout="@layout/sideslip_menu" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <RelativeLayout
+                    android:id="@+id/chatMain"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <RelativeLayout
+                        android:id="@+id/chatBottom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:background="@drawable/chat_bottom" >
+
+                        <EditText
+                            android:id="@+id/editText"
+                            android:layout_width="@dimen/editText_width"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/editText_left"
+                            android:background="@drawable/edittext"
+                            android:hint="@string/editText_hint"
+                            android:maxLines="3"
+                            android:singleLine="false"
+                            android:textColor="#000000"
+                            android:textSize="@dimen/chat_text_size" >
+
+                            <requestFocus />
+                        </EditText>
+
+                        <TextView
+                            android:id="@+id/send"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/sendText_left"
+                            android:layout_toRightOf="@id/editText"
+                            android:text="@string/sendText"
+                            android:textColor="#FFFFFF"
+                            android:textSize="@dimen/sendText_text_size" />
+
+                        <ImageView
+                            android:id="@+id/sendMore"
+                            android:layout_width="@dimen/sendMore_size"
+                            android:layout_height="@dimen/sendMore_size"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="@dimen/sendMore_right"
+                            android:background="@drawable/add" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/chatTop"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_alignParentTop="true"
+                        android:background="#222222" >
+
+                        <ImageView
+                            android:id="@+id/closeCurChat"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/back" />
+
+                        <TextView
+                            android:id="@+id/chatCurName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20dp" />
+                    </RelativeLayout>
+
+                    <ListView
+                        android:id="@+id/charContentList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_above="@id/chatBottom"
+                        android:layout_below="@id/chatTop"
+                        android:background="@drawable/chat_bg"
+                        android:divider="@null"
+                        android:transcriptMode="alwaysScroll" >
+                    </ListView>
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/sendFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|right"
+                    android:layout_marginBottom="45dp"
+                    android:layout_marginRight="5dp"
+                    android:orientation="vertical"
+                    android:visibility="gone" >
+
+                    <TextView
+                        android:id="@+id/sendImg"
+                        android:layout_width="60dp"
+                        android:layout_height="27dp"
+                        android:background="#FFFFFF"
+                        android:gravity="center"
+                        android:text="传图片"
+                        android:textSize="17dp" />
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="1dp"
+                        android:background="#9D9D9D" />
+
+                    <TextView
+                        android:id="@+id/sendVideo"
+                        android:layout_width="60dp"
+                        android:layout_height="27dp"
+                        android:background="#FFFFFF"
+                        android:gravity="center"
+                        android:text="传视频"
+                        android:textSize="17dp" />
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="1dp"
+                        android:background="#9D9D9D" />
+
+                    <TextView
+                        android:id="@+id/sendAudio"
+                        android:layout_width="60dp"
+                        android:layout_height="27dp"
+                        android:background="#FFFFFF"
+                        android:gravity="center"
+                        android:text="传音乐"
+                        android:textSize="17dp" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</net.ui.SideslipMenuView>
