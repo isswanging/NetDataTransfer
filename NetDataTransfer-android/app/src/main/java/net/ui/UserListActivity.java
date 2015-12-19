@@ -98,7 +98,7 @@ public class UserListActivity extends Activity {
 
     // 菜单是否显示
     boolean isMenuOpen = false;
-    int menuWidth = 185;//单位dp
+    int menuWidth;
     LinearLayout menu;
     View.OnClickListener onMenuClickListener;
     ScaleAnimation hideMenuAnim;
@@ -151,6 +151,7 @@ public class UserListActivity extends Activity {
         Rect frame = new Rect();
         getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
         statusBarHeight = frame.top;
+        menuWidth = getResources().getDimensionPixelSize(R.dimen.menu_width);
 
         showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
                 1f, Animation.RELATIVE_TO_SELF, 0f);
@@ -220,7 +221,6 @@ public class UserListActivity extends Activity {
                 finish();
             }
         }
-
         return super.onKeyDown(keyCode, event);
     }
 
@@ -304,10 +304,10 @@ public class UserListActivity extends Activity {
                         LayoutInflater layoutInflater = getLayoutInflater();
                         menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
                         FrameLayout.LayoutParams params = new FrameLayout.
-                                LayoutParams((int) dp2px(menuWidth),
-                                ViewGroup.LayoutParams.WRAP_CONTENT);
-                        params.topMargin = (int) (dp2px(48) + statusBarHeight + 2);
-                        params.leftMargin = (int) (screenWidth - dp2px(menuWidth));
+                                LayoutParams(menuWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        params.topMargin = getResources().getDimensionPixelSize(R.dimen.title_height
+                                + statusBarHeight);
+                        params.leftMargin = screenWidth - menuWidth;
                         menu.setLayoutParams(params);
 
                         root.addView(menu);
@@ -479,7 +479,6 @@ public class UserListActivity extends Activity {
 
                         // view位于超过显示部分的位置
                         if ((moveTopMargin + gap) <= (topMargin - touchView.getNeedMove())) {
-                            Logger.info(this.toString(), "slow up");
                             // 向上滑减速
                             if (gap < 0) {
                                 moveTopMargin = (int) (moveTopMargin + gap * 0.3);
@@ -494,10 +493,8 @@ public class UserListActivity extends Activity {
                         }
                         // view处于下压并且继续下拉的状态
                         else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
-                            Logger.info(this.toString(), "slow down");
                             moveTopMargin = (int) (moveTopMargin + gap * 0.1);
                         } else {
-                            Logger.info(this.toString(), "normal move");
                             moveTopMargin = (int) (moveTopMargin + gap);
                             if (touchView.isShow() && !touchView.running) {
                                 touchView.hideAnswerList();
@@ -515,11 +512,6 @@ public class UserListActivity extends Activity {
             }
             return super.dispatchTouchEvent(event);
         }
-    }
-
-    public float dp2px(float dp) {
-        final float scale = getResources().getDisplayMetrics().density;
-        return dp * scale + 0.5f;
     }
 
     class ListHandler extends Handler {
@@ -729,10 +721,4 @@ public class UserListActivity extends Activity {
             }
         }
     }
-
-    // TODO: 2015/12/10
-    /*
-     * 有的机器上，消息的声音不响
-     * 沉浸式菜单
-     */
 }

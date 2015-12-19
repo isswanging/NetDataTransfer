@@ -77,17 +77,12 @@ public class ForceTouchViewGroup extends LinearLayout {
         yTemp = 0;
 
         // 居中
-        int height = dp2px(500);
+        int height = getResources().getDimensionPixelSize(R.dimen.preview_content_height);
         int stateHeight = ScreenUtils.getStatusHeight(context);
         screenheight = ScreenUtils.getScreenHeight(context);
         topMargin = (screenheight - stateHeight - height) / 2;
         previewParams.topMargin = topMargin;
         preview.setLayoutParams(previewParams);
-    }
-
-    public int dp2px(float dp) {
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
     }
 
     public int getNeedMove() {
@@ -125,15 +120,16 @@ public class ForceTouchViewGroup extends LinearLayout {
         answerList.post(new Runnable() {
             @Override
             public void run() {
+                int between = getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
                 answerHeight = answerList.getHeight();
-                needMove = answerHeight - topMargin + dp2px(20);
-                answerListTop = screenheight - dp2px(10) - answerHeight;
-                answerListBottom = screenheight - dp2px(10);
+                needMove = answerHeight - topMargin + between*2;
+                answerListTop = screenheight - between - answerHeight;
+                answerListBottom = screenheight - between;
                 showAnswerList = AnimationUtils.loadAnimation(app, R.anim.show_answerlist_anim);
                 hideAnswerList = AnimationUtils.loadAnimation(app, R.anim.hide_answerlist_anim);
 
-                Logger.info(this.toString(), "answerList height====" + answerHeight);
-                Logger.info(this.toString(), "answerListTop==" + answerListTop + "===answerListBottom" + answerListBottom);
+                Logger.info(this.toString(), "answerList height====" + answerHeight + "====answerListTop=="
+                        + answerListTop + "===answerListBottom" + answerListBottom);
 
                 showAnswerList.setAnimationListener(new Animation.AnimationListener() {
                     @Override
