@@ -98,7 +98,7 @@ public class UserListActivity extends Activity {
 
     // 菜单是否显示
     boolean isMenuOpen = false;
-    int menuWidth = 180;//单位dp
+    int menuWidth = 185;//单位dp
     LinearLayout menu;
     View.OnClickListener onMenuClickListener;
     ScaleAnimation hideMenuAnim;
@@ -307,7 +307,7 @@ public class UserListActivity extends Activity {
                                 LayoutParams((int) dp2px(menuWidth),
                                 ViewGroup.LayoutParams.WRAP_CONTENT);
                         params.topMargin = (int) (dp2px(48) + statusBarHeight + 2);
-                        params.leftMargin = (int) (screenWidth - dp2px(menuWidth) - 4);
+                        params.leftMargin = (int) (screenWidth - dp2px(menuWidth));
                         menu.setLayoutParams(params);
 
                         root.addView(menu);
