@@ -35,5 +35,6 @@
     <dimen name="preview_content_height">460dp</dimen>
     <dimen name="menu_width">180dp</dimen>
     <dimen name="force_touch_view_margin">10dp</dimen>
+    <dimen name="qr_size">120dp</dimen>
 
 </resources>
