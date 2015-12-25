@@ -120,6 +120,7 @@ public class UserListActivity extends Activity {
     RelativeLayout.LayoutParams previewParams;
     int moveTopMargin;
     LinearLayout preview;
+    LinearLayout custPreview;
     String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
     String targetIp;
     String targetName;
@@ -459,6 +460,7 @@ public class UserListActivity extends Activity {
                 case MotionEvent.ACTION_UP:
                     Logger.info(this.toString(), "in activity touch UP");
                     if (!touchView.isShow()) {
+                        touchView.clearView();
                         root.removeView(touchView);
                         touchView = null;
                     } else {
@@ -578,9 +580,11 @@ public class UserListActivity extends Activity {
                                         // 组装需要显示的界面
                                         targetIp = ip.getText().toString();
                                         targetName = name.getText().toString();
-                                        LinearLayout custPreview = (LinearLayout) LayoutInflater.from(act).inflate(R.layout.touch_content, null);
+                                        if (custPreview == null)
+                                            custPreview = (LinearLayout) LayoutInflater.from(act).inflate(R.layout.touch_content, null);
                                         previewContent = (ListView) custPreview.getChildAt(1);
-                                        ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(name.getText());
+                                        ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(targetName);
+                                        Logger.info(this.toString(), "=====long click item targetName======" + targetName);
                                         chatAdapter = new ChatMsgAdapter(act, mDataArrays);
                                         previewContent.setAdapter(chatAdapter);
                                         mDataArrays.clear();
