@@ -1,0 +1,385 @@
+package net.ui.fragment;
+
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.Message;
+import android.support.v4.widget.DrawerLayout;
+import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
+import android.widget.AdapterView;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+
+import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
+import net.log.Logger;
+import net.ui.CaptureActivity;
+import net.ui.FileListActivity;
+import net.ui.ProgressBarListActivity;
+import net.ui.cust.PullRefreshListView;
+import net.util.CreateQRImage;
+import net.vo.Host;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class UserListFragment extends BaseFragment {
+    NetConfApplication app;
+    // 屏幕长宽
+    int screenWidth;
+    int screenHeight;
+    int statusBarHeight;
+    // 菜单是否显示
+    boolean isMenuOpen = false;
+    int menuWidth;
+    LinearLayout menu;
+    View.OnClickListener onMenuClickListener;
+    ScaleAnimation hideMenuAnim;
+    ScaleAnimation showMenuAnim;
+
+    AlphaAnimation hidePreviewAnim;
+    AlphaAnimation showPreviewAnim;
+
+    int send = 0;
+    int get = 1;
+
+    private SimpleAdapter userInfoAdapter;
+    private PullRefreshListView pullRefreshListView;
+    private DrawerLayout drawerLayout;
+    private FrameLayout root;
+    private LinearLayout listContent;
+
+    private List<Map<String, Object>> userList = new ArrayList<>();
+    private Bundle who = new Bundle();
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        app = (NetConfApplication) getActivity().getApplication();
+        // 菜单显示与隐藏的动画
+        showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
+                1f, Animation.RELATIVE_TO_SELF, 0f);
+        hideMenuAnim = new ScaleAnimation(1f, 0f, 1f, 0f, Animation.RELATIVE_TO_SELF,
+                1f, Animation.RELATIVE_TO_SELF, 0f);
+        showMenuAnim.setDuration(100);
+        hideMenuAnim.setDuration(100);
+        isMenuOpen = false;
+
+        View viewGroup = inflater.inflate(R.layout.user_list, container, false);
+        root = (FrameLayout) viewGroup.findViewById(R.id.mainContent);
+        drawerLayout = (DrawerLayout) viewGroup.findViewById(R.id.drawer_layout);
+        return viewGroup;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        // 初始化界面
+        initUI();
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onStart() {
+        if (app.isLand)
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        else
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        Logger.info(this.toString(), "========= onresume =========");
+        if (userInfoAdapter != null) {
+            Logger.info(this.toString(), "========= getUserData =========");
+            getUserData();
+            userInfoAdapter.notifyDataSetChanged();
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void getCommend(Message msg) {
+        switch (msg.what) {
+            case login:
+                loadUserListUI();
+                break;
+            case retry:
+                loadUserListOrWarn();
+                break;
+            case refresh:
+                pullRefreshListView.finishRefreshing();
+                getUserData();
+                userInfoAdapter.notifyDataSetChanged();
+                break;
+            case redraw:
+                if (userInfoAdapter != null) {
+                    getUserData();
+                    userInfoAdapter.notifyDataSetChanged();
+                }
+                break;
+        }
+    }
+
+    private List<Map<String, Object>> getUserData() {
+        userList.clear();
+        for (Host host : app.hostList) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("name", host.getUserName());
+            item.put("ip", host.getIp());
+            if (app.chatTempMap.containsKey(host.getIp())) {
+                item.put("img", R.drawable.unread);
+            } else {
+                item.put("img", 0);
+            }
+            userList.add(item);
+        }
+        return userList;
+    }
+
+    public void measureSrceen() {
+        // 获取屏幕长宽和状态栏高度
+        DisplayMetrics dm = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
+        if (app.isLand)
+            screenWidth = dm.widthPixels * 3 / 7;
+        else
+            screenWidth = dm.widthPixels;
+        screenHeight = dm.heightPixels;
+
+        Rect frame = new Rect();
+        getActivity().getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+        statusBarHeight = frame.top;
+        menuWidth = getResources().getDimensionPixelSize(R.dimen.menu_width);
+    }
+
+    private void getDeviceInfo() {
+        String manufacturerName = android.os.Build.MANUFACTURER;
+        String systemVersion = android.os.Build.VERSION.RELEASE;
+        String deviceName = android.os.Build.HARDWARE;
+        String appVersion = "";
+
+        TelephonyManager tm = (TelephonyManager) app.getSystemService(Context.TELEPHONY_SERVICE);
+
+        try {
+            PackageInfo info = app.getPackageManager().getPackageInfo(app.getPackageName(), 0);
+            appVersion = info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        TextView t1 = (TextView) drawerLayout.findViewById(R.id.device_name);
+        TextView t2 = (TextView) drawerLayout.findViewById(R.id.system_version);
+        TextView t3 = (TextView) drawerLayout.findViewById(R.id.operate_name);
+        TextView t4 = (TextView) drawerLayout.findViewById(R.id.mcc_mnc);
+        TextView t5 = (TextView) drawerLayout.findViewById(R.id.manufacturer_name);
+        TextView t6 = (TextView) drawerLayout.findViewById(R.id.appVersion);
+
+        t1.setText("：" + deviceName);
+        t2.setText("：Android " + systemVersion);
+        t3.setText("：" + tm.getNetworkOperatorName());
+        t4.setText("：" + tm.getNetworkOperator());
+        t5.setText("：" + manufacturerName);
+        t6.setText("版本号：" + appVersion);
+
+        ImageView QRImg = (ImageView) drawerLayout.findViewById(R.id.QRCode);
+        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg, app);
+    }
+
+    private void showMenu() {
+        menu.startAnimation(showMenuAnim);
+    }
+
+    private void hideMenu() {
+        menu.startAnimation(hideMenuAnim);
+        root.removeView(menu);
+        if (pullRefreshListView != null)
+            pullRefreshListView.setCanRefresh(true);
+        isMenuOpen = false;
+    }
+
+    private void loadUserListOrWarn() {
+        if (app.wifi == 1) {
+            notification.notifyInfo(login, null);
+        } else {
+            // 弹出警告框并退出
+            new AlertDialog.Builder(getActivity()).setTitle("错误")
+                    .setMessage("wifi未连接或端口异常，启动失败")
+                    .setPositiveButton("退出",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    getActivity().setResult(getActivity().RESULT_OK);// 确定按钮事件
+                                    getActivity().finish();
+                                }
+                            })
+                    .setNegativeButton("重试",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    app.check(getActivity());
+                                    notification.notifyInfo(retry, null);
+                                }
+                            }).setCancelable(false).show();
+        }
+    }
+
+    private void initUI() {
+        measureSrceen();
+        listContent = (LinearLayout) root.findViewById(R.id.listContent);
+        root.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (isMenuOpen) {
+                    hideMenu();
+                    return true;
+                } else return false;
+            }
+        });
+
+        drawerLayout.findViewById(R.id.left_drawer).setOnTouchListener(
+                new View.OnTouchListener() {
+                    @SuppressLint("ClickableViewAccessibility")
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        // 吞掉点击事件使下拉刷新失效
+                        return true;
+                    }
+                });
+        onMenuClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.exit:
+                        app.forceClose = true;
+                        getActivity().finish();
+                        break;
+                    case R.id.openFolder:
+                        startActivity(new Intent(getActivity(), FileListActivity.class));
+                        break;
+                    case R.id.sendProgress:
+                        Intent intentSend = new Intent(getActivity(), ProgressBarListActivity.class);
+                        intentSend.setFlags(send);
+                        startActivity(intentSend);
+                        break;
+                    case R.id.getProgress:
+                        Intent intentGet = new Intent(getActivity(), ProgressBarListActivity.class);
+                        intentGet.setFlags(get);
+                        startActivity(intentGet);
+                        break;
+                    case R.id.scan:
+                        Intent intentScan = new Intent(getActivity(), CaptureActivity.class);
+                        intentScan.setFlags(get);
+                        startActivity(intentScan);
+                        break;
+                    default:
+                        break;
+                }
+                hideMenu();
+            }
+        };
+        getDeviceInfo();
+
+        ImageView moreMenu = (ImageView) root.findViewById(R.id.moreMenu);
+        moreMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isMenuOpen) {
+                    if (menu == null) {
+                        Logger.info(this.toString(), "creat a new menu");
+                        LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                        menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
+                        menu.findViewById(R.id.getProgress).setOnClickListener(onMenuClickListener);
+                        menu.findViewById(R.id.sendProgress).setOnClickListener(onMenuClickListener);
+                        menu.findViewById(R.id.exit).setOnClickListener(onMenuClickListener);
+                        menu.findViewById(R.id.scan).setOnClickListener(onMenuClickListener);
+                        menu.findViewById(R.id.openFolder).setOnClickListener(onMenuClickListener);
+                    }
+                    FrameLayout.LayoutParams params = new FrameLayout.
+                            LayoutParams(menuWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params.topMargin = getResources().getDimensionPixelSize(R.dimen.title_height
+                            + statusBarHeight);
+                    params.leftMargin = screenWidth - menuWidth;
+                    menu.setLayoutParams(params);
+                    root.addView(menu);
+                    showMenu();
+                    isMenuOpen = true;
+                    if (pullRefreshListView != null)
+                        pullRefreshListView.setCanRefresh(false);
+                }
+            }
+        });
+
+        // 延迟一点加载列表
+        if (app.isFrist) {
+            loadUserListOrWarn();
+            app.isFrist = false;
+        } else {
+            loadUserListUI();
+        }
+    }
+
+    public void loadUserListUI() {
+        userInfoAdapter = new SimpleAdapter(getActivity(), getUserData(),
+                R.layout.user_item, new String[]{"name", "ip",
+                "img"}, new int[]{R.id.userName,
+                R.id.userIP, R.id.unread});
+        Logger.info(this.toString(),
+                String.valueOf(app.hostList.size()));
+
+        // 更新UI
+        LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+        pullRefreshListView = (PullRefreshListView) layoutInflater
+                .inflate(R.layout.users, null);
+
+        listContent.removeView(root.findViewById(R.id.wait));
+        listContent.addView(pullRefreshListView, new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        pullRefreshListView.getListView().setAdapter(userInfoAdapter);
+        pullRefreshListView.setPullListener(new PullRefreshListView.PullToRefreshListener() {
+            @Override
+            public void onRefresh() {
+                notification.notifyInfo(refresh, null);
+            }
+        });
+        pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView name = (TextView) view.findViewById(R.id.userName);
+                TextView ip = (TextView) view.findViewById(R.id.userIP);
+
+                if (ip.getText().equals(NetConfApplication.hostIP)) {
+                    if (!app.isLand)
+                        drawerLayout.openDrawer(Gravity.LEFT);
+                } else {
+                    Logger.info(this.toString(), "send notify to show chat fragment");
+                    who.putString("name", name.getText().toString());
+                    who.putString("ip", ip.getText().toString());
+                    notification.notifyInfo(startChat, who);
+                }
+            }
+        });
+    }
+}

@@ -43,31 +43,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="net.ui.UserListActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:name="net.ui.MainActivity"
+            android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar">
             <intent-filter>
-                <action android:name="net.ui.userList" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="net.ui.ChatActivity"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden">
-            <intent-filter>
-                <action android:name="net.ui.chatting" />
+                <action android:name="net.ui.main" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
             android:name="net.ui.FileListActivity"
-            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
@@ -100,16 +87,16 @@
 
         <service
             android:name="net.service.BroadcastMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
         <service
             android:name="net.service.UdpDataMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
         <service
             android:name="net.service.FileMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
         <service
             android:name="net.service.ScreenMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
     </application>
 
 </manifest>

@@ -38,6 +38,10 @@ public class NetConfApplication extends Application {
     public SoundPool soundPool;
     public NotificationManager nManager;
     public int soundID;
+    public boolean isLand = false;
+    public boolean isFrist = true;
+    public boolean forceClose = false;
+    public String topFragment = "users";
 
     // 发送普通信息端口
     public final static int textPort = 2324;

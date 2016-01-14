@@ -1,4 +1,4 @@
-package net.ui;
+package net.ui.cust;
 
 import net.app.netdatatransfer.R;
 import net.log.Logger;

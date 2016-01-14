@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<net.ui.SideslipMenuView xmlns:android="http://schemas.android.com/apk/res/android"
+<net.ui.cust.SideslipMenuView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/id_menu"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:background="@drawable/hide_menu"
-    android:scrollbars="none" >
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <include layout="@layout/sideslip_menu" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <FrameLayout
+                android:id="@+id/chatMain"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <RelativeLayout
-                    android:id="@+id/chatMain"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                    android:layout_height="match_parent">
 
                     <RelativeLayout
                         android:id="@+id/chatBottom"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:background="@drawable/chat_bottom" >
+                        android:background="@drawable/chat_bottom">
 
                         <EditText
                             android:id="@+id/editText"
@@ -45,10 +45,7 @@
                             android:maxLines="3"
                             android:singleLine="false"
                             android:textColor="#000000"
-                            android:textSize="@dimen/chat_text_size" >
-
-                            <requestFocus />
-                        </EditText>
+                            android:textSize="@dimen/chat_text_size" />
 
                         <TextView
                             android:id="@+id/send"
@@ -76,7 +73,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/title_height"
                         android:layout_alignParentTop="true"
-                        android:background="#222222" >
+                        android:background="#222222">
 
                         <ImageView
                             android:id="@+id/closeCurChat"
@@ -104,8 +101,7 @@
                         android:layout_below="@id/chatTop"
                         android:background="@drawable/chat_bg"
                         android:divider="@null"
-                        android:transcriptMode="alwaysScroll" >
-                    </ListView>
+                        android:transcriptMode="alwaysScroll"/>
                 </RelativeLayout>
 
                 <LinearLayout
@@ -116,7 +112,7 @@
                     android:layout_marginBottom="45dp"
                     android:layout_marginRight="5dp"
                     android:orientation="vertical"
-                    android:visibility="gone" >
+                    android:visibility="gone">
 
                     <TextView
                         android:id="@+id/sendImg"
@@ -155,8 +151,15 @@
                         android:text="传音乐"
                         android:textSize="17dp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/chatOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#ffffff"
+                    android:orientation="vertical" />
             </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 
-</net.ui.SideslipMenuView>
+</net.ui.cust.SideslipMenuView>

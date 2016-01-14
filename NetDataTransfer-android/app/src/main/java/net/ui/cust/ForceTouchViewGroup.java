@@ -1,4 +1,4 @@
-package net.ui;
+package net.ui.cust;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -39,33 +39,33 @@ import java.util.Map;
  * 模仿iphone的3D touch效果
  */
 public class ForceTouchViewGroup extends LinearLayout {
-    TextView title;
-    LinearLayout preview;
-    RelativeLayout.LayoutParams previewParams;
-    ListView answerList;
-    SimpleAdapter answerAdapter;
-    NetConfApplication app;
-    boolean isShow = false;// 判断菜单是否显示
-    boolean isLock = false;// 屏蔽activity的事件分发
-    boolean running = false;// 动画是否运行
-    boolean isMove = true;
-    float yDown;
-    float yMove;
-    float yTemp;
-    ViewGroup root;
-    int topMargin;
-    int moveTopMargin;
-    int answerHeight;
-    int needMove = 0;// 菜单显示需要上拉的距离
-    int answerListTop;
-    int answerListBottom;
-    int screenheight;
-    View previewContent;
-    Context mContext;
+    public TextView title;
+    public LinearLayout preview;
+    public RelativeLayout.LayoutParams previewParams;
+    public ListView answerList;
+    public SimpleAdapter answerAdapter;
+    public NetConfApplication app;
+    public boolean isShow = false;// 判断菜单是否显示
+    public boolean isLock = false;// 屏蔽activity的事件分发
+    public boolean running = false;// 动画是否运行
+    public boolean isMove = true;
+    public float yDown;
+    public float yMove;
+    public float yTemp;
+    public ViewGroup root;
+    public int topMargin;
+    public int moveTopMargin;
+    public int answerHeight;
+    public int needMove = 0;// 菜单显示需要上拉的距离
+    public int answerListTop;
+    public int answerListBottom;
+    public int screenheight;
+    public View previewContent;
+    public Context mContext;
 
     // 动画
-    Animation showAnswerList;
-    Animation hideAnswerList;
+    public Animation showAnswerList;
+    public Animation hideAnswerList;
 
     // 单例
     private static ForceTouchViewGroup instance;
@@ -256,7 +256,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         return super.dispatchTouchEvent(event);
     }
 
-    static class Builder {
+    public static class Builder {
         Context context;
         Bitmap blurBg;
         String pTargetIP;

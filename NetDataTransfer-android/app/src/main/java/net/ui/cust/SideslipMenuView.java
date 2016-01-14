@@ -1,7 +1,7 @@
-package net.ui;
+package net.ui.cust;
 
-import net.util.ScreenUtils;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -12,6 +12,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.nineoldandroids.view.ViewHelper;
+
+import net.log.Logger;
+import net.util.ScreenUtils;
 
 public class SideslipMenuView extends HorizontalScrollView {
 
@@ -48,7 +51,10 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     public SideslipMenuView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mScreenWidth = ScreenUtils.getScreenWidth(context);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            mScreenWidth = ScreenUtils.getScreenWidth(context);
+        else
+            mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
         mMenuRightPadding = dip2px(context, 150);
         this.context = context;
         imm = (InputMethodManager) this.context
@@ -95,25 +101,31 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        switch (action) {
-        // Up时，进行判断，如果显示区域大于菜单宽度一半则完全显示，否则隐藏
-        case MotionEvent.ACTION_UP:
-            int scrollX = getScrollX();
-            if (scrollX > mHalfMenuWidth) {
-                isOpen = false;
-                closeSoftkeyboard();
-                this.smoothScrollTo(mMenuWidth, 0);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Logger.info(this.toString(), "port can side");
+            int action = ev.getAction();
+            switch (action) {
+                // Up时，进行判断，如果显示区域大于菜单宽度一半则完全显示，否则隐藏
+                case MotionEvent.ACTION_UP:
+                    int scrollX = getScrollX();
+                    if (scrollX > mHalfMenuWidth) {
+                        isOpen = false;
+                        closeSoftkeyboard();
+                        this.smoothScrollTo(mMenuWidth, 0);
 
-            } else {
-                isOpen = true;
-                closeSoftkeyboard();
-                this.smoothScrollTo(0, 0);
+                    } else {
+                        isOpen = true;
+                        closeSoftkeyboard();
+                        this.smoothScrollTo(0, 0);
 
+                    }
+                    return true;
             }
-            return true;
+
+            return super.onTouchEvent(ev);
+        } else {
+            return false;
         }
-        return super.onTouchEvent(ev);
     }
 
     @Override
