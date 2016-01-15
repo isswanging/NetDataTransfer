@@ -33,7 +33,7 @@
     <dimen name="file_img_size">50dp</dimen>
     <dimen name="corner_length">12dp</dimen>
     <dimen name="preview_content_height">460dp</dimen>
-    <dimen name="menu_width">180dp</dimen>
+    <dimen name="menu_width">150dp</dimen>
     <dimen name="force_touch_view_margin">10dp</dimen>
     <dimen name="qr_size">120dp</dimen>
 

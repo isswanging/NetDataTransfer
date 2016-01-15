@@ -69,12 +69,14 @@ public class UserListFragment extends BaseFragment {
     private DrawerLayout drawerLayout;
     private FrameLayout root;
     private LinearLayout listContent;
+    private ImageView moreMenu;
 
     private List<Map<String, Object>> userList = new ArrayList<>();
     private Bundle who = new Bundle();
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         app = (NetConfApplication) getActivity().getApplication();
         // 菜单显示与隐藏的动画
         showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
@@ -83,12 +85,24 @@ public class UserListFragment extends BaseFragment {
                 1f, Animation.RELATIVE_TO_SELF, 0f);
         showMenuAnim.setDuration(100);
         hideMenuAnim.setDuration(100);
-        isMenuOpen = false;
 
-        View viewGroup = inflater.inflate(R.layout.user_list, container, false);
-        root = (FrameLayout) viewGroup.findViewById(R.id.mainContent);
-        drawerLayout = (DrawerLayout) viewGroup.findViewById(R.id.drawer_layout);
-        return viewGroup;
+        if (savedInstanceState != null) {
+            isRotate = true;
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (isRotate) {
+            return viewGroup;
+        } else {
+            viewGroup = inflater.inflate(R.layout.user_list, container, false);
+            root = (FrameLayout) viewGroup.findViewById(R.id.mainContent);
+            drawerLayout = (DrawerLayout) viewGroup.findViewById(R.id.drawer_layout);
+            listContent = (LinearLayout) root.findViewById(R.id.listContent);
+            moreMenu = (ImageView) root.findViewById(R.id.moreMenu);
+            return viewGroup;
+        }
     }
 
     @Override
@@ -116,6 +130,13 @@ public class UserListFragment extends BaseFragment {
             userInfoAdapter.notifyDataSetChanged();
         }
         super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        root.removeView(menu);
+        isMenuOpen = false;
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -246,7 +267,15 @@ public class UserListFragment extends BaseFragment {
 
     private void initUI() {
         measureSrceen();
-        listContent = (LinearLayout) root.findViewById(R.id.listContent);
+        if (!isRotate) {
+            getDeviceInfo();
+            registerForEvent();
+            // 延迟一点加载列表
+            loadUserListOrWarn();
+        }
+    }
+
+    private void registerForEvent() {
         root.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -298,9 +327,6 @@ public class UserListFragment extends BaseFragment {
                 hideMenu();
             }
         };
-        getDeviceInfo();
-
-        ImageView moreMenu = (ImageView) root.findViewById(R.id.moreMenu);
         moreMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -314,6 +340,7 @@ public class UserListFragment extends BaseFragment {
                         menu.findViewById(R.id.exit).setOnClickListener(onMenuClickListener);
                         menu.findViewById(R.id.scan).setOnClickListener(onMenuClickListener);
                         menu.findViewById(R.id.openFolder).setOnClickListener(onMenuClickListener);
+
                     }
                     FrameLayout.LayoutParams params = new FrameLayout.
                             LayoutParams(menuWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -321,6 +348,7 @@ public class UserListFragment extends BaseFragment {
                             + statusBarHeight);
                     params.leftMargin = screenWidth - menuWidth;
                     menu.setLayoutParams(params);
+
                     root.addView(menu);
                     showMenu();
                     isMenuOpen = true;
@@ -329,14 +357,6 @@ public class UserListFragment extends BaseFragment {
                 }
             }
         });
-
-        // 延迟一点加载列表
-        if (app.isFrist) {
-            loadUserListOrWarn();
-            app.isFrist = false;
-        } else {
-            loadUserListUI();
-        }
     }
 
     public void loadUserListUI() {

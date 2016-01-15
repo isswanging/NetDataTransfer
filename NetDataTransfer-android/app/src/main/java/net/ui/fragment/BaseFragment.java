@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Message;
+import android.view.View;
 
 public abstract class BaseFragment extends Fragment {
     Notification notification;
@@ -17,6 +18,9 @@ public abstract class BaseFragment extends Fragment {
     final int redraw = 6;
     final int close = 7;
     final int overlay = 8;
+
+    boolean isRotate = false;
+    View viewGroup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,6 +36,12 @@ public abstract class BaseFragment extends Fragment {
             e.printStackTrace();
         }
         super.onAttach(activity);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        isRotate = true;
+        super.onSaveInstanceState(outState);
     }
 
     @Override
