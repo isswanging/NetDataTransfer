@@ -44,8 +44,8 @@ import java.util.List;
 public class ChatFragment extends BaseFragment {
     NetConfApplication app;
     FrameLayout chatMain;
-    LinearLayout chatOverlay;
     SideslipMenuView sideslipMenuView;
+    ImageView backImg;
 
     private ChatOnClickListener clickListener = new ChatOnClickListener();
     // 聊天内容的适配器
@@ -65,52 +65,68 @@ public class ChatFragment extends BaseFragment {
     TextView otherIP;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         app = (NetConfApplication) getActivity().getApplication();
-        View viewGroup = inflater.inflate(R.layout.chat, container, false);
-        sideslipMenuView = (SideslipMenuView) viewGroup.findViewById(R.id.id_menu);
-        chatMain = (FrameLayout) viewGroup.findViewById(R.id.chatMain);
-        chatOverlay = (LinearLayout) viewGroup.findViewById(R.id.chatOverlay);
-        chatEditText = (EditText) viewGroup.findViewById(R.id.editText);
-        mListView = (ListView) viewGroup.findViewById(R.id.charContentList);
-        otherName = (TextView) viewGroup.findViewById(R.id.otherName);
-        otherIP = (TextView) viewGroup.findViewById(R.id.otherIP);
+    }
 
-        TextView send = (TextView) viewGroup.findViewById(R.id.send);
-        send.setOnClickListener(clickListener);
-        ImageView more = (ImageView) viewGroup.findViewById(R.id.sendMore);
-        more.setOnClickListener(clickListener);
-        sendFile = (LinearLayout) viewGroup.findViewById(R.id.sendFile);
-
-        TextView sendImg = (TextView) viewGroup.findViewById(R.id.sendImg);
-        TextView sendVideo = (TextView) viewGroup.findViewById(R.id.sendVideo);
-        TextView sendAudio = (TextView) viewGroup.findViewById(R.id.sendAudio);
-        sendImg.setOnClickListener(clickListener);
-        sendVideo.setOnClickListener(clickListener);
-        sendAudio.setOnClickListener(clickListener);
-        viewGroup.findViewById(R.id.closeCurChat).setOnClickListener(clickListener);
-        viewGroup.findViewById(R.id.closeChat).setOnClickListener(clickListener);
-
-        if (app.topFragment.equals("chat")) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (isRotate) {
             // 设置聊天列表
             TextView chatCurName = (TextView) chatMain.findViewById(R.id.chatCurName);
             chatCurName.setText(targetName);
 
             mAdapter = new ChatMsgAdapter(app, mDataArrays);
             mListView.setAdapter(mAdapter);
-            mListView.setSelection(mListView.getCount() - 1);
             otherName.setText(targetName);
             otherIP.setText(targetIp);
-            Logger.info(this.toString(), "hide overlay");
-            chatOverlay.setVisibility(View.GONE);
+            return viewGroup;
+        } else {
+            viewGroup = inflater.inflate(R.layout.chat, container, false);
+            sideslipMenuView = (SideslipMenuView) viewGroup.findViewById(R.id.id_menu);
+            chatMain = (FrameLayout) viewGroup.findViewById(R.id.chatMain);
+            chatEditText = (EditText) viewGroup.findViewById(R.id.editText);
+            mListView = (ListView) viewGroup.findViewById(R.id.charContentList);
+            otherName = (TextView) viewGroup.findViewById(R.id.otherName);
+            otherIP = (TextView) viewGroup.findViewById(R.id.otherIP);
+            backImg = (ImageView) viewGroup.findViewById(R.id.closeCurChat);
+
+            TextView send = (TextView) viewGroup.findViewById(R.id.send);
+            send.setOnClickListener(clickListener);
+            ImageView more = (ImageView) viewGroup.findViewById(R.id.sendMore);
+            more.setOnClickListener(clickListener);
+            sendFile = (LinearLayout) viewGroup.findViewById(R.id.sendFile);
+
+            TextView sendImg = (TextView) viewGroup.findViewById(R.id.sendImg);
+            TextView sendVideo = (TextView) viewGroup.findViewById(R.id.sendVideo);
+            TextView sendAudio = (TextView) viewGroup.findViewById(R.id.sendAudio);
+            sendImg.setOnClickListener(clickListener);
+            sendVideo.setOnClickListener(clickListener);
+            sendAudio.setOnClickListener(clickListener);
+            viewGroup.findViewById(R.id.closeCurChat).setOnClickListener(clickListener);
+            viewGroup.findViewById(R.id.closeChat).setOnClickListener(clickListener);
+
+            if (app.topFragment.equals("chat")) {
+                // 设置聊天列表
+                TextView chatCurName = (TextView) chatMain.findViewById(R.id.chatCurName);
+                chatCurName.setText(targetName);
+
+                mAdapter = new ChatMsgAdapter(app, mDataArrays);
+                mListView.setAdapter(mAdapter);
+                mListView.setSelection(mListView.getCount() - 1);
+                otherName.setText(targetName);
+                otherIP.setText(targetIp);
+                Logger.info(this.toString(), "hide overlay");
+            }
+
+            // 注册广播接收者
+            chatReceiver = new ChatReceiver();
+            filter = new IntentFilter();
+            filter.addAction("net.ui.chatFrom");
+
+            return viewGroup;
         }
-
-        // 注册广播接收者
-        chatReceiver = new ChatReceiver();
-        filter = new IntentFilter();
-        filter.addAction("net.ui.chatFrom");
-
-        return viewGroup;
     }
 
     @Override
@@ -120,6 +136,13 @@ public class ChatFragment extends BaseFragment {
         } else
             checkUnreadMsg();
         super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Logger.info(this.toString(), "chatfragment rotate happen");
+        isRotate = true;
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -167,7 +190,6 @@ public class ChatFragment extends BaseFragment {
                 app.topFragment = "chat";
                 bundle = (Bundle) msg.obj;
                 showChatContent(bundle);
-                chatOverlay.setVisibility(View.GONE);
                 break;
 
             case incomingMsg:
@@ -179,13 +201,6 @@ public class ChatFragment extends BaseFragment {
                 mDataArrays.add(entity);
                 mAdapter.notifyDataSetChanged();
                 mListView.setSelection(mListView.getCount() - 1);
-                break;
-
-            case overlay:
-                if (chatOverlay != null) {
-                    Logger.info(this.toString(), "show overlay");
-                    chatOverlay.setVisibility(View.VISIBLE);
-                }
                 break;
         }
     }

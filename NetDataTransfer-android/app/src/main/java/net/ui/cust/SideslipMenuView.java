@@ -2,6 +2,7 @@ package net.ui.cust;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -51,10 +52,6 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     public SideslipMenuView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            mScreenWidth = ScreenUtils.getScreenWidth(context);
-        else
-            mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
         mMenuRightPadding = dip2px(context, 150);
         this.context = context;
         imm = (InputMethodManager) this.context
@@ -78,7 +75,11 @@ public class SideslipMenuView extends HorizontalScrollView {
                     .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
             backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
                     .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
-
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                mScreenWidth = ScreenUtils.getScreenWidth(context);
+            } else {
+                mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
+            }
             mMenuWidth = mScreenWidth - mMenuRightPadding;
             mHalfMenuWidth = mMenuWidth / 2;
             mMenu.getLayoutParams().width = mMenuWidth;
@@ -87,6 +88,16 @@ public class SideslipMenuView extends HorizontalScrollView {
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            backImg.setVisibility(VISIBLE);
+        } else {
+            backImg.setVisibility(GONE);
+        }
+        super.onDraw(canvas);
     }
 
     @Override

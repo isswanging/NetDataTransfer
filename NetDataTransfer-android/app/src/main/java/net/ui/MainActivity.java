@@ -187,20 +187,15 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
 
     public void fragmentAction() {
         Logger.info(this.toString(), "fragmentAction method called");
+        if (app.topFragment.equals("users")) {
+            fragmentManager.beginTransaction().hide(chat).commit();
+        }
         //判断屏幕方向
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // 横屏
-            if (app.topFragment.equals("users")) {
-                Message msg = Message.obtain();
-                msg.what = overlay;
-                chat.getCommend(msg);
-            }
             app.isLand = true;
         } else {
             // 竖屏
-            if (app.topFragment.equals("users")) {
-                fragmentManager.beginTransaction().hide(chat).commit();
-            }
             app.isLand = false;
         }
     }
