@@ -2,7 +2,6 @@ package net.ui;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -33,13 +32,13 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 public class MainActivity extends Activity implements BaseFragment.Notification {
-    private String user_TAG = "usersFragment";
-    private String chat_TAG = "chatFragment";
+    private final String TAG = "MainActivity";
+    private final String user_TAG = "usersFragment";
+    private final String chat_TAG = "chatFragment";
     private Handler handler = new ListHandler(this);
     private UserListFragment users;
     private ChatFragment chat;
     private FragmentManager fragmentManager;
-    private FragmentTransaction fragmentTransaction;
     private NetConfApplication app;
 
     // 按两次退出的计时
@@ -57,18 +56,17 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final int incomingMsg = 5;
     private final int redraw = 6;
     private final int close = 7;
-    private final int overlay = 8;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Logger.info(this.toString(), "activity onCreat()");
+        Logger.info(TAG, "activity onCreat()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         app = (NetConfApplication) getApplication();
         app.forceClose = false;
 
         fragmentManager = getFragmentManager();
-        Logger.info(this.toString(), "begin fragments users and chat");
+        Logger.info(TAG, "begin fragments users and chat");
         users = (UserListFragment) fragmentManager.findFragmentByTag(user_TAG);
         chat = (ChatFragment) fragmentManager.findFragmentByTag(chat_TAG);
         if (users == null) {
@@ -80,7 +78,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             fragmentManager.beginTransaction().add(R.id.chat, chat, chat_TAG).commit();
         }
         fragmentAction();
-        Logger.info(this.toString(), "end fragments users and chat");
+        Logger.info(TAG, "end fragments users and chat");
 
         msgReceiver = new NewMsgReceiver();
         filter = new IntentFilter();
@@ -128,7 +126,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
 
     @Override
     public void notifyInfo(int commend, Object obj) {
-        Logger.info(this.toString(), "get commend from fragment==" + commend);
+        Logger.info(TAG, "get commend from fragment==" + commend);
         switch (commend) {
             case login:
             case refresh:
@@ -151,7 +149,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 handler.sendEmptyMessage(commend);
                 break;
             default:
-                Logger.error(this.toString(), "====get error commend====" + commend);
+                Logger.error(TAG, "====get error commend====" + commend);
         }
 
     }
@@ -186,7 +184,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     }
 
     public void fragmentAction() {
-        Logger.info(this.toString(), "fragmentAction method called");
+        Logger.info(TAG, "fragmentAction method called");
         if (app.topFragment.equals("users")) {
             fragmentManager.beginTransaction().hide(chat).commit();
         }

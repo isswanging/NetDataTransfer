@@ -1,7 +1,5 @@
 package net.ui.cust;
 
-import net.app.netdatatransfer.R;
-import net.log.Logger;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -15,13 +13,16 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
+
+import net.app.netdatatransfer.R;
+import net.log.Logger;
 
 /**
  * 圆形ImageView，可设置最多两个宽度不同且颜色不同的圆形边框。 设置颜色在 xml布局文件中由自定义属性配置参数指定
  */
 public class RoundImageView extends ImageView {
+    private final String TAG = "RoundImageView";
     private int mBorderThickness = 0;
     private Context mContext;
     private int defaultColor = 0xFFFFFFFF;
@@ -109,7 +110,7 @@ public class RoundImageView extends ImageView {
                     : defaultHeight) / 2;
         }
 
-        Logger.info(this.toString(), "defaultWidth=" + defaultWidth
+        Logger.info(TAG, "defaultWidth=" + defaultWidth
                 + ":::defaultHeight=" + defaultHeight + ":::radius=" + radius);
 
         Bitmap roundBitmap = getCroppedRoundBitmap(bitmap, radius);
@@ -120,7 +121,7 @@ public class RoundImageView extends ImageView {
     /**
      * 获取裁剪后的圆形图片
      * 
-     * @param radius半径
+     * @param radius 半径
      */
     public Bitmap getCroppedRoundBitmap(Bitmap bmp, int radius) {
         Bitmap scaledSrcBmp;

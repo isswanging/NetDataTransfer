@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatFragment extends BaseFragment {
+    private final String TAG = "ChatFragment";
     NetConfApplication app;
     FrameLayout chatMain;
     SideslipMenuView sideslipMenuView;
@@ -117,7 +118,7 @@ public class ChatFragment extends BaseFragment {
                 mListView.setSelection(mListView.getCount() - 1);
                 otherName.setText(targetName);
                 otherIP.setText(targetIp);
-                Logger.info(this.toString(), "hide overlay");
+                Logger.info(TAG, "hide overlay");
             }
 
             // 注册广播接收者
@@ -131,18 +132,11 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onResume() {
-        Logger.info(this.toString(), "resume::" + app.chatId);
+        Logger.info(TAG, "resume::" + app.chatId);
         if (app.chatId.equals("gone")) {
         } else
             checkUnreadMsg();
         super.onResume();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        Logger.info(this.toString(), "chatfragment rotate happen");
-        isRotate = true;
-        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -161,16 +155,16 @@ public class ChatFragment extends BaseFragment {
             switch (requestCode) {
                 case image:
                 case vedio:
-                    Logger.info(this.toString(), "image uri::::" + uri.toString());
+                    Logger.info(TAG, "image uri::::" + uri.toString());
                     filePath = uri2filePath(uri, images, imageID, imageUri, getActivity());
-                    Logger.info(this.toString(), "path::::" + filePath);
+                    Logger.info(TAG, "path::::" + filePath);
                     sendNotifyMsg(filePath);
                     break;
 
                 case audio:
-                    Logger.info(this.toString(), "audio uri::::" + uri.toString());
+                    Logger.info(TAG, "audio uri::::" + uri.toString());
                     filePath = uri2filePath(uri, audios, audioID, audioUri, getActivity());
-                    Logger.info(this.toString(), "path::::" + filePath);
+                    Logger.info(TAG, "path::::" + filePath);
                     sendNotifyMsg(filePath);
                     break;
 
@@ -186,7 +180,7 @@ public class ChatFragment extends BaseFragment {
         Bundle bundle;
         switch (msg.what) {
             case startChat:
-                Logger.info(this.toString(), "get commend from activity =" + msg.what);
+                Logger.info(TAG, "get commend from activity =" + msg.what);
                 app.topFragment = "chat";
                 bundle = (Bundle) msg.obj;
                 showChatContent(bundle);
@@ -208,7 +202,7 @@ public class ChatFragment extends BaseFragment {
     private void checkUnreadMsg() {
         // 如果有未读消息
         if (app.chatTempMap.containsKey(targetIp)) {
-            Logger.info(this.toString(), "get new massage");
+            Logger.info(TAG, "get new massage");
             app.nManager.cancelAll();
             mDataArrays.addAll(app.chatTempMap.get(targetIp));
             app.chatTempMap.remove(targetIp);
@@ -245,7 +239,7 @@ public class ChatFragment extends BaseFragment {
         targetName = bundle.getString("name");
         targetIp = bundle.getString("ip");
         app.chatId = targetIp;
-        Logger.info(this.toString(), "create::" + app.chatId);
+        Logger.info(TAG, "create::" + app.chatId);
 
         // 设置聊天列表
         TextView chatCurName = (TextView) chatMain.findViewById(R.id.chatCurName);

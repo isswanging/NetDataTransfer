@@ -18,6 +18,7 @@ import net.log.Logger;
 import net.util.ScreenUtils;
 
 public class SideslipMenuView extends HorizontalScrollView {
+    private final String TAG = "SideslipMenuView";
 
     /**
      * 屏幕宽度
@@ -113,7 +114,7 @@ public class SideslipMenuView extends HorizontalScrollView {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Logger.info(this.toString(), "port can side");
+            Logger.info(TAG, "port can side");
             int action = ev.getAction();
             switch (action) {
                 // Up时，进行判断，如果显示区域大于菜单宽度一半则完全显示，否则隐藏

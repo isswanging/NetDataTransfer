@@ -1,6 +1,5 @@
 package net.ui.fragment;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -45,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UserListFragment extends BaseFragment {
+    private final String TAG = "UserListFragment";
     NetConfApplication app;
     // 屏幕长宽
     int screenWidth;
@@ -123,9 +123,9 @@ public class UserListFragment extends BaseFragment {
 
     @Override
     public void onResume() {
-        Logger.info(this.toString(), "========= onresume =========");
+        Logger.info(TAG, "========= onresume =========");
         if (userInfoAdapter != null) {
-            Logger.info(this.toString(), "========= getUserData =========");
+            Logger.info(TAG, "========= getUserData =========");
             getUserData();
             userInfoAdapter.notifyDataSetChanged();
         }
@@ -239,38 +239,11 @@ public class UserListFragment extends BaseFragment {
         isMenuOpen = false;
     }
 
-    private void loadUserListOrWarn() {
-        if (app.wifi == 1) {
-            notification.notifyInfo(login, null);
-        } else {
-            // 弹出警告框并退出
-            new AlertDialog.Builder(getActivity()).setTitle("错误")
-                    .setMessage("wifi未连接或端口异常，启动失败")
-                    .setPositiveButton("退出",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getActivity().setResult(getActivity().RESULT_OK);// 确定按钮事件
-                                    getActivity().finish();
-                                }
-                            })
-                    .setNegativeButton("重试",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    app.check(getActivity());
-                                    notification.notifyInfo(retry, null);
-                                }
-                            }).setCancelable(false).show();
-        }
-    }
-
     private void initUI() {
         measureSrceen();
         if (!isRotate) {
             getDeviceInfo();
             registerForEvent();
-            // 延迟一点加载列表
             loadUserListOrWarn();
         }
     }
@@ -288,7 +261,6 @@ public class UserListFragment extends BaseFragment {
 
         drawerLayout.findViewById(R.id.left_drawer).setOnTouchListener(
                 new View.OnTouchListener() {
-                    @SuppressLint("ClickableViewAccessibility")
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         // 吞掉点击事件使下拉刷新失效
@@ -332,7 +304,7 @@ public class UserListFragment extends BaseFragment {
             public void onClick(View v) {
                 if (!isMenuOpen) {
                     if (menu == null) {
-                        Logger.info(this.toString(), "creat a new menu");
+                        Logger.info(TAG, "creat a new menu");
                         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
                         menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
                         menu.findViewById(R.id.getProgress).setOnClickListener(onMenuClickListener);
@@ -359,12 +331,40 @@ public class UserListFragment extends BaseFragment {
         });
     }
 
-    public void loadUserListUI() {
+    // 通过activity调用更新UI的操作设置了一定的延迟，程序第一次启动时调用
+    private void loadUserListOrWarn() {
+        if (app.wifi == 1) {
+            notification.notifyInfo(login, null);
+        } else {
+            // 弹出警告框并退出
+            new AlertDialog.Builder(getActivity()).setTitle("错误")
+                    .setMessage("wifi未连接或端口异常，启动失败")
+                    .setPositiveButton("退出",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    getActivity().setResult(getActivity().RESULT_OK);// 确定按钮事件
+                                    getActivity().finish();
+                                }
+                            })
+                    .setNegativeButton("重试",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    app.check(getActivity());
+                                    notification.notifyInfo(retry, null);
+                                }
+                            }).setCancelable(false).show();
+        }
+    }
+
+    // 更新UI的操作
+    private void loadUserListUI() {
         userInfoAdapter = new SimpleAdapter(getActivity(), getUserData(),
                 R.layout.user_item, new String[]{"name", "ip",
                 "img"}, new int[]{R.id.userName,
                 R.id.userIP, R.id.unread});
-        Logger.info(this.toString(),
+        Logger.info(TAG,
                 String.valueOf(app.hostList.size()));
 
         // 更新UI
@@ -394,7 +394,7 @@ public class UserListFragment extends BaseFragment {
                     if (!app.isLand)
                         drawerLayout.openDrawer(Gravity.LEFT);
                 } else {
-                    Logger.info(this.toString(), "send notify to show chat fragment");
+                    Logger.info(TAG, "send notify to show chat fragment");
                     who.putString("name", name.getText().toString());
                     who.putString("ip", ip.getText().toString());
                     notification.notifyInfo(startChat, who);

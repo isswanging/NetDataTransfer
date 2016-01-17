@@ -39,6 +39,8 @@ import java.util.Map;
  * 模仿iphone的3D touch效果
  */
 public class ForceTouchViewGroup extends LinearLayout {
+    private final String TAG = "ForceTouchViewGroup";
+
     public TextView title;
     public LinearLayout preview;
     public RelativeLayout.LayoutParams previewParams;
@@ -134,7 +136,7 @@ public class ForceTouchViewGroup extends LinearLayout {
                 showAnswerList = AnimationUtils.loadAnimation(app, R.anim.show_answerlist_anim);
                 hideAnswerList = AnimationUtils.loadAnimation(app, R.anim.hide_answerlist_anim);
 
-                Logger.info(this.toString(), "answerList height====" + answerHeight + "====answerListTop=="
+                Logger.info(TAG, "answerList height====" + answerHeight + "====answerListTop=="
                         + answerListTop + "===answerListBottom" + answerListBottom);
 
                 showAnswerList.setAnimationListener(new Animation.AnimationListener() {
@@ -181,7 +183,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         answerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Logger.info(this.toString(), "in item click event");
+                Logger.info(TAG, "in item click event");
                 Message msg = builder.pHandler.obtainMessage();
                 msg.what = builder.pWhat;
                 msg.arg1 = position;
@@ -199,14 +201,14 @@ public class ForceTouchViewGroup extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 yDown = event.getRawY();
                 moveTopMargin = previewParams.topMargin;
-                Logger.info(this.toString(), "yDown====" + yDown + "===answerListTop====" + answerListTop);
+                Logger.info(TAG, "yDown====" + yDown + "===answerListTop====" + answerListTop);
                 if (yDown > answerListTop && isShow)
                     isMove = false;
                 else
                     isMove = true;
                 break;
             case MotionEvent.ACTION_UP:
-                Logger.info(this.toString(), "in forceTouchView touch UP");
+                Logger.info(TAG, "in forceTouchView touch UP");
                 if (!isShow) {
                     clearView();
                     root.removeView(this);

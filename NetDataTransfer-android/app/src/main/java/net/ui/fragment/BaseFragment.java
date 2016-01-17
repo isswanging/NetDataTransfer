@@ -17,7 +17,6 @@ public abstract class BaseFragment extends Fragment {
     final int incomingMsg = 5;
     final int redraw = 6;
     final int close = 7;
-    final int overlay = 8;
 
     boolean isRotate = false;
     View viewGroup;
@@ -25,6 +24,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 翻转时fragment不销毁
         setRetainInstance(true);
     }
 
@@ -55,7 +55,7 @@ public abstract class BaseFragment extends Fragment {
         void notifyInfo(int commend, Object obj);
     }
 
-    // 接受activity的更新UI操作
+    // 接受activity更新指令的UI操作
     public abstract void getCommend(Message msg);
 
 }

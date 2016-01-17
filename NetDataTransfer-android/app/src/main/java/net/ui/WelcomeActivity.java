@@ -22,6 +22,7 @@ import net.vo.Host;
 import java.io.File;
 
 public class WelcomeActivity extends Activity {
+    private final String TAG = "WelcomeActivity";
     private NetConfApplication app;
 
     @Override
@@ -55,7 +56,7 @@ public class WelcomeActivity extends Activity {
 
     private void createShortCut() {
         // 调试版本不创建快捷方式
-        if (!Logger.tag) {
+        if (!Logger.DEBUG) {
             Intent shortcut = new Intent(
                     "com.android.launcher.action.INSTALL_SHORTCUT");
 
@@ -99,10 +100,10 @@ public class WelcomeActivity extends Activity {
             // 创建接收文件的目录
             NetConfApplication.saveFilePath = app.getSDPath()
                     + "/NetDataTransfer/recFile";
-            Logger.info(this.toString(), NetConfApplication.saveFilePath);
+            Logger.info(TAG, NetConfApplication.saveFilePath);
             File recFile = new File(NetConfApplication.saveFilePath);
             if (!recFile.exists()) {
-                Logger.info(this.toString(), "create dir");
+                Logger.info(TAG, "create dir");
                 recFile.mkdirs();
             }
         }
