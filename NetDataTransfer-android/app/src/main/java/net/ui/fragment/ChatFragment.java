@@ -132,11 +132,11 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onResume() {
+        super.onResume();
         Logger.info(TAG, "resume::" + app.chatId);
         if (app.chatId.equals("gone")) {
         } else
             checkUnreadMsg();
-        super.onResume();
     }
 
     @Override

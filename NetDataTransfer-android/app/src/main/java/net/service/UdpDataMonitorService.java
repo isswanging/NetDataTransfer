@@ -76,8 +76,7 @@ public class UdpDataMonitorService extends Service {
 
             // 发送广播
             sendBroadcast(intent);
-        }
-        else {
+        } else {
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                     app.getDate(), JSON.parseObject(info, DataPacket.class)
                     .getContent(), true);
@@ -89,41 +88,39 @@ public class UdpDataMonitorService extends Service {
                 app.chatTempMap.put(dp.getIp(), list);
             }
 
-            if (app.chatId.equals("none")) {
-                // 发送通知
-                Logger.info(this.toString(), "handler by Notification");
-                Intent notifyIntent = new Intent("net.ui.main");
-                notifyIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                Bundle bundle = new Bundle();
-                bundle.putString("name", dp.getSenderName());
-                bundle.putString("ip", dp.getIp());
-                notifyIntent.putExtras(bundle);
-                PendingIntent contentIntent = PendingIntent.getActivity(
-                        UdpDataMonitorService.this, R.string.app_name,
-                        notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // 发送通知
+            Logger.info(this.toString(), "handler by Notification");
+            Intent notifyIntent = new Intent("net.ui.main");
+            notifyIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Bundle bundle = new Bundle();
+            bundle.putString("name", dp.getSenderName());
+            bundle.putString("ip", dp.getIp());
+            notifyIntent.putExtras(bundle);
+            PendingIntent contentIntent = PendingIntent.getActivity(
+                    UdpDataMonitorService.this, R.string.app_name,
+                    notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                // 显示
-                Notification notification = new NotificationCompat.Builder(
-                        UdpDataMonitorService.this).setSmallIcon(R.drawable.notify)
-                        .setTicker("新消息").setContentTitle("点击查看")
-                        .setContentText(dp.getSenderName() + "发来一条新消息")
-                        .setContentIntent(contentIntent).build();
-                notification.flags = Notification.FLAG_AUTO_CANCEL
-                        | Notification.FLAG_SHOW_LIGHTS;
-                notification.ledARGB = 0x00FF00;
-                notification.ledOffMS = 100;
-                notification.ledOnMS = 100;
-                app.nManager.notify(R.id.chatName, notification);
+            // 显示
+            Notification notification = new NotificationCompat.Builder(
+                    UdpDataMonitorService.this).setSmallIcon(R.drawable.notify)
+                    .setTicker("新消息").setContentTitle("点击查看")
+                    .setContentText(dp.getSenderName() + "发来一条新消息")
+                    .setContentIntent(contentIntent).build();
+            notification.flags = Notification.FLAG_AUTO_CANCEL
+                    | Notification.FLAG_SHOW_LIGHTS;
+            notification.ledARGB = 0x00FF00;
+            notification.ledOffMS = 100;
+            notification.ledOnMS = 100;
+            app.nManager.notify(R.id.chatName, notification);
 
-                // 快捷方式显示数字(部分品牌有效)
-                BadgeUtil.setBadgeCount(getApplicationContext(),
-                        app.getUnreadMsgNum());
-            } else {
-                // 让界面显示未读消息的红点
-                Logger.info(this.toString(), "handler by userList");
-                Intent unReadIntent = new Intent("net.ui.newMsg");
-                sendBroadcast(unReadIntent);
-            }
+            // 快捷方式显示数字(部分品牌有效)
+            BadgeUtil.setBadgeCount(getApplicationContext(),
+                    app.getUnreadMsgNum());
+
+            // 让界面显示未读消息的红点
+            Logger.info(this.toString(), "handler by userList");
+            Intent unReadIntent = new Intent("net.ui.newMsg");
+            sendBroadcast(unReadIntent);
         }
 
     }

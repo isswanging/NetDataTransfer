@@ -11,6 +11,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.animation.AlphaAnimation;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
@@ -22,14 +30,21 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.ScreenMonitorService;
 import net.service.UdpDataMonitorService;
+import net.ui.cust.ForceTouchViewGroup;
 import net.ui.fragment.BaseFragment;
 import net.ui.fragment.ChatFragment;
 import net.ui.fragment.UserListFragment;
+import net.vo.ChatMsgEntity;
+import net.vo.DataPacket;
 import net.vo.Host;
 
 import java.lang.ref.WeakReference;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends Activity implements BaseFragment.Notification {
     private final String TAG = "MainActivity";
@@ -48,6 +63,28 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     NewMsgReceiver msgReceiver;
     IntentFilter filter;
 
+    // 3D touch效果
+    ListView previewContent;
+    List<Map<String, Object>> answerListData = new ArrayList<Map<String, Object>>();
+    List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
+    RelativeLayout.LayoutParams previewParams;
+    LinearLayout preview;
+    LinearLayout custPreview;
+    FrameLayout root;
+    String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
+    ChatMsgAdapter chatAdapter;
+    ForceTouchViewGroup touchView;
+    int moveTopMargin;
+    int topMargin;
+    AlphaAnimation hidePreviewAnim;
+    AlphaAnimation showPreviewAnim;
+    float yDown;
+    float yMove;
+    float yTemp;
+    String targetIp;
+    String targetName;
+    Bundle bundle;
+
     private final int login = 0;
     private final int refresh = 1;
     private final int retry = 2;
@@ -56,6 +93,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final int incomingMsg = 5;
     private final int redraw = 6;
     private final int close = 7;
+    private final int pressure = 8;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,6 +122,17 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         filter = new IntentFilter();
         filter.addAction("net.ui.newMsg");
         filter.addAction("net.ui.chatFrom");
+
+        for (int i = 0; i < answerData.length; i++) {
+            Map item = new HashMap();
+            item.put("text", answerData[i]);
+            answerListData.add(item);
+        }
+        showPreviewAnim = new AlphaAnimation(0f, 1f);
+        hidePreviewAnim = new AlphaAnimation(1f, 0f);
+        showPreviewAnim.setDuration(300);
+        hidePreviewAnim.setDuration(200);
+        bundle = new Bundle();
     }
 
     @Override
@@ -106,7 +155,75 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             stopService(new Intent(this, FileMonitorService.class));
             stopService(new Intent(this, ScreenMonitorService.class));
         }
+        handler.removeCallbacksAndMessages(null);
         super.onDestroy();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (touchView != null && !touchView.isLock()) {
+            Logger.info(TAG, "activity touch event");
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    Logger.info(TAG, "in activity touch DOWN");
+                    break;
+                case MotionEvent.ACTION_UP:
+                    Logger.info(TAG, "in activity touch UP");
+                    if (!touchView.isShow()) {
+                        touchView.clearView();
+                        root.removeView(touchView);
+                        touchView = null;
+                    } else {
+                        previewParams.topMargin = topMargin - touchView.getNeedMove();
+                        preview.setLayoutParams(previewParams);
+                        touchView.setIsLock(true);
+                    }
+                    yTemp = 0;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    // needMove可能还没准备好
+                    if (touchView.getNeedMove() != 0) {
+                        yMove = event.getRawY();
+                        if (yTemp == 0) {
+                            yTemp = yMove;
+                        }
+                        float gap = yMove - yTemp;
+
+                        // view位于超过显示部分的位置
+                        if ((moveTopMargin + gap) <= (topMargin - touchView.getNeedMove())) {
+                            // 向上滑减速
+                            if (gap < 0) {
+                                moveTopMargin = (int) (moveTopMargin + gap * 0.3);
+                            }
+                            // 向下滑速度正常
+                            else {
+                                moveTopMargin = (int) (moveTopMargin + gap);
+                            }
+                            if (!touchView.isShow() && !touchView.running) {
+                                touchView.showAnswerList();
+                            }
+                        }
+                        // view处于下压并且继续下拉的状态
+                        else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
+                            moveTopMargin = (int) (moveTopMargin + gap * 0.1);
+                        } else {
+                            moveTopMargin = (int) (moveTopMargin + gap);
+                            if (touchView.isShow() && !touchView.running) {
+                                touchView.hideAnswerList();
+                            }
+                        }
+                        yTemp = yMove;
+                        previewParams.topMargin = moveTopMargin;
+                        preview.setLayoutParams(previewParams);
+                    }
+            }
+            return true;
+        } else {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                yDown = event.getRawY();
+            }
+            return super.dispatchTouchEvent(event);
+        }
     }
 
     @Override
@@ -148,10 +265,49 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             case redraw:
                 handler.sendEmptyMessage(commend);
                 break;
+            case pressure:
+                show3dTouchView((Bundle) obj);
+                break;
             default:
                 Logger.error(TAG, "====get error commend====" + commend);
         }
 
+    }
+
+    private void show3dTouchView(Bundle bundle) {
+        targetIp = bundle.getString("ip");
+        targetName = bundle.getString("name");
+        // 组装需要显示的界面
+        if (custPreview == null)
+            custPreview = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.touch_content, null);
+        previewContent = (ListView) custPreview.getChildAt(1);
+        ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(targetName);
+        chatAdapter = new ChatMsgAdapter(this, mDataArrays);
+        previewContent.setAdapter(chatAdapter);
+        mDataArrays.clear();
+
+        // 填充数据
+        if (app.chatTempMap.containsKey(targetIp)) {
+            Logger.info(TAG, "get new massage");
+            app.nManager.cancelAll();
+            mDataArrays.addAll(app.chatTempMap.get(targetIp));
+            chatAdapter.notifyDataSetChanged();
+            previewContent.setSelection(chatAdapter.getCount() - 1);
+        }
+
+        // 显示3D touch菜单
+        touchView = new ForceTouchViewGroup.Builder(this).
+                setBackground(root).
+                setIP(bundle.getString("ip")).
+                setView(custPreview).
+                setData(answerListData).
+                setHandler(handler, answer).
+                setRoot(root).create();
+        touchView.startAnimation(showPreviewAnim);
+        preview = (LinearLayout) findViewById(R.id.preview);
+        previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
+        moveTopMargin = previewParams.topMargin;
+        topMargin = previewParams.topMargin;
     }
 
     class ListHandler extends Handler {
@@ -178,6 +334,42 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                         // 显示chatFragment
                         fragmentManager.beginTransaction().show(chat).commit();
                         break;
+                    case answer:
+                        // 获取数组的索引
+                        int i = msg.arg1;
+                        if ((i + 1) != answerData.length) {
+                            // 直接回复
+                            final DataPacket dp = new DataPacket(
+                                    NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
+                                    NetConfApplication.text);
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        app.sendUdpData(new DatagramSocket(),
+                                                JSON.toJSONString(dp), targetIp,
+                                                NetConfApplication.textPort);
+                                    } catch (SocketException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();
+
+                            // 清理操作
+                            app.chatTempMap.remove(targetIp);
+                            msg.what = redraw;
+                            users.getCommend(msg);
+                        } else {
+                            // 显示
+                            bundle.putString("ip",targetIp);
+                            bundle.putString("name",targetName);
+                            msg.what = startChat;
+                            msg.obj = bundle;
+                            chat.getCommend(msg);
+                            fragmentManager.beginTransaction().show(chat).commit();
+                        }
+                        break;
                 }
             }
         }
@@ -192,9 +384,11 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // 横屏
             app.isLand = true;
+            root = null;
         } else {
             // 竖屏
             app.isLand = false;
+            root = (FrameLayout) findViewById(R.id.mainUI);
         }
     }
 

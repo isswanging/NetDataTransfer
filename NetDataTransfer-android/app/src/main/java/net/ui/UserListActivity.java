@@ -111,7 +111,6 @@ public class UserListActivity extends Activity {
     int send = 0;
     int get = 1;
 
-    ForceTouchViewGroup touchView;
     ChatMsgAdapter chatAdapter;
     List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
     ListView previewContent;
@@ -119,6 +118,7 @@ public class UserListActivity extends Activity {
     float yMove;
     float yTemp;
     int topMargin;
+    ForceTouchViewGroup touchView;
     RelativeLayout.LayoutParams previewParams;
     int moveTopMargin;
     LinearLayout preview;

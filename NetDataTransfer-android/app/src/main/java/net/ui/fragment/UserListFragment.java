@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.Vibrator;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -55,11 +56,9 @@ public class UserListFragment extends BaseFragment {
     int menuWidth;
     LinearLayout menu;
     View.OnClickListener onMenuClickListener;
-    ScaleAnimation hideMenuAnim;
-    ScaleAnimation showMenuAnim;
 
-    AlphaAnimation hidePreviewAnim;
-    AlphaAnimation showPreviewAnim;
+    AlphaAnimation hideMenuAnim;
+    ScaleAnimation showMenuAnim;
 
     int send = 0;
     int get = 1;
@@ -74,6 +73,11 @@ public class UserListFragment extends BaseFragment {
     private List<Map<String, Object>> userList = new ArrayList<>();
     private Bundle who = new Bundle();
 
+    String targetIp;
+    String targetName;
+    long[] pattern = {100, 200};
+    Vibrator vibrator;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,11 +85,10 @@ public class UserListFragment extends BaseFragment {
         // 菜单显示与隐藏的动画
         showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
                 1f, Animation.RELATIVE_TO_SELF, 0f);
-        hideMenuAnim = new ScaleAnimation(1f, 0f, 1f, 0f, Animation.RELATIVE_TO_SELF,
-                1f, Animation.RELATIVE_TO_SELF, 0f);
+        hideMenuAnim = new AlphaAnimation(1f, 0f);
         showMenuAnim.setDuration(100);
-        hideMenuAnim.setDuration(100);
-
+        hideMenuAnim.setDuration(200);
+        vibrator = (Vibrator) app.getSystemService(app.VIBRATOR_SERVICE);
         if (savedInstanceState != null) {
             isRotate = true;
         }
@@ -326,6 +329,9 @@ public class UserListFragment extends BaseFragment {
                     isMenuOpen = true;
                     if (pullRefreshListView != null)
                         pullRefreshListView.setCanRefresh(false);
+                } else {
+                    hideMenu();
+                    isMenuOpen = false;
                 }
             }
         });
@@ -401,5 +407,32 @@ public class UserListFragment extends BaseFragment {
                 }
             }
         });
+        pullRefreshListView.getListView().setOnItemLongClickListener(
+                new AdapterView.OnItemLongClickListener() {
+
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                        if (!app.isLand) {
+                            Logger.info(TAG, "in 3d touch effect");
+                            TextView name = (TextView) view.findViewById(R.id.userName);
+                            TextView ip = (TextView) view.findViewById(R.id.userIP);
+
+                            // 组装需要显示的界面
+                            targetIp = ip.getText().toString();
+                            targetName = name.getText().toString();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("ip", targetIp);
+                            bundle.putString("name", targetName);
+                            // 振动提示
+                            vibrator.vibrate(pattern, -1);
+                            notification.notifyInfo(pressure, bundle);
+
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+        );
     }
 }

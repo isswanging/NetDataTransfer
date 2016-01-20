@@ -17,6 +17,7 @@ public abstract class BaseFragment extends Fragment {
     final int incomingMsg = 5;
     final int redraw = 6;
     final int close = 7;
+    final int pressure = 8;
 
     boolean isRotate = false;
     View viewGroup;
@@ -46,8 +47,8 @@ public abstract class BaseFragment extends Fragment {
 
     @Override
     public void onDetach() {
-        super.onDetach();
         notification = null;
+        super.onDetach();
     }
 
     // 和宿主activity通信的接口
