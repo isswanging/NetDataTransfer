@@ -1,5 +1,6 @@
 package net.app;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Environment;
 import android.util.SparseArray;
+import android.view.inputmethod.InputMethodManager;
 
 import net.app.netdatatransfer.R;
 import net.log.Logger;
@@ -33,6 +35,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 public class NetConfApplication extends Application {
+    private final String TAG = "NetConfApplication";
     public int wifi = 0;
     public String chatId = "none";
     public SoundPool soundPool;
@@ -242,8 +245,15 @@ public class NetConfApplication extends Application {
                 num += chatTempMap.get(s).size();
             }
         }
-        Logger.info("unread msg num::::", " " + num);
+        Logger.info(TAG, "unread msg num::::" + num);
         return num;
     }
 
+    // 收起输入法键盘
+    public void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm.isActive()) {
+            imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
+        }
+    }
 }

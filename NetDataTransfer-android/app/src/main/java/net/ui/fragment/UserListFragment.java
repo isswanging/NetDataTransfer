@@ -32,10 +32,10 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.ui.CaptureActivity;
-import net.ui.FileListActivity;
-import net.ui.ProgressBarListActivity;
-import net.ui.cust.PullRefreshListView;
+import net.ui.activity.CaptureActivity;
+import net.ui.activity.FileListActivity;
+import net.ui.activity.ProgressBarListActivity;
+import net.ui.view.PullRefreshListView;
 import net.util.CreateQRImage;
 import net.vo.Host;
 

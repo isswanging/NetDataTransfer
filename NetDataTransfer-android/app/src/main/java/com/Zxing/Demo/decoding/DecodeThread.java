@@ -16,15 +16,13 @@
 
 package com.Zxing.Demo.decoding;
 
-import net.ui.CaptureActivity;
+import net.ui.activity.CaptureActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.ResultPointCallback;
 
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 
 import java.util.Hashtable;
 import java.util.Vector;

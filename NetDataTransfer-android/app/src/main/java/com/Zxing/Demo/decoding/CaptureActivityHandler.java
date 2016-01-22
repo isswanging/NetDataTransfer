@@ -16,7 +16,7 @@
 
 package com.Zxing.Demo.decoding;
 
-import net.ui.CaptureActivity;
+import net.ui.activity.CaptureActivity;
 import com.Zxing.Demo.camera.CameraManager;
 import com.Zxing.Demo.view.*;
 import com.google.zxing.BarcodeFormat;

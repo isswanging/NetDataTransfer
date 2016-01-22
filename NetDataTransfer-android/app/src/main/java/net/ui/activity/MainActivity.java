@@ -1,4 +1,4 @@
-package net.ui;
+package net.ui.activity;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -30,10 +30,10 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.ScreenMonitorService;
 import net.service.UdpDataMonitorService;
-import net.ui.cust.ForceTouchViewGroup;
 import net.ui.fragment.BaseFragment;
 import net.ui.fragment.ChatFragment;
 import net.ui.fragment.UserListFragment;
+import net.ui.view.ForceTouchViewGroup;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import net.vo.Host;
@@ -144,6 +144,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     @Override
     protected void onPause() {
         unregisterReceiver(msgReceiver);
+        app.hideKeyboard(this);
         super.onPause();
     }
 
@@ -335,40 +336,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                         fragmentManager.beginTransaction().show(chat).commit();
                         break;
                     case answer:
-                        // 获取数组的索引
-                        int i = msg.arg1;
-                        if ((i + 1) != answerData.length) {
-                            // 直接回复
-                            final DataPacket dp = new DataPacket(
-                                    NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
-                                    NetConfApplication.text);
-
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        app.sendUdpData(new DatagramSocket(),
-                                                JSON.toJSONString(dp), targetIp,
-                                                NetConfApplication.textPort);
-                                    } catch (SocketException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }).start();
-
-                            // 清理操作
-                            app.chatTempMap.remove(targetIp);
-                            msg.what = redraw;
-                            users.getCommend(msg);
-                        } else {
-                            // 显示
-                            bundle.putString("ip",targetIp);
-                            bundle.putString("name",targetName);
-                            msg.what = startChat;
-                            msg.obj = bundle;
-                            chat.getCommend(msg);
-                            fragmentManager.beginTransaction().show(chat).commit();
-                        }
+                        answer(msg);
                         break;
                 }
             }
@@ -426,6 +394,43 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 }
             }
         }).start();
+    }
+
+    public void answer(Message msg) {
+        // 获取数组的索引
+        int i = msg.arg1;
+        if ((i + 1) != answerData.length) {
+            // 直接回复
+            final DataPacket dp = new DataPacket(
+                    NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
+                    NetConfApplication.text);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        app.sendUdpData(new DatagramSocket(),
+                                JSON.toJSONString(dp), targetIp,
+                                NetConfApplication.textPort);
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+
+            // 清理操作
+            app.chatTempMap.remove(targetIp);
+            msg.what = redraw;
+            users.getCommend(msg);
+        } else {
+            // 显示
+            bundle.putString("ip", targetIp);
+            bundle.putString("name", targetName);
+            msg.what = startChat;
+            msg.obj = bundle;
+            chat.getCommend(msg);
+            fragmentManager.beginTransaction().show(chat).commit();
+        }
     }
 
     class NewMsgReceiver extends BroadcastReceiver {

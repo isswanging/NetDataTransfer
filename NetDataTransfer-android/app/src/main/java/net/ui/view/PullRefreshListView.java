@@ -1,4 +1,4 @@
-package net.ui.cust;
+package net.ui.view;
 
 import android.content.Context;
 import android.os.AsyncTask;

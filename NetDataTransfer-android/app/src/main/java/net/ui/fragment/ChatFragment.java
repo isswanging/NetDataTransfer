@@ -31,8 +31,8 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.ui.ChatMsgAdapter;
-import net.ui.cust.SideslipMenuView;
+import net.ui.activity.ChatMsgAdapter;
+import net.ui.view.SideslipMenuView;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 
@@ -273,6 +273,7 @@ public class ChatFragment extends BaseFragment {
                     app.chatId = "gone";
                     app.topFragment = "users";
                     notification.notifyInfo(close, null);
+                    app.hideKeyboard(getActivity());
                     break;
 
                 case R.id.send:

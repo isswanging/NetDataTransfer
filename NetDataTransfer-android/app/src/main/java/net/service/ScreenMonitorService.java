@@ -22,6 +22,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 public class ScreenMonitorService extends Service {
+    private final String TAG = "ScreenMonitorService";
     Host host;
     NetConfApplication app;
 
@@ -69,7 +70,7 @@ public class ScreenMonitorService extends Service {
         isClosed = false;
         thread.interrupt();
         unregisterReceiver(screenListener);
-        Logger.info(this.toString(), "service stop");
+        Logger.info(TAG, "service stop");
         super.onDestroy();
     }
 
@@ -78,15 +79,15 @@ public class ScreenMonitorService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Logger.info(this.toString(), "receive a screen broadcast");
+            Logger.info(TAG, "receive a screen broadcast");
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
-                    Logger.info(this.toString(), "screen is off");
+                    Logger.info(TAG, "screen is off");
                     sendHostInfo.getHandler().sendEmptyMessage(SCREEN_Off);
                     break;
 
                 case Intent.ACTION_SCREEN_ON:
-                    Logger.info(this.toString(), "screen is on");
+                    Logger.info(TAG, "screen is on");
                     sendHostInfo.getHandler().sendEmptyMessage(SCREEN_ON);
                     break;
 
@@ -104,7 +105,7 @@ public class ScreenMonitorService extends Service {
 
             @Override
             public void run() {
-                Logger.info(this.toString(), "send broadcast");
+                Logger.info(TAG, "send broadcast");
                 try {
                     app.sendUdpData(new DatagramSocket(),
                             JSON.toJSONString(host),
@@ -121,7 +122,7 @@ public class ScreenMonitorService extends Service {
 
         @Override
         public void run() {
-            Logger.info(this.toString(), "in SendHostInfo");
+            Logger.info(TAG, "in SendHostInfo");
             Looper.prepare();
             updateHandler = new Handler() {
                 @Override

@@ -1,12 +1,5 @@
 package net.service;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-
-import net.app.NetConfApplication;
-import net.log.Logger;
-import net.vo.Host;
 import android.app.Service;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
@@ -14,7 +7,16 @@ import android.os.IBinder;
 
 import com.alibaba.fastjson.JSON;
 
+import net.app.NetConfApplication;
+import net.log.Logger;
+import net.vo.Host;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+
 public class BroadcastMonitorService extends Service {
+    private final String TAG="BroadcastMonitorService";
     DatagramSocket broadSocket = null;
     DatagramPacket broadPacket = null;
     NetConfApplication app;
@@ -39,7 +41,7 @@ public class BroadcastMonitorService extends Service {
         wifiLock.acquire();
 
         app = (NetConfApplication) getApplication();
-        Logger.info(this.toString(), "BroadcastMonitor started");
+        Logger.info(TAG, "BroadcastMonitor started");
         tag = true;
         thread = new Thread(new ReceiveHost());
         thread.start();
@@ -51,7 +53,7 @@ public class BroadcastMonitorService extends Service {
         wifiLock.release();
         tag = false;
         thread.interrupt();
-        Logger.info(this.toString(), "service stop");
+        Logger.info(TAG, "service stop");
         super.onDestroy();
     }
 
@@ -60,24 +62,24 @@ public class BroadcastMonitorService extends Service {
         @Override
         public void run() {
             try {
-                Logger.info(this.toString(), "start a service");
+                Logger.info(TAG, "start a service");
                 broadPacket = new DatagramPacket(new byte[512], 512);
                 broadSocket = new DatagramSocket(NetConfApplication.broadcastPort);
                 while (tag) {
                     // 收到广播
                     broadSocket.receive(broadPacket);
-                    Logger.info(this.toString(), "receive a broadcast");
+                    Logger.info(TAG, "receive a broadcast");
                     // 整理信息
                     String info = new String(broadPacket.getData(), 0,
                             broadPacket.getLength());
                     Host host = JSON.parseObject(info, Host.class);
                     host.setState(0);
-                    Logger.info(this.toString(), "from ip: " + host.getIp());
+                    Logger.info(TAG, "from ip: " + host.getIp());
 
                     if (!app.containHost(host)) {
                         host.setState(1);
                         app.addHost(host);
-                        Logger.info(this.toString(), "add a host");
+                        Logger.info(TAG, "add a host");
 
                         // 回应广播, 发送本机信息去目标地址
                         if (host.getTag() == 0) {
@@ -96,7 +98,7 @@ public class BroadcastMonitorService extends Service {
                     }
                 }
             } catch (IOException e) {
-                Logger.error(this.toString(), e.toString());
+                Logger.error(TAG, e.toString());
             }
 
         }

@@ -1,4 +1,4 @@
-package net.ui;
+package net.ui.activity;
 
 import java.util.ArrayList;
 
