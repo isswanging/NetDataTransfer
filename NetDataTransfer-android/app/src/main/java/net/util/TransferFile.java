@@ -1,20 +1,5 @@
 package net.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-
-import net.app.NetConfApplication;
-import net.app.netdatatransfer.R;
-import net.log.Logger;
-import net.vo.DataPacket;
-import net.vo.Progress;
-import net.vo.SendTask;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -31,7 +16,25 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 
+import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
+import net.log.Logger;
+import net.vo.DataPacket;
+import net.vo.Progress;
+import net.vo.SendTask;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
 public class TransferFile extends AsyncTask<SendTask, Void, Void> {
+    private final String TAG = "TransferFile";
+
     Context context;
     String fileName;
     NetConfApplication app;
@@ -45,7 +48,7 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
     @Override
     protected Void doInBackground(SendTask... params) {
 
-        Logger.info(this.toString(), "begin accept file");
+        Logger.info(TAG, "begin accept file");
         DataPacket dp = params[0].getDataPacket();
         int taskId = params[0].getTaskId();
         fileName = params[0].getFileName();
@@ -68,7 +71,7 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
             // 设置文件大小
             in = new DataInputStream(socket.getInputStream());
             long total = in.readLong();
-            Logger.info(this.toString(), "size" + total);
+            Logger.info(TAG, "size" + total);
             String path = getFileSavePath(fileName);
 
             bis = new BufferedInputStream(socket.getInputStream());
@@ -80,7 +83,7 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
 
             byte[] bytes = new byte[1024];
             while ((len = bis.read(bytes)) != -1) {
-                // Logger.info(this.toString(), "receiveing");
+                // Logger.info(TAG, "receiveing");
                 bos.write(bytes, 0, len);
                 bos.flush();
                 byteRead += len;
@@ -88,14 +91,14 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
                         fileName, (int) (byteRead * 100 / total)));
             }
 
-            Logger.info(this.toString(), "end file");
+            Logger.info(TAG, "end file");
 
             // save in content
             saveInContent(path);
 
         } catch (IOException e) {
             error = true;
-            Logger.error(this.toString(), e.toString());
+            Logger.error(TAG, e.toString());
         } finally {
             NetConfApplication.getTaskList.remove(taskId);
             try {
@@ -105,7 +108,7 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
                 bis.close();
                 socket.close();
             } catch (IOException e) {
-                Logger.info(this.toString(), e.toString());
+                Logger.info(TAG, e.toString());
             }
 
         }
@@ -113,7 +116,7 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
     }
 
     private void saveInContent(String path) {
-        Logger.info(this.toString(), fileName);
+        Logger.info(TAG, fileName);
         String[] sn = fileName.split("\\.");
         String buffix = sn[sn.length - 1];
 
@@ -175,7 +178,7 @@ public class TransferFile extends AsyncTask<SendTask, Void, Void> {
     @Override
     protected void onPostExecute(Void result) {
         if (!error) {
-            Logger.info(this.toString(), "toast notify");
+            Logger.info(TAG, "toast notify");
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View layout = inflater.inflate(R.layout.custom_toast, null);

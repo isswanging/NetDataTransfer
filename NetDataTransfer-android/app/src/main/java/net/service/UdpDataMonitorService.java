@@ -31,6 +31,7 @@ import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 public class UdpDataMonitorService extends Service {
+    private final String TAG = "UdpDataMonitorService";
     DatagramSocket UdpSocket = null;
     DatagramPacket UdpPacket = null;
     DataPacket dp = null;
@@ -50,7 +51,7 @@ public class UdpDataMonitorService extends Service {
         app = (NetConfApplication) getApplication();
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-        Logger.info(this.toString(), "UDPdataMonitor started");
+        Logger.info(TAG, "UDPdataMonitor started");
         tag = true;
         thread = new Thread(new ReceiveInfo());
         thread.start();
@@ -61,13 +62,14 @@ public class UdpDataMonitorService extends Service {
     public void onDestroy() {
         tag = false;
         thread.interrupt();
-        Logger.info(this.toString(), "service stop");
+        Logger.info(TAG, "service stop");
         super.onDestroy();
     }
 
     private void dispatchMessage(String info) {
         if (app.chatId.equals(dp.getIp())) {
             // 发广播在交给聊天窗口处理
+            Logger.info(TAG, "handler by chat");
             Intent intent = new Intent("net.ui.chatFrom");
             Bundle bundle = new Bundle();
             bundle.putString("content", info);
@@ -75,19 +77,7 @@ public class UdpDataMonitorService extends Service {
 
             // 发送广播
             sendBroadcast(intent);
-
         } else {
-            // 发送通知
-            Intent notifyIntent = new Intent("net.ui.chatting");
-            notifyIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            Bundle bundle = new Bundle();
-            bundle.putString("name", dp.getSenderName());
-            bundle.putString("ip", dp.getIp());
-            notifyIntent.putExtras(bundle);
-            PendingIntent contentIntent = PendingIntent.getActivity(
-                    UdpDataMonitorService.this, R.string.app_name,
-                    notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                     app.getDate(), JSON.parseObject(info, DataPacket.class)
                     .getContent(), true);
@@ -98,6 +88,18 @@ public class UdpDataMonitorService extends Service {
                 list.add(entity);
                 app.chatTempMap.put(dp.getIp(), list);
             }
+
+            // 发送通知
+            Logger.info(TAG, "handler by Notification");
+            Intent notifyIntent = new Intent("net.ui.main");
+            notifyIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            Bundle bundle = new Bundle();
+            bundle.putString("name", dp.getSenderName());
+            bundle.putString("ip", dp.getIp());
+            notifyIntent.putExtras(bundle);
+            PendingIntent contentIntent = PendingIntent.getActivity(
+                    UdpDataMonitorService.this, R.string.app_name,
+                    notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             // 显示
             Notification notification = new NotificationCompat.Builder(
@@ -117,9 +119,11 @@ public class UdpDataMonitorService extends Service {
                     app.getUnreadMsgNum());
 
             // 让界面显示未读消息的红点
+            Logger.info(TAG, "handler by userList");
             Intent unReadIntent = new Intent("net.ui.newMsg");
             sendBroadcast(unReadIntent);
         }
+
     }
 
     private class ReceiveInfo implements Runnable {
@@ -141,7 +145,7 @@ public class UdpDataMonitorService extends Service {
 
                         case NetConfApplication.text:
                             app.playVoice();
-                            Logger.info(this.toString(), "service::" + app.chatId);
+                            Logger.info(TAG, "service::" + app.chatId);
                             dispatchMessage(info);
                             break;
 
@@ -154,7 +158,7 @@ public class UdpDataMonitorService extends Service {
                             break;
 
                         case NetConfApplication.filePre:
-                            Logger.info(this.toString(), "file send request");
+                            Logger.info(TAG, "file send request");
                             // 振动提示
                             vibrator.vibrate(pattern, -1);
 
@@ -183,7 +187,7 @@ public class UdpDataMonitorService extends Service {
                 }
 
             } catch (IOException e) {
-                Logger.error(this.toString(), e.toString());
+                Logger.error(TAG, e.toString());
             }
         }
     }

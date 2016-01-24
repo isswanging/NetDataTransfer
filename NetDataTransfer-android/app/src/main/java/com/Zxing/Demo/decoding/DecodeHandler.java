@@ -25,7 +25,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import net.ui.CaptureActivity;
+import net.ui.activity.CaptureActivity;
 import com.Zxing.Demo.camera.CameraManager;
 import com.Zxing.Demo.camera.PlanarYUVLuminanceSource;
 import com.google.zxing.BinaryBitmap;

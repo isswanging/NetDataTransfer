@@ -1,7 +1,8 @@
-package net.ui;
+package net.ui.view;
 
-import net.util.ScreenUtils;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -13,7 +14,11 @@ import android.widget.LinearLayout;
 
 import com.nineoldandroids.view.ViewHelper;
 
+import net.log.Logger;
+import net.util.ScreenUtils;
+
 public class SideslipMenuView extends HorizontalScrollView {
+    private final String TAG = "SideslipMenuView";
 
     /**
      * 屏幕宽度
@@ -48,7 +53,6 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     public SideslipMenuView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mScreenWidth = ScreenUtils.getScreenWidth(context);
         mMenuRightPadding = dip2px(context, 150);
         this.context = context;
         imm = (InputMethodManager) this.context
@@ -65,6 +69,7 @@ public class SideslipMenuView extends HorizontalScrollView {
          * 显示的设置一个宽度
          */
         if (!once) {
+            Logger.info(TAG,"in onMeasure method");
             LinearLayout wrapper = (LinearLayout) getChildAt(0);
             mMenu = (ViewGroup) wrapper.getChildAt(0);
             mContent = (ViewGroup) wrapper.getChildAt(1);
@@ -72,15 +77,28 @@ public class SideslipMenuView extends HorizontalScrollView {
                     .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
             backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
                     .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
-
-            mMenuWidth = mScreenWidth - mMenuRightPadding;
-            mHalfMenuWidth = mMenuWidth / 2;
-            mMenu.getLayoutParams().width = mMenuWidth;
-            mContent.getLayoutParams().width = mScreenWidth;
-
         }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mScreenWidth = ScreenUtils.getScreenWidth(context);
+        } else {
+            mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
+        }
+        mMenuWidth = mScreenWidth - mMenuRightPadding;
+        mHalfMenuWidth = mMenuWidth / 2;
+        mMenu.getLayoutParams().width = mMenuWidth;
+        mContent.getLayoutParams().width = mScreenWidth;
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            backImg.setVisibility(VISIBLE);
+        } else {
+            backImg.setVisibility(GONE);
+        }
+        super.onDraw(canvas);
     }
 
     @Override
@@ -95,25 +113,31 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        int action = ev.getAction();
-        switch (action) {
-        // Up时，进行判断，如果显示区域大于菜单宽度一半则完全显示，否则隐藏
-        case MotionEvent.ACTION_UP:
-            int scrollX = getScrollX();
-            if (scrollX > mHalfMenuWidth) {
-                isOpen = false;
-                closeSoftkeyboard();
-                this.smoothScrollTo(mMenuWidth, 0);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Logger.info(TAG, "port can side");
+            int action = ev.getAction();
+            switch (action) {
+                // Up时，进行判断，如果显示区域大于菜单宽度一半则完全显示，否则隐藏
+                case MotionEvent.ACTION_UP:
+                    int scrollX = getScrollX();
+                    if (scrollX > mHalfMenuWidth) {
+                        isOpen = false;
+                        closeSoftkeyboard();
+                        this.smoothScrollTo(mMenuWidth, 0);
 
-            } else {
-                isOpen = true;
-                closeSoftkeyboard();
-                this.smoothScrollTo(0, 0);
+                    } else {
+                        isOpen = true;
+                        closeSoftkeyboard();
+                        this.smoothScrollTo(0, 0);
 
+                    }
+                    return true;
             }
-            return true;
+
+            return super.onTouchEvent(ev);
+        } else {
+            return false;
         }
-        return super.onTouchEvent(ev);
     }
 
     @Override

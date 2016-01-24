@@ -1,8 +1,5 @@
 package net.util;
 
-import java.util.Hashtable;
-
-import net.app.netdatatransfer.R;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,18 +11,27 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import net.app.netdatatransfer.R;
+import net.log.Logger;
+
+import java.util.Hashtable;
+import java.util.Random;
 
 public class CreateQRImage {
     private static ImageView sweepIV;
     private Context context;
-    private int QR_WIDTH = 200, QR_HEIGHT = 200;
+    private int QR_WIDTH, QR_HEIGHT;
     private int imageW, imageH;
+    Random rand = new Random();
 
     public CreateQRImage(String uri, ImageView img, Context context) {
         sweepIV = img;
         this.context = context;
-        QR_WIDTH = dip2px(context, QR_WIDTH);
-        QR_HEIGHT = dip2px(context, QR_HEIGHT);
+        QR_WIDTH = context.getResources().getDimensionPixelSize(R.dimen.qr_size);
+        QR_HEIGHT = context.getResources().getDimensionPixelSize(R.dimen.qr_size);
+        Logger.info(this.toString(), "QR_WIDTH====" + QR_WIDTH);
         createQRImage(uri);
     }
 
@@ -51,8 +57,10 @@ public class CreateQRImage {
             int startW = QR_WIDTH / 2 - imageW / 2;
             int starH = QR_HEIGHT / 2 - imageH / 2;
 
-            Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
+            Hashtable<EncodeHintType, Object> hints = new Hashtable();
             hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+            hints.put(EncodeHintType.MARGIN, 0);
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
             // 图像数据转换，使用了矩阵转换
             BitMatrix bitMatrix = new QRCodeWriter().encode(url,
                     BarcodeFormat.QR_CODE, QR_WIDTH, QR_HEIGHT, hints);
@@ -62,7 +70,12 @@ public class CreateQRImage {
             for (int y = 0; y < QR_HEIGHT; y++) {
                 for (int x = 0; x < QR_WIDTH; x++) {
                     if (bitMatrix.get(x, y)) {
-                        pixels[y * QR_WIDTH + x] = 0xff000000;
+                        int i = rand.nextInt(12) % 2;
+                        if (i == 0) {
+                            pixels[y * QR_WIDTH + x] = 0xff179108;
+                        } else
+                            pixels[y * QR_WIDTH + x] = 0xff006400;
+
                     } else {
                         pixels[y * QR_WIDTH + x] = 0xffffffff;
                     }
@@ -83,9 +96,7 @@ public class CreateQRImage {
 
     // 添加logo
     public Bitmap addLogo(Bitmap[] bitmaps, int w, int h) {
-
-        Bitmap newBitmap = Bitmap.createBitmap(bitmaps[0].getWidth(),
-                bitmaps[0].getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap newBitmap = Bitmap.createBitmap(QR_WIDTH, QR_HEIGHT, Bitmap.Config.ARGB_8888);
         Canvas cv = new Canvas(newBitmap);
 
         for (int i = 0; i < bitmaps.length; i++) {
@@ -98,10 +109,5 @@ public class CreateQRImage {
             cv.restore();
         }
         return newBitmap;
-    }
-
-    public int dip2px(Context context, float dpValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
     }
 }

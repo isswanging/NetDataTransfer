@@ -2,12 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="10dp">
+    android:paddingBottom="@dimen/force_touch_view_margin">
 
     <LinearLayout
         android:id="@+id/preview"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="@dimen/preview_content_height"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:orientation="vertical">

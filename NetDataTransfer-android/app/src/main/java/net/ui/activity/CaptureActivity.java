@@ -1,9 +1,5 @@
-package net.ui;
+package net.ui.activity;
 
-import java.io.IOException;
-import java.util.Vector;
-
-import net.app.netdatatransfer.R;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,8 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -22,10 +16,10 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
-import android.view.View;
 import android.view.SurfaceHolder.Callback;
-import android.view.View.OnClickListener;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -35,6 +29,11 @@ import com.Zxing.Demo.decoding.InactivityTimer;
 import com.Zxing.Demo.view.ViewfinderView;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
+
+import net.app.netdatatransfer.R;
+
+import java.io.IOException;
+import java.util.Vector;
 
 public class CaptureActivity extends Activity implements Callback {
 

@@ -3,8 +3,8 @@
     coreApp="true"
     package="net.app.netdatatransfer"
     android:persistent="true"
-    android:versionCode="4"
-    android:versionName="4.0">
+    android:versionCode="5"
+    android:versionName="5.0">
 
     <uses-sdk
         android:minSdkVersion="17"
@@ -33,7 +33,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name">
         <activity
-            android:name="net.ui.WelcomeActivity"
+            android:name="net.ui.activity.WelcomeActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
@@ -43,31 +43,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="net.ui.UserListActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:name="net.ui.activity.MainActivity"
+            android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar">
             <intent-filter>
-                <action android:name="net.ui.userList" />
+                <action android:name="net.ui.main" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity
-            android:name="net.ui.ChatActivity"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden">
-            <intent-filter>
-                <action android:name="net.ui.chatting" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="net.ui.FileListActivity"
-            android:screenOrientation="portrait"
+            android:name="net.ui.activity.FileListActivity"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
@@ -77,7 +64,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="net.ui.ProgressBarListActivity"
+            android:name="net.ui.activity.ProgressBarListActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:windowSoftInputMode="adjustUnspecified|stateHidden">
@@ -88,7 +75,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="net.ui.CaptureActivity"
+            android:name="net.ui.activity.CaptureActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
             <intent-filter>
@@ -100,16 +87,16 @@
 
         <service
             android:name="net.service.BroadcastMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
         <service
             android:name="net.service.UdpDataMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
         <service
             android:name="net.service.FileMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
         <service
             android:name="net.service.ScreenMonitorService"
-            android:persistent="true"/>
+            android:persistent="true" />
     </application>
 
 </manifest>

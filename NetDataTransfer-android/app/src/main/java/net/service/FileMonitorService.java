@@ -1,5 +1,18 @@
 package net.service;
 
+import android.app.Service;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.IBinder;
+
+import com.alibaba.fastjson.JSON;
+
+import net.app.NetConfApplication;
+import net.log.Logger;
+import net.vo.DataPacket;
+import net.vo.Progress;
+import net.vo.SendTask;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -10,19 +23,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import net.app.NetConfApplication;
-import net.log.Logger;
-import net.vo.DataPacket;
-import net.vo.Progress;
-import net.vo.SendTask;
-import android.app.Service;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.IBinder;
-
-import com.alibaba.fastjson.JSON;
-
 public class FileMonitorService extends Service {
+    private final String TAG = "FileMonitorService";
     Thread thread;
     boolean tag;
     ServerSocket server = null;
@@ -35,7 +37,7 @@ public class FileMonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Logger.info(this.toString(), "FileMonitorService started");
+        Logger.info(TAG, "FileMonitorService started");
         tag = true;
         thread = new Thread(new ReceiveInfo());
         thread.start();
@@ -46,7 +48,7 @@ public class FileMonitorService extends Service {
     public void onDestroy() {
         tag = false;
         thread.interrupt();
-        Logger.info(this.toString(), "service stop");
+        Logger.info(TAG, "service stop");
         super.onDestroy();
     }
 
@@ -58,7 +60,7 @@ public class FileMonitorService extends Service {
                 server = new ServerSocket(NetConfApplication.filePort);
                 while (tag) {
                     Socket socket = server.accept();
-                    Logger.info(this.toString(), "send file request");
+                    Logger.info(TAG, "send file request");
 
                     DataPacket dp = JSON.parseObject(
                             new DataInputStream(socket.getInputStream())
@@ -76,7 +78,7 @@ public class FileMonitorService extends Service {
                                     socket, fileName, dp));
                 }
             } catch (IOException e) {
-                Logger.info(this.toString(), e.toString());
+                Logger.info(TAG, e.toString());
             }
         }
     }
@@ -106,7 +108,7 @@ public class FileMonitorService extends Service {
                     long byteRead = 0;
                     o = new DataOutputStream(s.getOutputStream());
                     o.writeLong(total);
-                    Logger.info(this.toString(), "file size:::" + total);
+                    Logger.info(TAG, "file size:::" + total);
 
                     bos = new BufferedOutputStream(s.getOutputStream());
                     int len;
@@ -124,7 +126,7 @@ public class FileMonitorService extends Service {
                 }
 
             } catch (IOException e) {
-                Logger.info(this.toString(), e.toString());
+                Logger.info(TAG, e.toString());
             } finally {
                 NetConfApplication.sendTaskList.remove(taskId);
                 try {
@@ -133,7 +135,7 @@ public class FileMonitorService extends Service {
                     o.close();
                     s.close();
                 } catch (IOException e) {
-                    Logger.info(this.toString(), e.toString());
+                    Logger.info(TAG, e.toString());
                 }
 
             }

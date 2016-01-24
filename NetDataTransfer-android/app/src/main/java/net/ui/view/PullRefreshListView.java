@@ -1,4 +1,4 @@
-package net.ui;
+package net.ui.view;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -17,6 +17,7 @@ import net.log.Logger;
 
 public class PullRefreshListView extends LinearLayout implements
         OnTouchListener {
+    private final String TAG = "PullRefreshListView";
 
     // 下拉状态
     public enum Tag {
@@ -107,7 +108,7 @@ public class PullRefreshListView extends LinearLayout implements
             switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 yDown = event.getRawY();
-                Logger.info(this.toString(), "yDown   " + String.valueOf(yDown));
+                Logger.info(TAG, "yDown   " + String.valueOf(yDown));
                 return false;
             case MotionEvent.ACTION_MOVE:
                 yMove = event.getRawY();
@@ -286,18 +287,6 @@ public class PullRefreshListView extends LinearLayout implements
     // 耗时任务的接口
     public interface PullToRefreshListener {
         void onRefresh();
-    }
-
-    public float getyMove() {
-        return yMove;
-    }
-
-    public void setyMove(float yMove) {
-        this.yMove = yMove;
-    }
-
-    public PullToRefreshListener getPullListener() {
-        return pullListener;
     }
 
     public void setPullListener(PullToRefreshListener pullListener) {

@@ -1,4 +1,4 @@
-package net.ui;
+package net.ui.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
