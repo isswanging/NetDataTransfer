@@ -69,6 +69,7 @@ public class SideslipMenuView extends HorizontalScrollView {
          * 显示的设置一个宽度
          */
         if (!once) {
+            Logger.info(TAG,"in onMeasure method");
             LinearLayout wrapper = (LinearLayout) getChildAt(0);
             mMenu = (ViewGroup) wrapper.getChildAt(0);
             mContent = (ViewGroup) wrapper.getChildAt(1);
@@ -76,17 +77,16 @@ public class SideslipMenuView extends HorizontalScrollView {
                     .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
             backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
                     .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                mScreenWidth = ScreenUtils.getScreenWidth(context);
-            } else {
-                mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
-            }
-            mMenuWidth = mScreenWidth - mMenuRightPadding;
-            mHalfMenuWidth = mMenuWidth / 2;
-            mMenu.getLayoutParams().width = mMenuWidth;
-            mContent.getLayoutParams().width = mScreenWidth;
-
         }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mScreenWidth = ScreenUtils.getScreenWidth(context);
+        } else {
+            mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
+        }
+        mMenuWidth = mScreenWidth - mMenuRightPadding;
+        mHalfMenuWidth = mMenuWidth / 2;
+        mMenu.getLayoutParams().width = mMenuWidth;
+        mContent.getLayoutParams().width = mScreenWidth;
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
     }

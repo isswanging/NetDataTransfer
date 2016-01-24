@@ -42,7 +42,6 @@ public class NetConfApplication extends Application {
     public NotificationManager nManager;
     public int soundID;
     public boolean isLand = false;
-    public boolean isFrist = true;
     public boolean forceClose = false;
     public String topFragment = "users";
 
