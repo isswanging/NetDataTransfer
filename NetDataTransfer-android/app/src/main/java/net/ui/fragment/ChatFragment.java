@@ -75,7 +75,7 @@ public class ChatFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (isRotate) {
             // 设置聊天列表
-            TextView chatCurName = (TextView) chatMain.findViewById(R.id.chatCurName);
+            TextView chatCurName = getView(chatMain, R.id.chatCurName);
             chatCurName.setText(targetName);
 
             mAdapter = new ChatMsgAdapter(app, mDataArrays);
@@ -85,32 +85,32 @@ public class ChatFragment extends BaseFragment {
             return viewGroup;
         } else {
             viewGroup = inflater.inflate(R.layout.chat, container, false);
-            sideslipMenuView = (SideslipMenuView) viewGroup.findViewById(R.id.id_menu);
-            chatMain = (FrameLayout) viewGroup.findViewById(R.id.chatMain);
-            chatEditText = (EditText) viewGroup.findViewById(R.id.editText);
-            mListView = (ListView) viewGroup.findViewById(R.id.charContentList);
-            otherName = (TextView) viewGroup.findViewById(R.id.otherName);
-            otherIP = (TextView) viewGroup.findViewById(R.id.otherIP);
-            backImg = (ImageView) viewGroup.findViewById(R.id.closeCurChat);
+            sideslipMenuView = getView(viewGroup, R.id.id_menu);
+            chatMain = getView(viewGroup, R.id.chatMain);
+            chatEditText = getView(viewGroup, R.id.editText);
+            mListView = getView(viewGroup, R.id.charContentList);
+            otherName = getView(viewGroup, R.id.otherName);
+            otherIP = getView(viewGroup, R.id.otherIP);
+            backImg = getView(viewGroup, R.id.closeCurChat);
 
-            TextView send = (TextView) viewGroup.findViewById(R.id.send);
+            TextView send = getView(viewGroup, R.id.send);
             send.setOnClickListener(clickListener);
-            ImageView more = (ImageView) viewGroup.findViewById(R.id.sendMore);
+            ImageView more = getView(viewGroup, R.id.sendMore);
             more.setOnClickListener(clickListener);
-            sendFile = (LinearLayout) viewGroup.findViewById(R.id.sendFile);
+            sendFile = getView(viewGroup, R.id.sendFile);
 
-            TextView sendImg = (TextView) viewGroup.findViewById(R.id.sendImg);
-            TextView sendVideo = (TextView) viewGroup.findViewById(R.id.sendVideo);
-            TextView sendAudio = (TextView) viewGroup.findViewById(R.id.sendAudio);
+            TextView sendImg = getView(viewGroup, R.id.sendImg);
+            TextView sendVideo = getView(viewGroup, R.id.sendVideo);
+            TextView sendAudio = getView(viewGroup, R.id.sendAudio);
             sendImg.setOnClickListener(clickListener);
             sendVideo.setOnClickListener(clickListener);
             sendAudio.setOnClickListener(clickListener);
-            viewGroup.findViewById(R.id.closeCurChat).setOnClickListener(clickListener);
-            viewGroup.findViewById(R.id.closeChat).setOnClickListener(clickListener);
+            getView(viewGroup, R.id.closeCurChat).setOnClickListener(clickListener);
+            getView(viewGroup, R.id.closeChat).setOnClickListener(clickListener);
 
             if (app.topFragment.equals("chat")) {
                 // 设置聊天列表
-                TextView chatCurName = (TextView) chatMain.findViewById(R.id.chatCurName);
+                TextView chatCurName = getView(chatMain, R.id.chatCurName);
                 chatCurName.setText(targetName);
 
                 mAdapter = new ChatMsgAdapter(app, mDataArrays);
@@ -242,7 +242,7 @@ public class ChatFragment extends BaseFragment {
         Logger.info(TAG, "create::" + app.chatId);
 
         // 设置聊天列表
-        TextView chatCurName = (TextView) chatMain.findViewById(R.id.chatCurName);
+        TextView chatCurName = getView(chatMain, R.id.chatCurName);
         chatCurName.setText(targetName);
 
         mAdapter = new ChatMsgAdapter(app, mDataArrays);

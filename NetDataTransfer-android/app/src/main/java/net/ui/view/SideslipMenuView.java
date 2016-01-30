@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 import com.nineoldandroids.view.ViewHelper;
 
 import net.log.Logger;
-import net.util.ScreenUtils;
+import net.util.HelpUtils;
 
 public class SideslipMenuView extends HorizontalScrollView {
     private final String TAG = "SideslipMenuView";
@@ -79,9 +79,9 @@ public class SideslipMenuView extends HorizontalScrollView {
                     .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
         }
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mScreenWidth = ScreenUtils.getScreenWidth(context);
+            mScreenWidth = HelpUtils.getScreenWidth(context);
         } else {
-            mScreenWidth = ScreenUtils.getScreenWidth(context) * 4 / 7;
+            mScreenWidth = HelpUtils.getScreenWidth(context) * 4 / 7;
         }
         mMenuWidth = mScreenWidth - mMenuRightPadding;
         mHalfMenuWidth = mMenuWidth / 2;
