@@ -137,6 +137,20 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        Bundle b = getIntent().getExtras();
+        if (b != null) {
+            Message msg = handler.obtainMessage();
+            msg.obj = b;
+            msg.what = startChat;
+            msg.sendToTarget();
+        }
+
+    }
+
+    @Override
     protected void onResume() {
         registerReceiver(msgReceiver, filter);
         super.onResume();
