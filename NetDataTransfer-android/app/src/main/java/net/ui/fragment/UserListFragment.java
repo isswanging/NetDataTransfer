@@ -89,9 +89,6 @@ public class UserListFragment extends BaseFragment {
         showMenuAnim.setDuration(100);
         hideMenuAnim.setDuration(200);
         vibrator = (Vibrator) app.getSystemService(app.VIBRATOR_SERVICE);
-        if (savedInstanceState != null) {
-            isRotate = true;
-        }
     }
 
     @Override
@@ -248,7 +245,16 @@ public class UserListFragment extends BaseFragment {
             getDeviceInfo();
             registerForEvent();
             loadUserListOrWarn();
+        } else {
+            if (getView(root, R.id.wait) != null) {
+                loadUserListUI();
+            }
+            if (pullRefreshListView != null &&
+                    pullRefreshListView.currentState == PullRefreshListView.Tag.Refreshing) {
+                pullRefreshListView.finishRefreshing();
+            }
         }
+
     }
 
     private void registerForEvent() {

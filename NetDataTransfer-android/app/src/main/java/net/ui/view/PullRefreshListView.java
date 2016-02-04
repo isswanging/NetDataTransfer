@@ -31,10 +31,10 @@ public class PullRefreshListView extends LinearLayout implements
         Normal
     }
 
-    private Tag currentState;
-    private Tag lastState;
+    public Tag currentState;
+    public Tag lastState;
 
-    private View pullRefreshListView;
+    public View pullRefreshListView;
 
     // 下拉头的View
     private View header;
