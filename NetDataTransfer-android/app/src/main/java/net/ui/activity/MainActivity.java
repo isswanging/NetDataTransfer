@@ -1,6 +1,7 @@
 package net.ui.activity;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -95,6 +96,9 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final int redraw = 6;
     private final int close = 7;
     private final int pressure = 8;
+
+    private final int SHOW = 1;
+    private final int HIDE = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -276,7 +280,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 msg.sendToTarget();
                 break;
             case close:
-                fragmentManager.beginTransaction().hide(chat).commit();
+                animFragmentEffect(HIDE, chat);
                 break;
             case redraw:
                 handler.sendEmptyMessage(commend);
@@ -358,7 +362,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     case startChat:
                         act.chat.getCommend(msg);
                         // 显示chatFragment
-                        act.fragmentManager.beginTransaction().show(act.chat).commit();
+                        act.animFragmentEffect(act.SHOW, act.chat);
                         break;
                     case answer:
                         act.answer(msg);
@@ -371,7 +375,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     public void fragmentAction() {
         Logger.info(TAG, "fragmentAction method called");
         if (app.topFragment.equals("users")) {
-            fragmentManager.beginTransaction().hide(chat).commit();
+            animFragmentEffect(HIDE, chat);
         }
         //判断屏幕方向
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -454,8 +458,27 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             msg.what = startChat;
             msg.obj = bundle;
             chat.getCommend(msg);
-            fragmentManager.beginTransaction().show(chat).commit();
+            animFragmentEffect(SHOW, chat);
         }
+    }
+
+    /**
+     * fragment切换的动画效果
+     * commend：0 隐藏，1 显示
+     */
+    public void animFragmentEffect(int commend, Fragment fragment) {
+        if (commend == 0) {
+            //hide
+            fragmentManager.beginTransaction().
+                    setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
+                    hide(fragment).commit();
+        } else {
+            //show
+            fragmentManager.beginTransaction().
+                    setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
+                    show(fragment).commit();
+        }
+
     }
 
     class NewMsgReceiver extends BroadcastReceiver {
