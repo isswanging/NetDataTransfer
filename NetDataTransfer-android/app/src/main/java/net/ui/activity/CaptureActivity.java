@@ -165,7 +165,7 @@ public class CaptureActivity extends Activity implements Callback {
                 bundle.putString("name", s[0]);
                 bundle.putString("ip", s[1]);
                 intent.putExtras(bundle);
-                intent.setAction("net.ui.chatting");
+                intent.setAction("net.ui.main");
                 startActivity(intent);
                 finish();
             } else if (content.matches(regx)) {

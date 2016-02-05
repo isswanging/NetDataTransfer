@@ -1,6 +1,7 @@
 package net.ui.activity;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +35,7 @@ import net.ui.fragment.BaseFragment;
 import net.ui.fragment.ChatFragment;
 import net.ui.fragment.UserListFragment;
 import net.ui.view.ForceTouchViewGroup;
+import net.util.HelpUtils;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import net.vo.Host;
@@ -95,6 +97,9 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final int close = 7;
     private final int pressure = 8;
 
+    private final int SHOW = 1;
+    private final int HIDE = 0;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Logger.info(TAG, "activity onCreat()");
@@ -133,6 +138,20 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         showPreviewAnim.setDuration(300);
         hidePreviewAnim.setDuration(200);
         bundle = new Bundle();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        Bundle b = getIntent().getExtras();
+        if (b != null) {
+            Message msg = handler.obtainMessage();
+            msg.obj = b;
+            msg.what = startChat;
+            msg.sendToTarget();
+        }
+
     }
 
     @Override
@@ -261,7 +280,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 msg.sendToTarget();
                 break;
             case close:
-                fragmentManager.beginTransaction().hide(chat).commit();
+                animFragmentEffect(HIDE, chat);
                 break;
             case redraw:
                 handler.sendEmptyMessage(commend);
@@ -305,13 +324,23 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 setHandler(handler, answer).
                 setRoot(root).create();
         touchView.startAnimation(showPreviewAnim);
-        preview = (LinearLayout) findViewById(R.id.preview);
+        preview = HelpUtils.getView(this, R.id.preview);
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
         moveTopMargin = previewParams.topMargin;
         topMargin = previewParams.topMargin;
     }
 
-    class ListHandler extends Handler {
+    static class ListHandler extends Handler {
+        private final int login = 0;
+        private final int refresh = 1;
+        private final int retry = 2;
+        private final int answer = 3;
+        private final int startChat = 4;
+        private final int incomingMsg = 5;
+        private final int redraw = 6;
+        private final int close = 7;
+        private final int pressure = 8;
+
         WeakReference<MainActivity> refActvity;
 
         ListHandler(MainActivity activity) {
@@ -328,15 +357,15 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     case refresh:
                     case retry:
                     case redraw:
-                        users.getCommend(msg);
+                        act.users.getCommend(msg);
                         break;
                     case startChat:
-                        chat.getCommend(msg);
+                        act.chat.getCommend(msg);
                         // 显示chatFragment
-                        fragmentManager.beginTransaction().show(chat).commit();
+                        act.animFragmentEffect(act.SHOW, act.chat);
                         break;
                     case answer:
-                        answer(msg);
+                        act.answer(msg);
                         break;
                 }
             }
@@ -346,7 +375,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     public void fragmentAction() {
         Logger.info(TAG, "fragmentAction method called");
         if (app.topFragment.equals("users")) {
-            fragmentManager.beginTransaction().hide(chat).commit();
+            animFragmentEffect(HIDE, chat);
         }
         //判断屏幕方向
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -356,7 +385,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         } else {
             // 竖屏
             app.isLand = false;
-            root = (FrameLayout) findViewById(R.id.mainUI);
+            root = HelpUtils.getView(this, R.id.mainUI);
         }
     }
 
@@ -429,8 +458,27 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             msg.what = startChat;
             msg.obj = bundle;
             chat.getCommend(msg);
-            fragmentManager.beginTransaction().show(chat).commit();
+            animFragmentEffect(SHOW, chat);
         }
+    }
+
+    /**
+     * fragment切换的动画效果
+     * commend：0 隐藏，1 显示
+     */
+    public void animFragmentEffect(int commend, Fragment fragment) {
+        if (commend == 0) {
+            //hide
+            fragmentManager.beginTransaction().
+                    setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
+                    hide(fragment).commit();
+        } else {
+            //show
+            fragmentManager.beginTransaction().
+                    setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
+                    show(fragment).commit();
+        }
+
     }
 
     class NewMsgReceiver extends BroadcastReceiver {

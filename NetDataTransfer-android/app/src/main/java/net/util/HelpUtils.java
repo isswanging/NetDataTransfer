@@ -11,8 +11,8 @@ import android.view.WindowManager;
 /**
  * 获得屏幕相关的辅助类
  */
-public class ScreenUtils {
-    private ScreenUtils() {
+public class HelpUtils {
+    private HelpUtils() {
         /* cannot be instantiated */
         throw new UnsupportedOperationException("cannot be instantiated");
     }
@@ -110,4 +110,10 @@ public class ScreenUtils {
         return bp;
     }
 
+    /**
+     * 简化findViewById操作
+     */
+    public static <T extends View> T getView(Activity a, int id) {
+        return (T) a.findViewById(id);
+    }
 }

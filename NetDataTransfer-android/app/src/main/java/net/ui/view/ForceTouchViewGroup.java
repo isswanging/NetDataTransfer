@@ -30,7 +30,7 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.util.ScreenUtils;
+import net.util.HelpUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -368,8 +368,8 @@ public class ForceTouchViewGroup extends LinearLayout {
 
         // 居中
         int height = getResources().getDimensionPixelSize(R.dimen.preview_content_height);
-        int stateHeight = ScreenUtils.getStatusHeight(context);
-        screenheight = ScreenUtils.getScreenHeight(context);
+        int stateHeight = HelpUtils.getStatusHeight(context);
+        screenheight = HelpUtils.getScreenHeight(context);
         topMargin = (screenheight - stateHeight - height) / 2;
         previewParams.topMargin = topMargin;
         preview.setLayoutParams(previewParams);

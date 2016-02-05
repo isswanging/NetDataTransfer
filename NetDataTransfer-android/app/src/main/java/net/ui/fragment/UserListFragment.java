@@ -89,9 +89,6 @@ public class UserListFragment extends BaseFragment {
         showMenuAnim.setDuration(100);
         hideMenuAnim.setDuration(200);
         vibrator = (Vibrator) app.getSystemService(app.VIBRATOR_SERVICE);
-        if (savedInstanceState != null) {
-            isRotate = true;
-        }
     }
 
     @Override
@@ -100,10 +97,10 @@ public class UserListFragment extends BaseFragment {
             return viewGroup;
         } else {
             viewGroup = inflater.inflate(R.layout.user_list, container, false);
-            root = (FrameLayout) viewGroup.findViewById(R.id.mainContent);
-            drawerLayout = (DrawerLayout) viewGroup.findViewById(R.id.drawer_layout);
-            listContent = (LinearLayout) root.findViewById(R.id.listContent);
-            moreMenu = (ImageView) root.findViewById(R.id.moreMenu);
+            root = getView(viewGroup, R.id.mainContent);
+            drawerLayout = getView(viewGroup, R.id.drawer_layout);
+            listContent = getView(root, R.id.listContent);
+            moreMenu = getView(root, R.id.moreMenu);
             return viewGroup;
         }
     }
@@ -212,12 +209,12 @@ public class UserListFragment extends BaseFragment {
             e.printStackTrace();
         }
 
-        TextView t1 = (TextView) drawerLayout.findViewById(R.id.device_name);
-        TextView t2 = (TextView) drawerLayout.findViewById(R.id.system_version);
-        TextView t3 = (TextView) drawerLayout.findViewById(R.id.operate_name);
-        TextView t4 = (TextView) drawerLayout.findViewById(R.id.mcc_mnc);
-        TextView t5 = (TextView) drawerLayout.findViewById(R.id.manufacturer_name);
-        TextView t6 = (TextView) drawerLayout.findViewById(R.id.appVersion);
+        TextView t1 = getView(drawerLayout, R.id.device_name);
+        TextView t2 = getView(drawerLayout, R.id.system_version);
+        TextView t3 = getView(drawerLayout, R.id.operate_name);
+        TextView t4 = getView(drawerLayout, R.id.mcc_mnc);
+        TextView t5 = getView(drawerLayout, R.id.manufacturer_name);
+        TextView t6 = getView(drawerLayout, R.id.appVersion);
 
         t1.setText("：" + deviceName);
         t2.setText("：Android " + systemVersion);
@@ -226,7 +223,7 @@ public class UserListFragment extends BaseFragment {
         t5.setText("：" + manufacturerName);
         t6.setText("版本号：" + appVersion);
 
-        ImageView QRImg = (ImageView) drawerLayout.findViewById(R.id.QRCode);
+        ImageView QRImg = getView(drawerLayout, R.id.QRCode);
         new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg, app);
     }
 
@@ -248,7 +245,16 @@ public class UserListFragment extends BaseFragment {
             getDeviceInfo();
             registerForEvent();
             loadUserListOrWarn();
+        } else {
+            if (getView(root, R.id.wait) != null) {
+                loadUserListUI();
+            }
+            if (pullRefreshListView != null &&
+                    pullRefreshListView.currentState == PullRefreshListView.Tag.Refreshing) {
+                pullRefreshListView.finishRefreshing();
+            }
         }
+
     }
 
     private void registerForEvent() {
@@ -262,7 +268,7 @@ public class UserListFragment extends BaseFragment {
             }
         });
 
-        drawerLayout.findViewById(R.id.left_drawer).setOnTouchListener(
+        getView(drawerLayout, R.id.left_drawer).setOnTouchListener(
                 new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
@@ -310,11 +316,11 @@ public class UserListFragment extends BaseFragment {
                         Logger.info(TAG, "creat a new menu");
                         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
                         menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
-                        menu.findViewById(R.id.getProgress).setOnClickListener(onMenuClickListener);
-                        menu.findViewById(R.id.sendProgress).setOnClickListener(onMenuClickListener);
-                        menu.findViewById(R.id.exit).setOnClickListener(onMenuClickListener);
-                        menu.findViewById(R.id.scan).setOnClickListener(onMenuClickListener);
-                        menu.findViewById(R.id.openFolder).setOnClickListener(onMenuClickListener);
+                        getView(menu, R.id.getProgress).setOnClickListener(onMenuClickListener);
+                        getView(menu, R.id.sendProgress).setOnClickListener(onMenuClickListener);
+                        getView(menu, R.id.exit).setOnClickListener(onMenuClickListener);
+                        getView(menu, R.id.scan).setOnClickListener(onMenuClickListener);
+                        getView(menu, R.id.openFolder).setOnClickListener(onMenuClickListener);
 
                     }
                     FrameLayout.LayoutParams params = new FrameLayout.
@@ -378,7 +384,7 @@ public class UserListFragment extends BaseFragment {
         pullRefreshListView = (PullRefreshListView) layoutInflater
                 .inflate(R.layout.users, null);
 
-        listContent.removeView(root.findViewById(R.id.wait));
+        listContent.removeView(getView(root, R.id.wait));
         listContent.addView(pullRefreshListView, new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
@@ -393,8 +399,8 @@ public class UserListFragment extends BaseFragment {
         pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView name = (TextView) view.findViewById(R.id.userName);
-                TextView ip = (TextView) view.findViewById(R.id.userIP);
+                TextView name = getView(view, R.id.userName);
+                TextView ip = getView(view, R.id.userIP);
 
                 if (ip.getText().equals(NetConfApplication.hostIP)) {
                     if (!app.isLand)
@@ -414,8 +420,8 @@ public class UserListFragment extends BaseFragment {
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                         if (!app.isLand) {
                             Logger.info(TAG, "in 3d touch effect");
-                            TextView name = (TextView) view.findViewById(R.id.userName);
-                            TextView ip = (TextView) view.findViewById(R.id.userIP);
+                            TextView name = getView(view, R.id.userName);
+                            TextView ip = getView(view, R.id.userIP);
 
                             // 组装需要显示的界面
                             targetIp = ip.getText().toString();

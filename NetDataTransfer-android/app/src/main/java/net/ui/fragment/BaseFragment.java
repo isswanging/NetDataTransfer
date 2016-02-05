@@ -59,4 +59,8 @@ public abstract class BaseFragment extends Fragment {
     // 接受activity更新指令的UI操作
     public abstract void getCommend(Message msg);
 
+    // 简化findViewById操作
+    public static <T extends View> T getView(View v, int id) {
+        return (T) v.findViewById(id);
+    }
 }
