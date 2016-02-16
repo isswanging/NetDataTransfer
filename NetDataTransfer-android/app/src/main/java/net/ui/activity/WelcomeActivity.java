@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.widget.ImageView;
 
 import net.app.NetConfApplication;
@@ -50,6 +51,15 @@ public class WelcomeActivity extends Activity {
                 finish();
             }
         }, 2400);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            return false;
+        }else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     private void createShortCut() {
