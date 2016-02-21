@@ -274,18 +274,19 @@ public class ForceTouchViewGroup extends LinearLayout {
         }
 
         public Builder setBackground(View view) {
-            //创建一块画布
-            Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            //画出原图
-            view.draw(canvas);
-            //缩小原图提高运行效率
-            Bitmap background = scaleBitmap(bitmap);
-            //高斯模糊处理
-            blurBg = blurBitmap(bitmap);
-            background.recycle();
-            bitmap.recycle();
-
+            if(blurBg==null){
+                //创建一块画布
+                Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                //画出原图
+                view.draw(canvas);
+                //缩小原图提高运行效率
+                Bitmap background = scaleBitmap(bitmap);
+                //高斯模糊处理
+                blurBg = blurBitmap(bitmap);
+                background.recycle();
+                bitmap.recycle();
+            }
             return this;
         }
 

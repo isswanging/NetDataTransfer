@@ -15,6 +15,8 @@ import android.os.Environment;
 import android.util.SparseArray;
 import android.view.inputmethod.InputMethodManager;
 
+import com.squareup.leakcanary.LeakCanary;
+
 import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.vo.ChatMsgEntity;
@@ -188,8 +190,9 @@ public class NetConfApplication extends Application {
 
     @Override
     public void onCreate() {
-        hostIP = getHostIp(this);
         super.onCreate();
+        hostIP = getHostIp(this);
+        LeakCanary.install(this);
     }
 
     private String intToIp(int i) {

@@ -135,6 +135,8 @@ public class UserListFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         root.removeView(menu);
+        if (pullRefreshListView != null)
+            pullRefreshListView.setCanRefresh(true);
         isMenuOpen = false;
         super.onSaveInstanceState(outState);
     }

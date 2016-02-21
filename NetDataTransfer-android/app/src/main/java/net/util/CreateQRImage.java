@@ -20,7 +20,7 @@ import java.util.Hashtable;
 import java.util.Random;
 
 public class CreateQRImage {
-    private static ImageView sweepIV;
+    private ImageView sweepIV;
     private Context context;
     private int QR_WIDTH, QR_HEIGHT;
     private int imageW, imageH;

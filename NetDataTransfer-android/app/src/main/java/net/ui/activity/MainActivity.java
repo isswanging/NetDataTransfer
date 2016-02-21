@@ -3,6 +3,7 @@ package net.ui.activity;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -107,6 +108,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         setContentView(R.layout.main);
         app = (NetConfApplication) getApplication();
         app.forceClose = false;
+        app.nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         fragmentManager = getFragmentManager();
         Logger.info(TAG, "begin fragments users and chat");
@@ -291,7 +293,6 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             default:
                 Logger.error(TAG, "====get error commend====" + commend);
         }
-
     }
 
     private void show3dTouchView(Bundle bundle) {
@@ -478,7 +479,6 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
                     show(fragment).commit();
         }
-
     }
 
     class NewMsgReceiver extends BroadcastReceiver {

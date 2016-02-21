@@ -1,8 +1,6 @@
 package net.ui.activity;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.os.Bundle;
@@ -32,12 +30,11 @@ public class WelcomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome);
         app = (NetConfApplication) getApplication();
-        app.nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         // 创建快捷方式
         createShortCut();
         // 启动动画
-        ImageView welcomeAnim = HelpUtils.getView(this,R.id.welcome_img);
+        ImageView welcomeAnim = HelpUtils.getView(this, R.id.welcome_img);
         welcomeAnim.setBackgroundResource(getImg());
         // 检查端口
         preCheck();
@@ -57,7 +54,7 @@ public class WelcomeActivity extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             return false;
-        }else {
+        } else {
             return super.onKeyDown(keyCode, event);
         }
     }
@@ -94,13 +91,13 @@ public class WelcomeActivity extends Activity {
     }
 
     private void preCheck() {
-        if (app.check(this).endsWith(app.SUCCESS)) {
-            String userName = android.os.Build.MODEL;// 获取用户名
-            String userDomain = "Android";// 获取计算机域
-            Host host = new Host(userName, userDomain, "0.0.0.0",
-                    NetConfApplication.hostName, 1, 0);
-            app.addHost(host);
+        String userName = android.os.Build.MODEL;// 获取用户名
+        String userDomain = "Android";// 获取计算机域
+        Host host = new Host(userName, userDomain, "0.0.0.0",
+                NetConfApplication.hostName, 1, 0);
+        app.addHost(host);
 
+        if (app.check(this).endsWith(app.SUCCESS)) {
             // 建立监听
             listen();
             // 加载音乐
