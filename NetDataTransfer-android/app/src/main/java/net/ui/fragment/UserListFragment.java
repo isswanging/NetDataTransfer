@@ -284,6 +284,7 @@ public class UserListFragment extends BaseFragment {
                 switch (v.getId()) {
                     case R.id.exit:
                         app.forceClose = true;
+                        app.hostList.clear();
                         getActivity().finish();
                         break;
                     case R.id.openFolder:

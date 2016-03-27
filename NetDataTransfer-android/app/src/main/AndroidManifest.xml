@@ -46,7 +46,7 @@
             android:name="net.ui.activity.MainActivity"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar">
+            android:theme="@style/TranslucentTheme">
             <intent-filter>
                 <action android:name="net.ui.main" />
 
