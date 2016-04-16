@@ -58,6 +58,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private ChatFragment chat;
     private FragmentManager fragmentManager;
     private NetConfApplication app;
+    String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     // 按两次退出的计时
     private long exitTime = 0;
@@ -140,6 +141,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         showPreviewAnim.setDuration(300);
         hidePreviewAnim.setDuration(200);
         bundle = new Bundle();
+
     }
 
     @Override
@@ -153,12 +155,11 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             msg.what = startChat;
             msg.sendToTarget();
         }
-
     }
 
     @Override
     protected void onResume() {
-        registerReceiver(msgReceiver, filter);
+        registerReceiver(msgReceiver, filter, permission, null);
         super.onResume();
     }
 

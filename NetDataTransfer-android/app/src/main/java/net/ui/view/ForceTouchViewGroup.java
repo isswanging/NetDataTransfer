@@ -70,7 +70,7 @@ public class ForceTouchViewGroup extends LinearLayout {
     public Animation hideAnswerList;
 
     // 单例
-    private static ForceTouchViewGroup instance;
+    private static ForceTouchViewGroup instance = null;
 
     private ForceTouchViewGroup(Context context) {
         super(context);
@@ -84,7 +84,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         mContext = context;
     }
 
-    public static ForceTouchViewGroup getInstance(Context context) {
+    private static ForceTouchViewGroup getInstance(Context context) {
         if (instance == null)
             instance = new ForceTouchViewGroup(context);
         return instance;

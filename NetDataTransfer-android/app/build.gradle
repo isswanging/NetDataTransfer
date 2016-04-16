@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "19.1.0"
+    buildToolsVersion "21.0.0"
 
     defaultConfig {
         applicationId "net.app.netdatatransfer"
-        minSdkVersion 17
+        minSdkVersion 16
         targetSdkVersion 21
     }
     buildTypes {

@@ -3,10 +3,7 @@ package net.ui.fragment;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -47,6 +44,7 @@ public class ChatFragment extends BaseFragment {
     FrameLayout chatMain;
     SideslipMenuView sideslipMenuView;
     ImageView backImg;
+    String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     private ChatOnClickListener clickListener = new ChatOnClickListener();
     // 聊天内容的适配器
@@ -58,10 +56,7 @@ public class ChatFragment extends BaseFragment {
     private String targetName;
     private String targetIp;
 
-    ChatReceiver chatReceiver;
-    IntentFilter filter;
     LinearLayout sendFile;
-
     TextView otherName;
     TextView otherIP;
 
@@ -120,11 +115,6 @@ public class ChatFragment extends BaseFragment {
                 otherIP.setText(targetIp);
                 Logger.info(TAG, "hide overlay");
             }
-
-            // 注册广播接收者
-            chatReceiver = new ChatReceiver();
-            filter = new IntentFilter();
-            filter.addAction("net.ui.chatFrom");
 
             return viewGroup;
         }
@@ -273,6 +263,7 @@ public class ChatFragment extends BaseFragment {
                     app.chatId = "gone";
                     app.topFragment = "users";
                     notification.notifyInfo(close, null);
+                    mDataArrays.clear();
                     app.hideKeyboard(getActivity());
                     break;
 
@@ -330,22 +321,6 @@ public class ChatFragment extends BaseFragment {
                 default:
                     break;
             }
-        }
-    }
-
-    class ChatReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context content, Intent intent) {
-            Bundle bundle = intent.getExtras();
-            DataPacket dp = JSON.parseObject(bundle.getString("content"),
-                    DataPacket.class);
-
-            // 判断是否当前聊天窗口
-            ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-                    app.getDate(), dp.getContent(), true);
-            mDataArrays.add(entity);
-            mAdapter.notifyDataSetChanged();
-            mListView.setSelection(mListView.getCount() - 1);
         }
     }
 
