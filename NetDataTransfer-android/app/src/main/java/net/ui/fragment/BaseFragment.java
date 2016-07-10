@@ -18,6 +18,7 @@ public abstract class BaseFragment extends Fragment {
     final int redraw = 6;
     final int close = 7;
     final int pressure = 8;
+    final int exit = 9;
 
     boolean isRotate = false;
     View viewGroup;

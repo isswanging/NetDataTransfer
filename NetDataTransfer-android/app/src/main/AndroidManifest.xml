@@ -87,18 +87,10 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="net.service.BroadcastMonitorService"
-            android:persistent="true" />
-        <service
-            android:name="net.service.UdpDataMonitorService"
-            android:persistent="true" />
-        <service
-            android:name="net.service.FileMonitorService"
-            android:persistent="true" />
-        <service
-            android:name="net.service.ScreenMonitorService"
-            android:persistent="true" />
+        <service android:name="net.service.BroadcastMonitorService" />
+        <service android:name="net.service.UdpDataMonitorService" />
+        <service android:name="net.service.FileMonitorService" />
+        <service android:name="net.service.ScreenMonitorService" />
     </application>
 
 </manifest>

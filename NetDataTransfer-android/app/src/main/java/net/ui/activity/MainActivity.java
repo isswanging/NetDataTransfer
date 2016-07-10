@@ -3,19 +3,21 @@ package net.ui.activity;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -42,12 +44,14 @@ import net.vo.DataPacket;
 import net.vo.Host;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 public class MainActivity extends Activity implements BaseFragment.Notification {
     private final String TAG = "MainActivity";
@@ -69,8 +73,8 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
 
     // 3D touch效果
     ListView previewContent;
-    List<Map<String, Object>> answerListData = new ArrayList<Map<String, Object>>();
-    List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
+    List<Map<String, Object>> answerListData = new ArrayList<>();
+    List<ChatMsgEntity> mDataArrays = new ArrayList<>();
     RelativeLayout.LayoutParams previewParams;
     LinearLayout preview;
     LinearLayout custPreview;
@@ -98,9 +102,14 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final int redraw = 6;
     private final int close = 7;
     private final int pressure = 8;
+    private final int exit = 9;
 
     private final int SHOW = 1;
     private final int HIDE = 0;
+
+    private final int add = 0;
+    private final int remove = 1;
+    ForceTouchViewGroup.Builder builder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -109,19 +118,29 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         setContentView(R.layout.main);
         app = (NetConfApplication) getApplication();
         app.forceClose = false;
-        app.nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (savedInstanceState != null) {
+            String s = savedInstanceState.getString("users");
+            Vector<Host> list = new Vector<>(JSON.parseArray(s, Host.class));
+            for (Host h : list) {
+                app.hostList.add(h);
+            }
+            savedInstanceState.clear();
+        }
 
         fragmentManager = getFragmentManager();
         Logger.info(TAG, "begin fragments users and chat");
         users = (UserListFragment) fragmentManager.findFragmentByTag(user_TAG);
         chat = (ChatFragment) fragmentManager.findFragmentByTag(chat_TAG);
-        if (users == null) {
-            users = new UserListFragment();
-            fragmentManager.beginTransaction().add(R.id.users, users, user_TAG).commit();
-        }
+
         if (chat == null) {
             chat = new ChatFragment();
             fragmentManager.beginTransaction().add(R.id.chat, chat, chat_TAG).commit();
+        }
+
+        if (users == null) {
+            users = new UserListFragment();
+            fragmentManager.beginTransaction().add(R.id.users, users, user_TAG).commit();
         }
         fragmentAction();
         Logger.info(TAG, "end fragments users and chat");
@@ -141,7 +160,6 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         showPreviewAnim.setDuration(300);
         hidePreviewAnim.setDuration(200);
         bundle = new Bundle();
-
     }
 
     @Override
@@ -171,6 +189,13 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("users", JSON.toJSONString(app.hostList));
+        Logger.info(TAG, "in onSaveInstanceState");
+    }
+
+    @Override
     protected void onDestroy() {
         if (app.forceClose) {
             stopService(new Intent(this, BroadcastMonitorService.class));
@@ -179,6 +204,10 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             stopService(new Intent(this, ScreenMonitorService.class));
         }
         handler.removeCallbacksAndMessages(null);
+        app.hostList.clear();
+        Logger.info(TAG, "host list length: " + app.hostList.size());
+        fixInputMethodManagerLeak(this);
+        System.exit(0);
         super.onDestroy();
     }
 
@@ -257,8 +286,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 exitTime = System.currentTimeMillis();
                 return false;
             } else {
-                app.forceClose = true;
-                finish();
+                cleanAndExit();
             }
         }
         return super.onKeyDown(keyCode, event);
@@ -291,9 +319,30 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             case pressure:
                 show3dTouchView((Bundle) obj);
                 break;
+            case exit:
+                cleanAndExit();
+                break;
             default:
                 Logger.error(TAG, "====get error commend====" + commend);
         }
+    }
+
+    private void cleanAndExit() {
+        app.forceClose = true;
+        app.hostList.clear();
+        app.chatTempMap.clear();
+        app.nManager.cancel(R.id.chatName);
+        if (touchView != null) {
+            touchView.setActionListener(null);
+            touchView.preview = null;
+            touchView.answerList = null;
+            touchView.hideAnswerList = null;
+            touchView.showAnswerList = null;
+            touchView.previewContent = null;
+            ForceTouchViewGroup.setInstance();
+            builder.previewContent = null;
+        }
+        finish();
     }
 
     private void show3dTouchView(Bundle bundle) {
@@ -301,7 +350,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         targetName = bundle.getString("name");
         // 组装需要显示的界面
         if (custPreview == null)
-            custPreview = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.touch_content, null);
+            custPreview = (LinearLayout) LayoutInflater.from(app).inflate(R.layout.touch_content, null);
         previewContent = (ListView) custPreview.getChildAt(1);
         ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(targetName);
         chatAdapter = new ChatMsgAdapter(this, mDataArrays);
@@ -318,13 +367,27 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         }
 
         // 显示3D touch菜单
-        touchView = new ForceTouchViewGroup.Builder(this).
-                setBackground(root).
-                setIP(bundle.getString("ip")).
-                setView(custPreview).
-                setData(answerListData).
-                setHandler(handler, answer).
-                setRoot(root).create();
+        builder = new ForceTouchViewGroup.Builder(this);
+        touchView = builder.setBackground(root).setIP(bundle.getString("ip")).
+                setView(custPreview).setData(answerListData).
+                setHandler(handler, answer).create();
+
+        touchView.setActionListener(new ForceTouchViewGroup.ActionListener() {
+            @Override
+            public void updateUI(int cmd) {
+
+                switch (cmd) {
+                    case add:
+                        root.addView(touchView);
+                        break;
+                    case remove:
+                        root.removeView(touchView);
+                        break;
+                }
+            }
+        });
+        touchView.show(builder);
+
         touchView.startAnimation(showPreviewAnim);
         preview = HelpUtils.getView(this, R.id.preview);
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
@@ -362,6 +425,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                         act.users.getCommend(msg);
                         break;
                     case startChat:
+                        act.findViewById(R.id.chat).setVisibility(View.VISIBLE);
                         act.chat.getCommend(msg);
                         // 显示chatFragment
                         act.animFragmentEffect(act.SHOW, act.chat);
@@ -400,7 +464,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             host.setIp(NetConfApplication.hostIP);
         } else {
             app.hostList.clear();
-            String userName = android.os.Build.MODEL;// 获取用户名
+            String userName = Build.MODEL;// 获取用户名
             String hostName = "Android";// 获取主机名
             String userDomain = "Android";// 获取计算机域
 
@@ -433,7 +497,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         if ((i + 1) != answerData.length) {
             // 直接回复
             final DataPacket dp = new DataPacket(
-                    NetConfApplication.hostIP, android.os.Build.MODEL, answerData[i],
+                    NetConfApplication.hostIP, Build.MODEL, answerData[i],
                     NetConfApplication.text);
 
             new Thread(new Runnable() {
@@ -459,6 +523,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             bundle.putString("name", targetName);
             msg.what = startChat;
             msg.obj = bundle;
+            findViewById(R.id.chat).setVisibility(View.VISIBLE);
             chat.getCommend(msg);
             animFragmentEffect(SHOW, chat);
         }
@@ -496,6 +561,42 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 // 在界面上显示未读消息
                 msg.what = redraw;
                 users.getCommend(msg);
+            }
+        }
+    }
+
+    public void fixInputMethodManagerLeak(Context destContext) {
+        if (destContext == null) {
+            return;
+        }
+
+        InputMethodManager imm = (InputMethodManager) destContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null) {
+            return;
+        }
+
+        String[] arr = new String[]{"mCurRootView", "mServedView", "mNextServedView"};
+        Field f = null;
+        Object obj_get = null;
+        for (int i = 0; i < arr.length; i++) {
+            String param = arr[i];
+            try {
+                f = imm.getClass().getDeclaredField(param);
+                if (f.isAccessible() == false) {
+                    f.setAccessible(true);
+                } // author: sodino mail:sodino@qq.com
+                obj_get = f.get(imm);
+                if (obj_get != null && obj_get instanceof View) {
+                    View v_get = (View) obj_get;
+                    if (v_get.getContext() == destContext) { // 被InputMethodManager持有引用的context是想要目标销毁的
+                        f.set(imm, null); // 置空，破坏掉path to gc节点
+                    } else {
+                        // 不是想要目标销毁的，即为又进了另一层界面了，不要处理，避免影响原逻辑,也就不用继续for循环了
+                        break;
+                    }
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
             }
         }
     }

@@ -54,7 +54,7 @@ public class ForceTouchViewGroup extends LinearLayout {
     public float yDown;
     public float yMove;
     public float yTemp;
-    public ViewGroup root;
+    public ActionListener actionListener;
     public int topMargin;
     public int moveTopMargin;
     public int answerHeight;
@@ -72,22 +72,30 @@ public class ForceTouchViewGroup extends LinearLayout {
     // 单例
     private static ForceTouchViewGroup instance = null;
 
+    private final int add = 0;
+    private final int remove = 1;
+
     private ForceTouchViewGroup(Context context) {
         super(context);
         // 初始化
-        addView(LayoutInflater.from(context).inflate(R.layout.force_touch_view, null));
         app = (NetConfApplication) context.getApplicationContext();
+        addView(LayoutInflater.from(app).inflate(R.layout.force_touch_view, null));
+
         title = (TextView) findViewById(R.id.preview_username);
         preview = (LinearLayout) findViewById(R.id.preview);
         answerList = (ListView) findViewById(R.id.answer);
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     private static ForceTouchViewGroup getInstance(Context context) {
         if (instance == null)
             instance = new ForceTouchViewGroup(context);
         return instance;
+    }
+
+    public static void setInstance(){
+        instance = null;
     }
 
     public int getNeedMove() {
@@ -114,8 +122,6 @@ public class ForceTouchViewGroup extends LinearLayout {
         drawable.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
         setBackground(drawable);
 
-        root = builder.pRoot;
-
         // 填充view和list数据
         previewContent = builder.previewContent;
         preview.addView(previewContent,
@@ -123,7 +129,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         answerAdapter = new SimpleAdapter(app, builder.answerListData,
                 R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
         answerList.setAdapter(answerAdapter);
-        root.addView(this);
+        actionListener.updateUI(add);
         // 计算list高度和滑动的距离
         answerList.post(new Runnable() {
             @Override
@@ -189,7 +195,7 @@ public class ForceTouchViewGroup extends LinearLayout {
                 msg.arg1 = position;
                 msg.sendToTarget();
                 clearView();
-                root.removeView(ForceTouchViewGroup.this);
+                actionListener.updateUI(remove);
             }
         });
 
@@ -211,7 +217,7 @@ public class ForceTouchViewGroup extends LinearLayout {
                 Logger.info(TAG, "in forceTouchView touch UP");
                 if (!isShow) {
                     clearView();
-                    root.removeView(this);
+                    actionListener.updateUI(remove);
                 } else {
                     previewParams.topMargin = topMargin - needMove;
                     preview.setLayoutParams(previewParams);
@@ -262,19 +268,18 @@ public class ForceTouchViewGroup extends LinearLayout {
         Context context;
         Bitmap blurBg;
         String pTargetIP;
-        ViewGroup pRoot;
         Handler pHandler;
         int pWhat;
         float scale = 0.1f;
-        View previewContent;
+        public View previewContent;
         List<Map<String, Object>> answerListData;
 
         public Builder(Context c) {
-            context = c;
+            context = c.getApplicationContext();
         }
 
         public Builder setBackground(View view) {
-            if(blurBg==null){
+            if (blurBg == null) {
                 //创建一块画布
                 Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(bitmap);
@@ -301,16 +306,8 @@ public class ForceTouchViewGroup extends LinearLayout {
             return this;
         }
 
-        // 设置主界面的父节点
-        public Builder setRoot(ViewGroup v) {
-            pRoot = v;
-            return this;
-        }
-
         public ForceTouchViewGroup create() {
-            ForceTouchViewGroup forceTouchViewGroup = ForceTouchViewGroup.getInstance(context);
-            forceTouchViewGroup.show(this);
-            return forceTouchViewGroup;
+            return ForceTouchViewGroup.getInstance(context.getApplicationContext());
         }
 
         // 放缩图片
@@ -388,4 +385,12 @@ public class ForceTouchViewGroup extends LinearLayout {
         answerList.startAnimation(hideAnswerList);
     }
 
+
+    public interface ActionListener {
+        void updateUI(int cmd);
+    }
+
+    public void setActionListener(ActionListener listener) {
+        actionListener = listener;
+    }
 }

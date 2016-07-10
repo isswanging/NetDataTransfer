@@ -86,7 +86,7 @@ public class PullRefreshListView extends LinearLayout implements
     public PullRefreshListView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        pullRefreshListView = LayoutInflater.from(context).inflate(
+        pullRefreshListView = LayoutInflater.from(context.getApplicationContext()).inflate(
                 R.layout.pull_refresh_listview, this);
         header = pullRefreshListView.findViewById(R.id.refresh_head);
         headerLayoutParams = (MarginLayoutParams) header.getLayoutParams();

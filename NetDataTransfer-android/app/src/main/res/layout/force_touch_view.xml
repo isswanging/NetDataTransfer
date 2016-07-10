@@ -22,6 +22,8 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:background="@drawable/answer"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:dividerHeight="1px"
+        android:divider="@color/share_text"/>
 
 </RelativeLayout>

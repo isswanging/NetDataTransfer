@@ -16,6 +16,7 @@ import android.util.SparseArray;
 import android.view.inputmethod.InputMethodManager;
 
 import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import net.app.netdatatransfer.R;
 import net.log.Logger;
@@ -39,7 +40,7 @@ import java.util.Vector;
 public class NetConfApplication extends Application {
     private final String TAG = "NetConfApplication";
     public int wifi = 0;
-    public String chatId = "none";
+    public String chatId = "gone";
     public SoundPool soundPool;
     public NotificationManager nManager;
     public int soundID;
@@ -93,11 +94,11 @@ public class NetConfApplication extends Application {
     // 文件传送的任务id
     public static int taskId = 0;
     // 传输文件任务列表
-    public static SparseArray<Progress> sendTaskList = new SparseArray<Progress>();
-    public static SparseArray<Progress> getTaskList = new SparseArray<Progress>();
+    public static SparseArray<Progress> sendTaskList = new SparseArray<>();
+    public static SparseArray<Progress> getTaskList = new SparseArray<>();
 
     // 记录聊天内容(未读的消息)
-    public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
+    public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<>();
 
     // 文件格式
     public final static String[] imageSupport = {"BMP", "JPG", "JPEG", "PNG",
@@ -106,14 +107,15 @@ public class NetConfApplication extends Application {
             "mpg"};
     public final static String[] audioSupport = {"mp3", "wma", "wav", "amr"};
 
+    public final static int add = 0;
+    public final static int remove = 1;
+
     // 检查端口
-    public String check(Context userListActivity) {
+    public String check() {
         // 获取wifi服务
-        WifiManager wifiManager = (WifiManager) userListActivity
-                .getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         // 获取连接状态
-        ConnectivityManager connectMgr = (ConnectivityManager) userListActivity
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo wifiNetInfo = connectMgr
                 .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (wifiManager.isWifiEnabled() && wifiNetInfo.isConnected()) {
@@ -121,7 +123,7 @@ public class NetConfApplication extends Application {
             try {
                 new DatagramSocket(textPort).close();
                 new ServerSocket(filePort).close();
-
+                Logger.info(TAG, "check result : " + SUCCESS);
                 return SUCCESS;
             } catch (SocketException e) {
                 return ERROR;
@@ -192,7 +194,8 @@ public class NetConfApplication extends Application {
     public void onCreate() {
         super.onCreate();
         hostIP = getHostIp(this);
-        LeakCanary.install(this);
+        refWatcher = LeakCanary.install(this);
+        nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private String intToIp(int i) {
@@ -258,4 +261,14 @@ public class NetConfApplication extends Application {
             imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
         }
     }
+
+    //在自己的Application中添加如下代码
+    public static RefWatcher getRefWatcher(Context context) {
+        NetConfApplication application = (NetConfApplication) context
+                .getApplicationContext();
+        return application.refWatcher;
+    }
+
+    //在自己的Application中添加如下代码
+    private RefWatcher refWatcher;
 }

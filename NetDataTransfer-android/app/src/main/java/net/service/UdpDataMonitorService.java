@@ -2,7 +2,6 @@ package net.service;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -18,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
+import net.service.base.BaseService;
 import net.util.BadgeUtil;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
@@ -30,13 +30,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 
-public class UdpDataMonitorService extends Service {
+public class UdpDataMonitorService extends BaseService {
     private final String TAG = "UdpDataMonitorService";
     DatagramSocket UdpSocket = null;
     DatagramPacket UdpPacket = null;
     DataPacket dp = null;
-    Thread thread;
-    boolean tag;
     NetConfApplication app;
     Vibrator vibrator;
     long[] pattern = {100, 200};
@@ -53,15 +51,12 @@ public class UdpDataMonitorService extends Service {
 
         Logger.info(TAG, "UDPdataMonitor started");
         tag = true;
-        thread = new Thread(new ReceiveInfo());
-        thread.start();
+        cachedThreadPool.execute(new ReceiveInfo());
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        tag = false;
-        thread.interrupt();
         Logger.info(TAG, "service stop");
         super.onDestroy();
     }

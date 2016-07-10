@@ -43,7 +43,6 @@ public class ChatFragment extends BaseFragment {
     NetConfApplication app;
     FrameLayout chatMain;
     SideslipMenuView sideslipMenuView;
-    ImageView backImg;
     String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     private ChatOnClickListener clickListener = new ChatOnClickListener();
@@ -86,7 +85,6 @@ public class ChatFragment extends BaseFragment {
             mListView = getView(viewGroup, R.id.charContentList);
             otherName = getView(viewGroup, R.id.otherName);
             otherIP = getView(viewGroup, R.id.otherIP);
-            backImg = getView(viewGroup, R.id.closeCurChat);
 
             TextView send = getView(viewGroup, R.id.send);
             send.setOnClickListener(clickListener);

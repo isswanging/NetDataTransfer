@@ -1,6 +1,5 @@
 package net.service;
 
-import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
@@ -9,6 +8,7 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
+import net.service.base.BaseService;
 import net.vo.DataPacket;
 import net.vo.Progress;
 import net.vo.SendTask;
@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class FileMonitorService extends Service {
+public class FileMonitorService extends BaseService {
     private final String TAG = "FileMonitorService";
-    Thread thread;
-    boolean tag;
     ServerSocket server = null;
     DataInputStream geter;
 
@@ -39,15 +37,12 @@ public class FileMonitorService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Logger.info(TAG, "FileMonitorService started");
         tag = true;
-        thread = new Thread(new ReceiveInfo());
-        thread.start();
+        cachedThreadPool.execute(new ReceiveInfo());
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        tag = false;
-        thread.interrupt();
         Logger.info(TAG, "service stop");
         super.onDestroy();
     }

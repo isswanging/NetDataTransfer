@@ -1,28 +1,24 @@
 package net.service;
 
-import android.app.Service;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.IBinder;
 
 import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
+import net.service.base.BaseService;
 import net.vo.Host;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class BroadcastMonitorService extends Service {
+public class BroadcastMonitorService extends BaseService {
     private final String TAG="BroadcastMonitorService";
     DatagramSocket broadSocket = null;
     DatagramPacket broadPacket = null;
     NetConfApplication app;
-    Thread thread;
-    boolean tag;
-    WifiManager.MulticastLock wifiLock;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -36,23 +32,15 @@ public class BroadcastMonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        WifiManager manager = (WifiManager) this.getSystemService(WIFI_SERVICE);
-        wifiLock = manager.createMulticastLock("wifi");
-        wifiLock.acquire();
-
         app = (NetConfApplication) getApplication();
         Logger.info(TAG, "BroadcastMonitor started");
         tag = true;
-        thread = new Thread(new ReceiveHost());
-        thread.start();
+        cachedThreadPool.execute(new ReceiveHost());
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        wifiLock.release();
-        tag = false;
-        thread.interrupt();
         Logger.info(TAG, "service stop");
         super.onDestroy();
     }
@@ -100,8 +88,6 @@ public class BroadcastMonitorService extends Service {
             } catch (IOException e) {
                 Logger.error(TAG, e.toString());
             }
-
         }
-
     }
 }

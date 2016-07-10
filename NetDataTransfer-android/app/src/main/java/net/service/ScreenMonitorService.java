@@ -1,6 +1,5 @@
 package net.service;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,18 +15,16 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
+import net.service.base.BaseService;
 import net.vo.Host;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
-public class ScreenMonitorService extends Service {
+public class ScreenMonitorService extends BaseService {
     private final String TAG = "ScreenMonitorService";
     Host host;
     NetConfApplication app;
-
-    boolean isClosed;
-    Thread thread;
     SendHostInfo sendHostInfo;
 
     private static final int SCREEN_Off = 0;
@@ -56,19 +53,15 @@ public class ScreenMonitorService extends Service {
         screenListener = new ScreenListener();
         registerReceiver(screenListener, filter);
 
-        isClosed = false;
+        tag = false;
         sendHostInfo = new SendHostInfo();
-        thread = new Thread(sendHostInfo);
-        thread.start();
-
+        cachedThreadPool.execute(sendHostInfo);
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         releaseWakeLock();
-        isClosed = false;
-        thread.interrupt();
         unregisterReceiver(screenListener);
         Logger.info(TAG, "service stop");
         super.onDestroy();
@@ -111,7 +104,7 @@ public class ScreenMonitorService extends Service {
                             JSON.toJSONString(host),
                             NetConfApplication.broadcastIP,
                             NetConfApplication.broadcastPort);
-                    if (isClosed) {
+                    if (tag) {
                         updateHandler.postDelayed(this, 1000);
                     }
                 } catch (SocketException e) {
@@ -130,11 +123,11 @@ public class ScreenMonitorService extends Service {
 
                     switch (msg.what) {
                         case SCREEN_Off:
-                            isClosed = true;
+                            tag = true;
                             this.postDelayed(sendSelfInfo, 1000);
                             break;
                         case SCREEN_ON:
-                            isClosed = false;
+                            tag = false;
                             this.removeCallbacks(sendHostInfo);
                             break;
                         default:
@@ -166,6 +159,5 @@ public class ScreenMonitorService extends Service {
             wakeLock.release();
             wakeLock = null;
         }
-
     }
 }

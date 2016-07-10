@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Vibrator;
@@ -89,6 +90,7 @@ public class UserListFragment extends BaseFragment {
         showMenuAnim.setDuration(100);
         hideMenuAnim.setDuration(200);
         vibrator = (Vibrator) app.getSystemService(app.VIBRATOR_SERVICE);
+        Logger.info(TAG, "UserListFragment onCreate");
     }
 
     @Override
@@ -283,9 +285,7 @@ public class UserListFragment extends BaseFragment {
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.exit:
-                        app.forceClose = true;
-                        app.hostList.clear();
-                        getActivity().finish();
+                        notification.notifyInfo(exit, null);
                         break;
                     case R.id.openFolder:
                         startActivity(new Intent(getActivity(), FileListActivity.class));
@@ -317,7 +317,7 @@ public class UserListFragment extends BaseFragment {
                 if (!isMenuOpen) {
                     if (menu == null) {
                         Logger.info(TAG, "creat a new menu");
-                        LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                        LayoutInflater layoutInflater = LayoutInflater.from(app);
                         menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
                         getView(menu, R.id.getProgress).setOnClickListener(onMenuClickListener);
                         getView(menu, R.id.sendProgress).setOnClickListener(onMenuClickListener);
@@ -366,7 +366,7 @@ public class UserListFragment extends BaseFragment {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    app.check(getActivity());
+                                    app.check();
                                     notification.notifyInfo(retry, null);
                                 }
                             }).setCancelable(false).show();
@@ -421,7 +421,7 @@ public class UserListFragment extends BaseFragment {
 
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (!app.isLand) {
+                        if (!app.isLand && android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
                             Logger.info(TAG, "in 3d touch effect");
                             TextView name = getView(view, R.id.userName);
                             TextView ip = getView(view, R.id.userIP);
