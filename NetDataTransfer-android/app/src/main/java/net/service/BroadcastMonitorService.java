@@ -37,30 +37,30 @@ public class BroadcastMonitorService extends BaseService {
         tag = true;
         cachedThreadPool.execute(new ReceiveHost());
         return super.onStartCommand(intent, flags, startId);
-    }
+                }
 
-    @Override
-    public void onDestroy() {
-        Logger.info(TAG, "service stop");
-        super.onDestroy();
-    }
+                @Override
+                public void onDestroy() {
+                    Logger.info(TAG, "service stop");
+                    super.onDestroy();
+                }
 
-    private class ReceiveHost implements Runnable {
+                private class ReceiveHost implements Runnable {
 
-        @Override
-        public void run() {
-            try {
-                Logger.info(TAG, "start a service");
-                broadPacket = new DatagramPacket(new byte[512], 512);
-                broadSocket = new DatagramSocket(NetConfApplication.broadcastPort);
-                while (tag) {
-                    // 收到广播
-                    broadSocket.receive(broadPacket);
-                    Logger.info(TAG, "receive a broadcast");
-                    // 整理信息
-                    String info = new String(broadPacket.getData(), 0,
-                            broadPacket.getLength());
-                    Host host = JSON.parseObject(info, Host.class);
+                    @Override
+                    public void run() {
+                        try {
+                            Logger.info(TAG, "start a service");
+                            broadPacket = new DatagramPacket(new byte[512], 512);
+                            broadSocket = new DatagramSocket(NetConfApplication.broadcastPort);
+                            while (tag) {
+                                // 收到广播
+                                broadSocket.receive(broadPacket);
+                                Logger.info(TAG, "receive a broadcast");
+                                // 整理信息
+                                String info = new String(broadPacket.getData(), 0,
+                                        broadPacket.getLength());
+                                Host host = JSON.parseObject(info, Host.class);
                     host.setState(0);
                     Logger.info(TAG, "from ip: " + host.getIp());
 

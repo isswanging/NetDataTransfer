@@ -214,7 +214,6 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (touchView != null && !touchView.isLock()) {
-            Logger.info(TAG, "activity touch event");
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Logger.info(TAG, "in activity touch DOWN");
