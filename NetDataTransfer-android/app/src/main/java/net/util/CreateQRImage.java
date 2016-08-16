@@ -86,16 +86,14 @@ public class CreateQRImage {
             bitmap.setPixels(pixels, 0, QR_WIDTH, 0, 0, QR_WIDTH, QR_HEIGHT);
 
             Bitmap bitmap2 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.qc_bg)).getBitmap();
-            Bitmap newBitmap = Bitmap.createBitmap(bitmap);
-            Canvas canvas = new Canvas(newBitmap);
+            Canvas canvas = new Canvas(bitmap);
             Paint paint = new Paint();
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
             canvas.drawBitmap(bitmap2, 0, 0, paint);
-            bitmaps[0] = newBitmap;
+            bitmaps[0] = bitmap;
 
             // 显示到一个ImageView上面
             sweepIV.setImageBitmap(addLogo(bitmaps, startW, starH));
-            bitmap.recycle();
             bitmap2.recycle();
         } catch (WriterException e) {
             e.printStackTrace();
