@@ -66,6 +66,8 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
 
     // 按两次退出的计时
     private long exitTime = 0;
+    // 防止转屏退出程序
+    private boolean isExit;
 
     // 更新消息提示的广播
     NewMsgReceiver msgReceiver;
@@ -118,6 +120,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         setContentView(R.layout.main);
         app = (NetConfApplication) getApplication();
         app.forceClose = false;
+        isExit = true;
 
         if (savedInstanceState != null) {
             String s = savedInstanceState.getString("users");
@@ -193,6 +196,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         super.onSaveInstanceState(outState);
         outState.putString("users", JSON.toJSONString(app.hostList));
         Logger.info(TAG, "in onSaveInstanceState");
+        isExit = false;
     }
 
     @Override
@@ -207,7 +211,10 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         app.hostList.clear();
         Logger.info(TAG, "host list length: " + app.hostList.size());
         fixInputMethodManagerLeak(this);
-        System.exit(0);
+        if(isExit){
+            Logger.info(TAG,"exit apk");
+            System.exit(0);
+        }
         super.onDestroy();
     }
 
@@ -439,7 +446,9 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
 
     public void fragmentAction() {
         Logger.info(TAG, "fragmentAction method called");
+        findViewById(R.id.chat).setVisibility(View.VISIBLE);
         if (app.topFragment.equals("users")) {
+            Logger.info(TAG, "hide chat fragment");
             animFragmentEffect(HIDE, chat);
         }
         //判断屏幕方向

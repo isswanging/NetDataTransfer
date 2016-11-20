@@ -129,6 +129,7 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
+        Logger.info(TAG,"chatfragment destroy");
         app.topFragment = "users";
         super.onDestroy();
     }
