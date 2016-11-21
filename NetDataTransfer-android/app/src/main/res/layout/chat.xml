@@ -44,7 +44,6 @@
                             android:background="@drawable/edittext"
                             android:hint="@string/editText_hint"
                             android:maxLines="3"
-                            android:singleLine="false"
                             android:textColor="#000000"
                             android:textSize="@dimen/chat_text_size" />
 

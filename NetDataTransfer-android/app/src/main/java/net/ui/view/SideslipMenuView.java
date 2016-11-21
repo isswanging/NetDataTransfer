@@ -48,7 +48,10 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     public SideslipMenuView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+    }
 
+    public int getmMenuWidth(){
+        return mMenuWidth;
     }
 
     public SideslipMenuView(Context context, AttributeSet attrs, int defStyle) {
@@ -141,7 +144,8 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        closeSoftkeyboard();
+        //closeSoftkeyboard();
+        imm.hideSoftInputFromWindow(this.getWindowToken(), 0); // 强制隐藏键盘
 
         float scale = l * 1.0f / mMenuWidth;
         float leftScale = 1 - 0.3f * scale;

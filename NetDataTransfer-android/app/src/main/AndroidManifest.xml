@@ -46,7 +46,6 @@
         </activity>
         <activity
             android:name="net.ui.activity.MainActivity"
-            android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
             android:theme="@style/TranslucentTheme">
             <intent-filter>

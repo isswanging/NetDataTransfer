@@ -123,6 +123,8 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         isExit = true;
 
         if (savedInstanceState != null) {
+            // 防止转屏时导致列表混乱
+            app.hostList.clear();
             String s = savedInstanceState.getString("users");
             Vector<Host> list = new Vector<>(JSON.parseArray(s, Host.class));
             for (Host h : list) {

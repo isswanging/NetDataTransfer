@@ -129,7 +129,7 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        Logger.info(TAG,"chatfragment destroy");
+        Logger.info(TAG, "chatfragment destroy");
         app.topFragment = "users";
         super.onDestroy();
     }
@@ -258,6 +258,7 @@ public class ChatFragment extends BaseFragment {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.closeChat:
+                    sideslipMenuView.scrollTo(sideslipMenuView.getmMenuWidth(), 0);
                 case R.id.closeCurChat:
                     app.chatId = "gone";
                     app.topFragment = "users";

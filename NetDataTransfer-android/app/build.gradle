@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "net.app.netdatatransfer"
-        minSdkVersion 19
+        minSdkVersion 16
         targetSdkVersion 21
     }
     buildTypes {
