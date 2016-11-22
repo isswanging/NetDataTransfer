@@ -213,8 +213,8 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         app.hostList.clear();
         Logger.info(TAG, "host list length: " + app.hostList.size());
         fixInputMethodManagerLeak(this);
-        if(isExit){
-            Logger.info(TAG,"exit apk");
+        if (isExit) {
+            Logger.info(TAG, "exit apk");
             System.exit(0);
         }
         super.onDestroy();
@@ -448,9 +448,10 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
 
     public void fragmentAction() {
         Logger.info(TAG, "fragmentAction method called");
-        findViewById(R.id.chat).setVisibility(View.VISIBLE);
-        if (app.topFragment.equals("users")) {
-            Logger.info(TAG, "hide chat fragment");
+        if (!app.topFragment.equals("users")) {
+            Logger.info(TAG, "show chat fragment");
+            animFragmentEffect(SHOW, chat);
+        } else {
             animFragmentEffect(HIDE, chat);
         }
         //判断屏幕方向
@@ -551,6 +552,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     hide(fragment).commit();
         } else {
             //show
+            findViewById(R.id.chat).setVisibility(View.VISIBLE);
             fragmentManager.beginTransaction().
                     setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
                     show(fragment).commit();

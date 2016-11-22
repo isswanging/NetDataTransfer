@@ -50,7 +50,7 @@ public class SideslipMenuView extends HorizontalScrollView {
         this(context, attrs, 0);
     }
 
-    public int getmMenuWidth(){
+    public int getmMenuWidth() {
         return mMenuWidth;
     }
 
@@ -76,10 +76,10 @@ public class SideslipMenuView extends HorizontalScrollView {
             LinearLayout wrapper = (LinearLayout) getChildAt(0);
             mMenu = (ViewGroup) wrapper.getChildAt(0);
             mContent = (ViewGroup) wrapper.getChildAt(1);
-            eText = (EditText) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
-                    .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
-            backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
-                    .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
+            eText = (EditText) (((ViewGroup) ((ViewGroup) mContent
+                    .getChildAt(0)).getChildAt(0))).getChildAt(0);
+            backImg = (ImageView) ((ViewGroup) (((ViewGroup) mContent
+                    .getChildAt(0))).getChildAt(1)).getChildAt(0);
         }
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mScreenWidth = HelpUtils.getScreenWidth(context);
@@ -98,8 +98,10 @@ public class SideslipMenuView extends HorizontalScrollView {
     protected void onDraw(Canvas canvas) {
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
                 && !isOpen) {
+            eText.setEnabled(true);
             backImg.setVisibility(VISIBLE);
         } else {
+            eText.setEnabled(false);
             backImg.setVisibility(GONE);
         }
         super.onDraw(canvas);
@@ -179,5 +181,9 @@ public class SideslipMenuView extends HorizontalScrollView {
             eText.setEnabled(true);
             backImg.setVisibility(VISIBLE);
         }
+    }
+
+    public void setOpen(boolean isOpen) {
+        this.isOpen = isOpen;
     }
 }

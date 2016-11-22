@@ -165,6 +165,12 @@ public class ChatFragment extends BaseFragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        sideslipMenuView.setOpen(false);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void getCommend(Message msg) {
         Bundle bundle;
         switch (msg.what) {
