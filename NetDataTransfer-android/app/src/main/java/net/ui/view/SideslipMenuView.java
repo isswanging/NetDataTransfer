@@ -101,7 +101,6 @@ public class SideslipMenuView extends HorizontalScrollView {
             eText.setEnabled(true);
             backImg.setVisibility(VISIBLE);
         } else {
-            eText.setEnabled(false);
             backImg.setVisibility(GONE);
         }
         super.onDraw(canvas);

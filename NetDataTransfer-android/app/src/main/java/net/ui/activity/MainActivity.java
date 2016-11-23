@@ -58,6 +58,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final String user_TAG = "usersFragment";
     private final String chat_TAG = "chatFragment";
     private Handler handler = new ListHandler(this);
+    private ActionListener listener = new ActionListener(this);
     private UserListFragment users;
     private ChatFragment chat;
     private FragmentManager fragmentManager;
@@ -109,8 +110,8 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
     private final int SHOW = 1;
     private final int HIDE = 0;
 
-    private final int add = 0;
-    private final int remove = 1;
+    private static final int add = 0;
+    private static final int remove = 1;
     ForceTouchViewGroup.Builder builder;
 
     @Override
@@ -380,20 +381,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                 setView(custPreview).setData(answerListData).
                 setHandler(handler, answer).create();
 
-        touchView.setActionListener(new ForceTouchViewGroup.ActionListener() {
-            @Override
-            public void updateUI(int cmd) {
-
-                switch (cmd) {
-                    case add:
-                        root.addView(touchView);
-                        break;
-                    case remove:
-                        root.removeView(touchView);
-                        break;
-                }
-            }
-        });
+        touchView.setActionListener(listener);
         touchView.show(builder);
 
         touchView.startAnimation(showPreviewAnim);
@@ -401,6 +389,27 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
         moveTopMargin = previewParams.topMargin;
         topMargin = previewParams.topMargin;
+    }
+
+    static class ActionListener implements ForceTouchViewGroup.ActionListener {
+        WeakReference<MainActivity> refActvity;
+
+        ActionListener(MainActivity activity) {
+            refActvity = new WeakReference(activity);
+        }
+
+        @Override
+        public void updateUI(int cmd) {
+            final MainActivity act = refActvity.get();
+            switch (cmd) {
+                case add:
+                    act.root.addView(act.touchView);
+                    break;
+                case remove:
+                    act.root.removeView(act.touchView);
+                    break;
+            }
+        }
     }
 
     static class ListHandler extends Handler {
