@@ -1,6 +1,5 @@
 package net.ui.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.os.Bundle;
@@ -15,13 +14,12 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.ScreenMonitorService;
 import net.service.UdpDataMonitorService;
-import net.util.HelpUtils;
 import net.vo.Host;
 
 import java.io.File;
 import java.util.Random;
 
-public class WelcomeActivity extends Activity {
+public class WelcomeActivity extends BaseActivity {
     private final String TAG = "WelcomeActivity";
     private NetConfApplication app;
 
@@ -34,7 +32,7 @@ public class WelcomeActivity extends Activity {
         // 创建快捷方式
         createShortCut();
         // 启动动画
-        ImageView welcomeAnim = HelpUtils.getView(this, R.id.welcome_img);
+        ImageView welcomeAnim = getView(R.id.welcome_img);
         welcomeAnim.setBackgroundResource(getImg());
         // 检查端口
         preCheck();

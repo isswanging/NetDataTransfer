@@ -11,8 +11,8 @@ import android.view.WindowManager;
 /**
  * 获得屏幕相关的辅助类
  */
-public class HelpUtils {
-    private HelpUtils() {
+public class ScreenHelpUtils {
+    private ScreenHelpUtils() {
         /* cannot be instantiated */
         throw new UnsupportedOperationException("cannot be instantiated");
     }
@@ -108,12 +108,5 @@ public class HelpUtils {
                 - statusBarHeight);
         view.destroyDrawingCache();
         return bp;
-    }
-
-    /**
-     * 简化findViewById操作
-     */
-    public static <T extends View> T getView(Activity a, int id) {
-        return (T) a.findViewById(id);
     }
 }

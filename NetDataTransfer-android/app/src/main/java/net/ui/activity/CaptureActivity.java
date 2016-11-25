@@ -1,7 +1,6 @@
 package net.ui.activity;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,7 +34,7 @@ import net.app.netdatatransfer.R;
 import java.io.IOException;
 import java.util.Vector;
 
-public class CaptureActivity extends Activity implements Callback {
+public class CaptureActivity extends BaseActivity implements Callback {
 
     private CaptureActivityHandler handler;
     private ViewfinderView viewfinderView;
@@ -57,7 +56,7 @@ public class CaptureActivity extends Activity implements Callback {
 
         // 初始化 CameraManager
         CameraManager.init(getApplication());
-        viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
+        viewfinderView = getView(R.id.viewfinder_view);
         hasSurface = false;
         inactivityTimer = new InactivityTimer(this);
     }
@@ -65,7 +64,7 @@ public class CaptureActivity extends Activity implements Callback {
     @Override
     protected void onResume() {
         super.onResume();
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+        SurfaceView surfaceView = getView(R.id.preview_view);
         SurfaceHolder surfaceHolder = surfaceView.getHolder();
         if (hasSurface) {
             initCamera(surfaceHolder);
@@ -187,7 +186,7 @@ public class CaptureActivity extends Activity implements Callback {
                                         setResult(RESULT_OK);// 确定按钮事件
 
                                         // 继续扫描
-                                        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
+                                        SurfaceView surfaceView = getView(R.id.preview_view);
                                         SurfaceHolder surfaceHolder = surfaceView
                                                 .getHolder();
                                         initCamera(surfaceHolder);

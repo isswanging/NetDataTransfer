@@ -1,14 +1,7 @@
 package net.ui.activity;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import net.app.NetConfApplication;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,21 +10,29 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 
-public class FileListActivity extends Activity {
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class FileListActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.file_list);
         initActionBar();
-        TextView t = (TextView) findViewById(R.id.filePath);
+        TextView t = getView(R.id.filePath);
         t.setText("所在目录：" + NetConfApplication.saveFilePath);
 
-        ListView fileList = (ListView) findViewById(R.id.fileList);
+        ListView fileList = getView(R.id.fileList);
         SimpleAdapter adapter = new SimpleAdapter(this, getData(),
-                R.layout.file_item, new String[] { "img", "info" }, new int[] {
-                        R.id.fileImg, R.id.fileInfo });
+                R.layout.file_item, new String[]{"img", "info"}, new int[]{
+                R.id.fileImg, R.id.fileInfo});
         fileList.setAdapter(adapter);
         super.onCreate(savedInstanceState);
     }
@@ -41,13 +42,14 @@ public class FileListActivity extends Activity {
 
         File folder = new File(NetConfApplication.saveFilePath);
         String[] paths = folder.list();
-        for (String path : paths) {
-            HashMap<String, Object> m = new HashMap<String, Object>();
-            m.put("img", R.drawable.file);
-            m.put("info", path);
-            fileList.add(m);
+        if (paths != null) {
+            for (String path : paths) {
+                HashMap<String, Object> m = new HashMap<String, Object>();
+                m.put("img", R.drawable.file);
+                m.put("info", path);
+                fileList.add(m);
+            }
         }
-
         return fileList;
     }
 
@@ -63,7 +65,7 @@ public class FileListActivity extends Activity {
         title.setCustomView(actionbarLayout);
         ((TextView) findViewById(R.id.titleName)).setText("文件列表");
 
-        ImageButton back = (ImageButton) findViewById(R.id.back);
+        ImageButton back = getView(R.id.back);
         back.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -71,6 +73,5 @@ public class FileListActivity extends Activity {
                 finish();
             }
         });
-
     }
 }

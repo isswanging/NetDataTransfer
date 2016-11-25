@@ -1,6 +1,5 @@
 package net.ui.activity;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
@@ -38,7 +37,6 @@ import net.ui.fragment.BaseFragment;
 import net.ui.fragment.ChatFragment;
 import net.ui.fragment.UserListFragment;
 import net.ui.view.ForceTouchViewGroup;
-import net.util.HelpUtils;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import net.vo.Host;
@@ -53,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class MainActivity extends Activity implements BaseFragment.Notification {
+public class MainActivity extends BaseActivity implements BaseFragment.Notification {
     private final String TAG = "MainActivity";
     private final String user_TAG = "usersFragment";
     private final String chat_TAG = "chatFragment";
@@ -230,6 +228,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     break;
                 case MotionEvent.ACTION_UP:
                     Logger.info(TAG, "in activity touch UP");
+                    touchView.setCanMove(true);
                     if (!touchView.isShow()) {
                         touchView.clearView();
                         root.removeView(touchView);
@@ -241,9 +240,24 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     }
                     yTemp = 0;
                     break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    Logger.info(TAG, "in activity touch ACTION_POINTER_DOWN");
+                    touchView.setCanMove(false);
+                    Logger.info(TAG, "stop move");
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    Logger.info(TAG, "in activity touch ACTION_POINTER_UP");
+                    touchView.setCanMove(true);
+                    if (!touchView.isShow()) {
+                        touchView.clearView();
+                        root.removeView(touchView);
+                        touchView = null;
+                        yTemp = 0;
+                    }
+                    break;
                 case MotionEvent.ACTION_MOVE:
                     // needMove可能还没准备好
-                    if (touchView.getNeedMove() != 0) {
+                    if (touchView.getNeedMove() != 0 && touchView.isCanMove()) {
                         yMove = event.getRawY();
                         if (yTemp == 0) {
                             yTemp = yMove;
@@ -385,7 +399,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         touchView.show(builder);
 
         touchView.startAnimation(showPreviewAnim);
-        preview = HelpUtils.getView(this, R.id.preview);
+        preview = getView(R.id.preview);
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
         moveTopMargin = previewParams.topMargin;
         topMargin = previewParams.topMargin;
@@ -442,7 +456,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                         act.users.getCommend(msg);
                         break;
                     case startChat:
-                        act.findViewById(R.id.chat).setVisibility(View.VISIBLE);
+                        act.getView(R.id.chat).setVisibility(View.VISIBLE);
                         act.chat.getCommend(msg);
                         // 显示chatFragment
                         act.animFragmentEffect(act.SHOW, act.chat);
@@ -471,7 +485,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
         } else {
             // 竖屏
             app.isLand = false;
-            root = HelpUtils.getView(this, R.id.mainUI);
+            root = getView(R.id.mainUI);
         }
     }
 
@@ -543,7 +557,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
             bundle.putString("name", targetName);
             msg.what = startChat;
             msg.obj = bundle;
-            findViewById(R.id.chat).setVisibility(View.VISIBLE);
+            getView(R.id.chat).setVisibility(View.VISIBLE);
             chat.getCommend(msg);
             animFragmentEffect(SHOW, chat);
         }
@@ -561,7 +575,7 @@ public class MainActivity extends Activity implements BaseFragment.Notification 
                     hide(fragment).commit();
         } else {
             //show
-            findViewById(R.id.chat).setVisibility(View.VISIBLE);
+            getView(R.id.chat).setVisibility(View.VISIBLE);
             fragmentManager.beginTransaction().
                     setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).
                     show(fragment).commit();

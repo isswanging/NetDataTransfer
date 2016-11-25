@@ -30,7 +30,7 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.util.HelpUtils;
+import net.util.ScreenHelpUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -64,6 +64,7 @@ public class ForceTouchViewGroup extends LinearLayout {
     public int screenheight;
     public View previewContent;
     public Context mContext;
+    public boolean canMove;
 
     // 动画
     public Animation showAnswerList;
@@ -86,6 +87,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         answerList = (ListView) findViewById(R.id.answer);
         previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
         mContext = context.getApplicationContext();
+        canMove = true;
     }
 
     private static ForceTouchViewGroup getInstance(Context context) {
@@ -94,7 +96,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         return instance;
     }
 
-    public static void setInstance(){
+    public static void setInstance() {
         instance = null;
     }
 
@@ -198,7 +200,6 @@ public class ForceTouchViewGroup extends LinearLayout {
                 actionListener.updateUI(remove);
             }
         });
-
     }
 
     @Override
@@ -223,9 +224,23 @@ public class ForceTouchViewGroup extends LinearLayout {
                     preview.setLayoutParams(previewParams);
                     yTemp = 0;
                 }
+                setCanMove(true);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                Logger.info(TAG, "in activity touch ACTION_POINTER_DOWN");
+                setCanMove(false);
+                Logger.info(TAG, "stop move");
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                Logger.info(TAG, "in activity touch ACTION_POINTER_UP");
+                if (!isShow) {
+                    clearView();
+                    actionListener.updateUI(remove);
+                }
+                setCanMove(true);
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (isMove) {
+                if (isMove && canMove) {
                     yMove = event.getRawY();
                     if (yTemp == 0) {
                         yTemp = yMove;
@@ -366,8 +381,8 @@ public class ForceTouchViewGroup extends LinearLayout {
 
         // 居中
         int height = getResources().getDimensionPixelSize(R.dimen.preview_content_height);
-        int stateHeight = HelpUtils.getStatusHeight(context);
-        screenheight = HelpUtils.getScreenHeight(context);
+        int stateHeight = ScreenHelpUtils.getStatusHeight(context);
+        screenheight = ScreenHelpUtils.getScreenHeight(context);
         topMargin = (screenheight - stateHeight - height) / 2;
         previewParams.topMargin = topMargin;
         preview.setLayoutParams(previewParams);
@@ -392,5 +407,13 @@ public class ForceTouchViewGroup extends LinearLayout {
 
     public void setActionListener(ActionListener listener) {
         actionListener = listener;
+    }
+
+    public boolean isCanMove() {
+        return canMove;
+    }
+
+    public void setCanMove(boolean move) {
+        canMove = move;
     }
 }
