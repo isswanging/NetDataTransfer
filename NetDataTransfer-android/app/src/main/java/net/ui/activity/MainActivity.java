@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -41,9 +41,10 @@ import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
 import net.vo.Host;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.net.DatagramSocket;
+import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,6 +121,8 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         app = (NetConfApplication) getApplication();
         app.forceClose = false;
         isExit = true;
+        if (app.wifi != 1)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         if (savedInstanceState != null) {
             // 防止转屏时导致列表混乱
@@ -211,12 +214,19 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         handler.removeCallbacksAndMessages(null);
         app.hostList.clear();
         Logger.info(TAG, "host list length: " + app.hostList.size());
-        fixInputMethodManagerLeak(this);
+        try {
+            new DatagramSocket(app.textPort).close();
+            new ServerSocket(app.filePort).close();
+        } catch (SocketException e) {
+            Logger.error(TAG, "socket close error" + e.toString());
+        } catch (IOException e) {
+            Logger.error(TAG, "socket close error" + e.toString());
+        }
+        super.onDestroy();
         if (isExit) {
             Logger.info(TAG, "exit apk");
             System.exit(0);
         }
-        super.onDestroy();
     }
 
     @Override
@@ -320,12 +330,15 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         Logger.info(TAG, "get commend from fragment==" + commend);
         switch (commend) {
             case login:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             case refresh:
                 login(commend);
                 handler.sendEmptyMessageDelayed(commend, 2000);
                 break;
             case retry:
-                handler.sendEmptyMessageDelayed(commend, 2000);
+                app.check();
+                listen();
+                handler.sendEmptyMessageDelayed(commend, 1000);
                 break;
             case startChat:
                 Message msg = handler.obtainMessage();
@@ -356,6 +369,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         app.chatTempMap.clear();
         app.nManager.cancel(R.id.chatName);
         if (touchView != null) {
+            touchView.answerList.clearAnimation();
             touchView.setActionListener(null);
             touchView.preview = null;
             touchView.answerList = null;
@@ -376,7 +390,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             custPreview = (LinearLayout) LayoutInflater.from(app).inflate(R.layout.touch_content, null);
         previewContent = (ListView) custPreview.getChildAt(1);
         ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(targetName);
-        chatAdapter = new ChatMsgAdapter(this, mDataArrays);
+        chatAdapter = new ChatMsgAdapter(new WeakReference<>(this), mDataArrays);
         previewContent.setAdapter(chatAdapter);
         mDataArrays.clear();
 
@@ -409,7 +423,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         WeakReference<MainActivity> refActvity;
 
         ActionListener(MainActivity activity) {
-            refActvity = new WeakReference(activity);
+            refActvity = new WeakReference<>(activity);
         }
 
         @Override
@@ -417,9 +431,11 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             final MainActivity act = refActvity.get();
             switch (cmd) {
                 case add:
+                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                     act.root.addView(act.touchView);
                     break;
                 case remove:
+                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     act.root.removeView(act.touchView);
                     break;
             }
@@ -600,39 +616,4 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         }
     }
 
-    public void fixInputMethodManagerLeak(Context destContext) {
-        if (destContext == null) {
-            return;
-        }
-
-        InputMethodManager imm = (InputMethodManager) destContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm == null) {
-            return;
-        }
-
-        String[] arr = new String[]{"mCurRootView", "mServedView", "mNextServedView"};
-        Field f = null;
-        Object obj_get = null;
-        for (int i = 0; i < arr.length; i++) {
-            String param = arr[i];
-            try {
-                f = imm.getClass().getDeclaredField(param);
-                if (f.isAccessible() == false) {
-                    f.setAccessible(true);
-                } // author: sodino mail:sodino@qq.com
-                obj_get = f.get(imm);
-                if (obj_get != null && obj_get instanceof View) {
-                    View v_get = (View) obj_get;
-                    if (v_get.getContext() == destContext) { // 被InputMethodManager持有引用的context是想要目标销毁的
-                        f.set(imm, null); // 置空，破坏掉path to gc节点
-                    } else {
-                        // 不是想要目标销毁的，即为又进了另一层界面了，不要处理，避免影响原逻辑,也就不用继续for循环了
-                        break;
-                    }
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-    }
 }

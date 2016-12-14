@@ -7,7 +7,6 @@
     <dimen name="sendMore_right">12dp</dimen>
     <dimen name="sendMore_size">35dp</dimen>
     <dimen name="editText_left">11dp</dimen>
-    <dimen name="editText_width">230dp</dimen>
     <dimen name="sendText_text_size">20dp</dimen>
     <dimen name="sendText_left">16dp</dimen>
     <dimen name="head_width">70dp</dimen>

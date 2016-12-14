@@ -47,7 +47,6 @@ import java.util.Map;
 
 public class UserListFragment extends BaseFragment {
     private final String TAG = "UserListFragment";
-    NetConfApplication app;
     // 屏幕长宽
     int screenWidth;
     int screenHeight;
@@ -82,7 +81,6 @@ public class UserListFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = (NetConfApplication) getActivity().getApplication();
         // 菜单显示与隐藏的动画
         showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
                 1f, Animation.RELATIVE_TO_SELF, 0f);

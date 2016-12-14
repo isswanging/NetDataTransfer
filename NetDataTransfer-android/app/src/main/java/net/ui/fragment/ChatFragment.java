@@ -40,7 +40,6 @@ import java.util.List;
 
 public class ChatFragment extends BaseFragment {
     private final String TAG = "ChatFragment";
-    NetConfApplication app;
     FrameLayout chatMain;
     SideslipMenuView sideslipMenuView;
     String permission = "com.android.permission.RECV_NDT_NOTIFY";
@@ -62,12 +61,12 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = (NetConfApplication) getActivity().getApplication();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (isRotate) {
+            Logger.info(TAG, "not create new ui");
             // 设置聊天列表
             TextView chatCurName = getView(chatMain, R.id.chatCurName);
             chatCurName.setText(targetName);
@@ -78,6 +77,7 @@ public class ChatFragment extends BaseFragment {
             otherIP.setText(targetIp);
             return viewGroup;
         } else {
+            Logger.info(TAG, "create new ui");
             viewGroup = inflater.inflate(R.layout.chat, container, false);
             sideslipMenuView = getView(viewGroup, R.id.id_menu);
             chatMain = getView(viewGroup, R.id.chatMain);
@@ -167,6 +167,9 @@ public class ChatFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         sideslipMenuView.setOpen(false);
+        int width = (int) (getResources().getDimension(R.dimen.editText_width));
+        Logger.info(TAG, "edit width = " + width);
+        chatEditText.getLayoutParams().width = width;
         super.onSaveInstanceState(outState);
     }
 
@@ -265,6 +268,7 @@ public class ChatFragment extends BaseFragment {
             switch (v.getId()) {
                 case R.id.closeChat:
                     sideslipMenuView.scrollTo(sideslipMenuView.getmMenuWidth(), 0);
+                    sideslipMenuView.setOpen(false);
                 case R.id.closeCurChat:
                     app.chatId = "gone";
                     app.topFragment = "users";

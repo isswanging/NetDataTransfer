@@ -6,8 +6,11 @@ import android.os.Bundle;
 import android.os.Message;
 import android.view.View;
 
+import net.app.NetConfApplication;
+
 public abstract class BaseFragment extends Fragment {
     Notification notification;
+    NetConfApplication app;
 
     final int login = 0;
     final int refresh = 1;
@@ -28,6 +31,7 @@ public abstract class BaseFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // 翻转时fragment不销毁
         setRetainInstance(true);
+        app = (NetConfApplication) getActivity().getApplication();
     }
 
     @Override

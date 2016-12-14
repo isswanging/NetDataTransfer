@@ -30,8 +30,10 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
+import net.ui.activity.MainActivity;
 import net.util.ScreenHelpUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
@@ -192,7 +194,7 @@ public class ForceTouchViewGroup extends LinearLayout {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Logger.info(TAG, "in item click event");
-                Message msg = builder.pHandler.obtainMessage();
+                Message msg = ((Handler) builder.pHandler.get()).obtainMessage();
                 msg.what = builder.pWhat;
                 msg.arg1 = position;
                 msg.sendToTarget();
@@ -280,17 +282,19 @@ public class ForceTouchViewGroup extends LinearLayout {
     }
 
     public static class Builder {
+        WeakReference<MainActivity> refActvity;
         Context context;
         Bitmap blurBg;
         String pTargetIP;
-        Handler pHandler;
+        WeakReference pHandler;
         int pWhat;
         float scale = 0.1f;
         public View previewContent;
         List<Map<String, Object>> answerListData;
 
-        public Builder(Context c) {
-            context = c.getApplicationContext();
+        public Builder(MainActivity c) {
+            refActvity = new WeakReference<>(c);
+            context = refActvity.get();
         }
 
         public Builder setBackground(View view) {
@@ -364,7 +368,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         }
 
         public Builder setHandler(Handler handler, int what) {
-            pHandler = handler;
+            pHandler = new WeakReference(handler);
             pWhat = what;
             return this;
         }

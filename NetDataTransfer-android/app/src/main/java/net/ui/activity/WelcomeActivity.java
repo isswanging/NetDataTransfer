@@ -10,10 +10,6 @@ import android.widget.ImageView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.service.BroadcastMonitorService;
-import net.service.FileMonitorService;
-import net.service.ScreenMonitorService;
-import net.service.UdpDataMonitorService;
 import net.vo.Host;
 
 import java.io.File;
@@ -81,29 +77,22 @@ public class WelcomeActivity extends BaseActivity {
         }
     }
 
-    private void listen() {
-        this.startService(new Intent(this, BroadcastMonitorService.class));
-        this.startService(new Intent(this, UdpDataMonitorService.class));
-        this.startService(new Intent(this, FileMonitorService.class));
-        this.startService(new Intent(this, ScreenMonitorService.class));
-    }
-
     private void preCheck() {
         String userName = android.os.Build.MODEL;// 获取用户名
         String userDomain = "Android";// 获取计算机域
         Host host = new Host(userName, userDomain, "0.0.0.0", NetConfApplication.hostName, 1, 0);
         app.addHost(host);
+        // 加载音乐
+        app.loadVoice();
+        // 创建接收文件的目录
+        NetConfApplication.saveFilePath = app.getSDPath()
+                + "/NetDataTransfer/recFile";
+        Logger.info(TAG, NetConfApplication.saveFilePath);
 
         if (app.check().endsWith(app.SUCCESS)) {
-            Logger.info(TAG,"prepare something");
             // 建立监听
             listen();
-            // 加载音乐
-            app.loadVoice();
-            // 创建接收文件的目录
-            NetConfApplication.saveFilePath = app.getSDPath()
-                    + "/NetDataTransfer/recFile";
-            Logger.info(TAG, NetConfApplication.saveFilePath);
+            Logger.info(TAG, "prepare something");
             File recFile = new File(NetConfApplication.saveFilePath);
             if (!recFile.exists()) {
                 Logger.info(TAG, "create dir");
