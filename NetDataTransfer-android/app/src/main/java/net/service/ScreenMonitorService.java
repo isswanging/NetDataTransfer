@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -25,7 +25,26 @@ public class ScreenMonitorService extends BaseService {
     private final String TAG = "ScreenMonitorService";
     Host host;
     NetConfApplication app;
-    SendHostInfo sendHostInfo;
+    Handler updateHandler;
+    HandlerThread screenHandlerThread;
+    Runnable sendSelfInfo = new Runnable() {
+
+        @Override
+        public void run() {
+            Logger.info(TAG, "send broadcast");
+            try {
+                app.sendUdpData(new DatagramSocket(),
+                        JSON.toJSONString(host),
+                        NetConfApplication.broadcastIP,
+                        NetConfApplication.broadcastPort);
+                if (tag) {
+                    updateHandler.postDelayed(this, 1000);
+                }
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     private static final int SCREEN_Off = 0;
     private static final int SCREEN_ON = 1;
@@ -54,8 +73,26 @@ public class ScreenMonitorService extends BaseService {
         registerReceiver(screenListener, filter);
 
         tag = false;
-        sendHostInfo = new SendHostInfo();
-        cachedThreadPool.execute(sendHostInfo);
+        screenHandlerThread = new HandlerThread("screen");
+        screenHandlerThread.start();
+        updateHandler = new Handler(screenHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+
+                switch (msg.what) {
+                    case SCREEN_Off:
+                        tag = true;
+                        this.postDelayed(sendSelfInfo, 1000);
+                        break;
+                    case SCREEN_ON:
+                        tag = false;
+                        this.removeCallbacks(sendSelfInfo);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -76,71 +113,17 @@ public class ScreenMonitorService extends BaseService {
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
                     Logger.info(TAG, "screen is off");
-                    sendHostInfo.getHandler().sendEmptyMessage(SCREEN_Off);
+                    updateHandler.sendEmptyMessage(SCREEN_Off);
                     break;
 
                 case Intent.ACTION_SCREEN_ON:
                     Logger.info(TAG, "screen is on");
-                    sendHostInfo.getHandler().sendEmptyMessage(SCREEN_ON);
+                    updateHandler.sendEmptyMessage(SCREEN_ON);
                     break;
 
                 default:
                     break;
             }
-        }
-    }
-
-    private class SendHostInfo implements Runnable {
-
-        Handler updateHandler;
-
-        Runnable sendSelfInfo = new Runnable() {
-
-            @Override
-            public void run() {
-                Logger.info(TAG, "send broadcast");
-                try {
-                    app.sendUdpData(new DatagramSocket(),
-                            JSON.toJSONString(host),
-                            NetConfApplication.broadcastIP,
-                            NetConfApplication.broadcastPort);
-                    if (tag) {
-                        updateHandler.postDelayed(this, 1000);
-                    }
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        @Override
-        public void run() {
-            Logger.info(TAG, "in SendHostInfo");
-            Looper.prepare();
-            updateHandler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-
-                    switch (msg.what) {
-                        case SCREEN_Off:
-                            tag = true;
-                            this.postDelayed(sendSelfInfo, 1000);
-                            break;
-                        case SCREEN_ON:
-                            tag = false;
-                            this.removeCallbacks(sendHostInfo);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            };
-            Looper.loop();
-
-        }
-
-        public Handler getHandler() {
-            return updateHandler;
         }
     }
 
