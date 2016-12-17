@@ -90,6 +90,14 @@ public class ChatMsgAdapter extends BaseAdapter {
                     .findViewById(R.id.chatContent);
             viewHolder.isComMsg = isComMsg;
 
+            viewHolder.content.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    v.showContextMenu();
+                    return true;
+                }
+            });
+
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();

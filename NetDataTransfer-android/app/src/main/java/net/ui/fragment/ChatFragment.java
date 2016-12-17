@@ -3,6 +3,9 @@ package net.ui.fragment;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -11,10 +14,13 @@ import android.os.Bundle;
 import android.os.Message;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -57,6 +63,8 @@ public class ChatFragment extends BaseFragment {
     LinearLayout sendFile;
     TextView otherName;
     TextView otherIP;
+
+    private final int COPY = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,6 +121,18 @@ public class ChatFragment extends BaseFragment {
                 otherIP.setText(targetIp);
                 Logger.info(TAG, "hide overlay");
             }
+
+            mListView.setOnTouchListener(new View.OnTouchListener() {
+
+                @SuppressLint("ClickableViewAccessibility")
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    sendFile.setVisibility(View.GONE);
+                    return false;
+                }
+            });
+
+            registerForContextMenu(mListView);
 
             return viewGroup;
         }
@@ -171,6 +191,29 @@ public class ChatFragment extends BaseFragment {
         Logger.info(TAG, "edit width = " + width);
         chatEditText.getLayoutParams().width = width;
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        menu.add(0, COPY, 0, R.string.copy_menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        switch (item.getItemId()) {
+            case COPY:
+                ChatMsgEntity entity = mDataArrays.get(menuInfo.position);
+                String text = entity.getText();
+                ClipboardManager cbm = (ClipboardManager) app.getSystemService(Context.CLIPBOARD_SERVICE);
+                cbm.setPrimaryClip(ClipData.newPlainText(null, text));
+
+                break;
+            default:
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 
     @Override
@@ -250,15 +293,6 @@ public class ChatFragment extends BaseFragment {
         otherName.setText(targetName);
         otherIP.setText(targetIp);
 
-        mListView.setOnTouchListener(new View.OnTouchListener() {
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                sendFile.setVisibility(View.GONE);
-                return false;
-            }
-        });
     }
 
     public class ChatOnClickListener implements View.OnClickListener {

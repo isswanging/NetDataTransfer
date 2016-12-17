@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -78,7 +77,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     List<Map<String, Object>> answerListData = new ArrayList<>();
     List<ChatMsgEntity> mDataArrays = new ArrayList<>();
     RelativeLayout.LayoutParams previewParams;
-    LinearLayout preview;
     LinearLayout custPreview;
     FrameLayout root;
     String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
@@ -95,16 +93,16 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     String targetName;
     Bundle bundle;
 
-    private final int login = 0;
-    private final int refresh = 1;
-    private final int retry = 2;
-    private final int answer = 3;
-    private final int startChat = 4;
-    private final int incomingMsg = 5;
-    private final int redraw = 6;
-    private final int close = 7;
-    private final int pressure = 8;
-    private final int exit = 9;
+    private static final int login = 0;
+    private static final int refresh = 1;
+    private static final int retry = 2;
+    private static final int answer = 3;
+    private static final int startChat = 4;
+    private static final int incomingMsg = 5;
+    private static final int redraw = 6;
+    private static final int close = 7;
+    private static final int pressure = 8;
+    private static final int exit = 9;
 
     private final int SHOW = 1;
     private final int HIDE = 0;
@@ -240,12 +238,11 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                     Logger.info(TAG, "in activity touch UP");
                     touchView.setCanMove(true);
                     if (!touchView.isShow()) {
-                        touchView.clearView();
                         root.removeView(touchView);
                         touchView = null;
                     } else {
                         previewParams.topMargin = topMargin - touchView.getNeedMove();
-                        preview.setLayoutParams(previewParams);
+                        custPreview.setLayoutParams(previewParams);
                         touchView.setIsLock(true);
                     }
                     yTemp = 0;
@@ -259,7 +256,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                     Logger.info(TAG, "in activity touch ACTION_POINTER_UP");
                     touchView.setCanMove(true);
                     if (!touchView.isShow()) {
-                        touchView.clearView();
                         root.removeView(touchView);
                         touchView = null;
                         yTemp = 0;
@@ -268,6 +264,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 case MotionEvent.ACTION_MOVE:
                     // needMove可能还没准备好
                     if (touchView.getNeedMove() != 0 && touchView.isCanMove()) {
+                        Logger.info(TAG, "in activity touch MOVE");
                         yMove = event.getRawY();
                         if (yTemp == 0) {
                             yTemp = yMove;
@@ -299,7 +296,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                         }
                         yTemp = yMove;
                         previewParams.topMargin = moveTopMargin;
-                        preview.setLayoutParams(previewParams);
+                        custPreview.setLayoutParams(previewParams);
                     }
             }
             return true;
@@ -371,13 +368,10 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         if (touchView != null) {
             touchView.answerList.clearAnimation();
             touchView.setActionListener(null);
-            touchView.preview = null;
             touchView.answerList = null;
             touchView.hideAnswerList = null;
             touchView.showAnswerList = null;
             touchView.previewContent = null;
-            ForceTouchViewGroup.setInstance();
-            builder.previewContent = null;
         }
         finish();
     }
@@ -385,9 +379,19 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private void show3dTouchView(Bundle bundle) {
         targetIp = bundle.getString("ip");
         targetName = bundle.getString("name");
+
+        // 显示3D touch菜单
+        if (builder == null)
+            builder = new ForceTouchViewGroup.Builder(this);
+        touchView = builder.setBackground(root).setIP(targetIp).setView(R.layout.touch_content)
+                .setData(answerListData).setHandler(handler, answer).create();
+        touchView.setActionListener(listener);
+        touchView.show(builder);
+        touchView.startAnimation(showPreviewAnim);
+
         // 组装需要显示的界面
         if (custPreview == null)
-            custPreview = (LinearLayout) LayoutInflater.from(app).inflate(R.layout.touch_content, null);
+            custPreview = (LinearLayout) touchView.findViewById(R.id.cust_preview);
         previewContent = (ListView) custPreview.getChildAt(1);
         ((TextView) ((LinearLayout) custPreview.getChildAt(0)).getChildAt(0)).setText(targetName);
         chatAdapter = new ChatMsgAdapter(new WeakReference<>(this), mDataArrays);
@@ -403,18 +407,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             previewContent.setSelection(chatAdapter.getCount() - 1);
         }
 
-        // 显示3D touch菜单
-        builder = new ForceTouchViewGroup.Builder(this);
-        touchView = builder.setBackground(root).setIP(bundle.getString("ip")).
-                setView(custPreview).setData(answerListData).
-                setHandler(handler, answer).create();
-
-        touchView.setActionListener(listener);
-        touchView.show(builder);
-
-        touchView.startAnimation(showPreviewAnim);
-        preview = getView(R.id.preview);
-        previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
+        previewParams = (RelativeLayout.LayoutParams) custPreview.getLayoutParams();
         moveTopMargin = previewParams.topMargin;
         topMargin = previewParams.topMargin;
     }
@@ -443,16 +436,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     }
 
     static class ListHandler extends Handler {
-        private final int login = 0;
-        private final int refresh = 1;
-        private final int retry = 2;
-        private final int answer = 3;
-        private final int startChat = 4;
-        private final int incomingMsg = 5;
-        private final int redraw = 6;
-        private final int close = 7;
-        private final int pressure = 8;
-
         WeakReference<MainActivity> refActvity;
 
         ListHandler(MainActivity activity) {

@@ -16,4 +16,5 @@
     <string name="me">我</string>
     <string name="close_chat">退出聊天</string>
     <string name="users_title">用户列表</string>
+    <string name="copy_menu">复制</string>
 </resources>

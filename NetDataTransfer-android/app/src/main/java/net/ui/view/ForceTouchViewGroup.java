@@ -17,11 +17,10 @@ import android.renderscript.ScriptIntrinsicBlur;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -40,11 +39,11 @@ import java.util.Map;
 /**
  * 模仿iphone的3D touch效果
  */
-public class ForceTouchViewGroup extends LinearLayout {
+public class ForceTouchViewGroup extends RelativeLayout {
     private final String TAG = "ForceTouchViewGroup";
 
     public TextView title;
-    public LinearLayout preview;
+    public ViewStub preview;
     public RelativeLayout.LayoutParams previewParams;
     public ListView answerList;
     public SimpleAdapter answerAdapter;
@@ -72,34 +71,20 @@ public class ForceTouchViewGroup extends LinearLayout {
     public Animation showAnswerList;
     public Animation hideAnswerList;
 
-    // 单例
-    private static ForceTouchViewGroup instance = null;
-
     private final int add = 0;
     private final int remove = 1;
 
-    private ForceTouchViewGroup(Context context) {
+    public ForceTouchViewGroup(Context context) {
         super(context);
         // 初始化
         app = (NetConfApplication) context.getApplicationContext();
-        addView(LayoutInflater.from(app).inflate(R.layout.force_touch_view, null));
+        LayoutInflater.from(app).inflate(R.layout.force_touch_view, this);
 
         title = (TextView) findViewById(R.id.preview_username);
-        preview = (LinearLayout) findViewById(R.id.preview);
+        preview = (ViewStub) findViewById(R.id.preview);
         answerList = (ListView) findViewById(R.id.answer);
-        previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
         mContext = context.getApplicationContext();
         canMove = true;
-    }
-
-    private static ForceTouchViewGroup getInstance(Context context) {
-        if (instance == null)
-            instance = new ForceTouchViewGroup(context);
-        return instance;
-    }
-
-    public static void setInstance() {
-        instance = null;
     }
 
     public int getNeedMove() {
@@ -119,17 +104,20 @@ public class ForceTouchViewGroup extends LinearLayout {
     }
 
     public void show(final Builder builder) {
-        initPostion(mContext);
-
         // 设置模糊背景
         Drawable drawable = new BitmapDrawable(getResources(), builder.blurBg);
         drawable.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
         setBackground(drawable);
 
         // 填充view和list数据
-        previewContent = builder.previewContent;
-        preview.addView(previewContent,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (previewContent == null) {
+            preview.setLayoutResource(builder.previewLayout);
+            preview.inflate();
+            previewContent = findViewById(R.id.cust_preview);
+        }
+        previewParams = (RelativeLayout.LayoutParams) previewContent.getLayoutParams();
+        initPostion(mContext);
+
         answerAdapter = new SimpleAdapter(app, builder.answerListData,
                 R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
         answerList.setAdapter(answerAdapter);
@@ -198,7 +186,6 @@ public class ForceTouchViewGroup extends LinearLayout {
                 msg.what = builder.pWhat;
                 msg.arg1 = position;
                 msg.sendToTarget();
-                clearView();
                 actionListener.updateUI(remove);
             }
         });
@@ -219,11 +206,10 @@ public class ForceTouchViewGroup extends LinearLayout {
             case MotionEvent.ACTION_UP:
                 Logger.info(TAG, "in forceTouchView touch UP");
                 if (!isShow) {
-                    clearView();
                     actionListener.updateUI(remove);
                 } else {
                     previewParams.topMargin = topMargin - needMove;
-                    preview.setLayoutParams(previewParams);
+                    previewContent.setLayoutParams(previewParams);
                     yTemp = 0;
                 }
                 setCanMove(true);
@@ -236,7 +222,6 @@ public class ForceTouchViewGroup extends LinearLayout {
             case MotionEvent.ACTION_POINTER_UP:
                 Logger.info(TAG, "in activity touch ACTION_POINTER_UP");
                 if (!isShow) {
-                    clearView();
                     actionListener.updateUI(remove);
                 }
                 setCanMove(true);
@@ -274,7 +259,7 @@ public class ForceTouchViewGroup extends LinearLayout {
                     }
                     yTemp = yMove;
                     previewParams.topMargin = moveTopMargin;
-                    preview.setLayoutParams(previewParams);
+                    previewContent.setLayoutParams(previewParams);
                 }
                 break;
         }
@@ -289,8 +274,9 @@ public class ForceTouchViewGroup extends LinearLayout {
         WeakReference pHandler;
         int pWhat;
         float scale = 0.1f;
-        public View previewContent;
+        int previewLayout;
         List<Map<String, Object>> answerListData;
+        ForceTouchViewGroup forceTouchViewGroup;
 
         public Builder(MainActivity c) {
             refActvity = new WeakReference<>(c);
@@ -320,13 +306,15 @@ public class ForceTouchViewGroup extends LinearLayout {
         }
 
         // 设置主界面
-        public Builder setView(View view) {
-            previewContent = view;
+        public Builder setView(int res) {
+            previewLayout = res;
             return this;
         }
 
         public ForceTouchViewGroup create() {
-            return ForceTouchViewGroup.getInstance(context.getApplicationContext());
+            if (forceTouchViewGroup == null)
+                forceTouchViewGroup = new ForceTouchViewGroup(context.getApplicationContext());
+            return forceTouchViewGroup;
         }
 
         // 放缩图片
@@ -389,11 +377,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         screenheight = ScreenHelpUtils.getScreenHeight(context);
         topMargin = (screenheight - stateHeight - height) / 2;
         previewParams.topMargin = topMargin;
-        preview.setLayoutParams(previewParams);
-    }
-
-    public void clearView() {
-        preview.removeView(previewContent);
+        previewContent.setLayoutParams(previewParams);
     }
 
     public void showAnswerList() {
