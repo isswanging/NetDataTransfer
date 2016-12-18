@@ -28,9 +28,9 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.service.BroadcastMonitorService;
+import net.service.LoginMonitorService;
 import net.service.FileMonitorService;
-import net.service.ScreenMonitorService;
+import net.service.BroadcastMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.fragment.BaseFragment;
 import net.ui.fragment.ChatFragment;
@@ -60,7 +60,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private UserListFragment users;
     private ChatFragment chat;
     private FragmentManager fragmentManager;
-    private NetConfApplication app;
     String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     // 按两次退出的计时
@@ -116,7 +115,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         Logger.info(TAG, "activity onCreat()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        app = (NetConfApplication) getApplication();
         app.forceClose = false;
         isExit = true;
         if (app.wifi != 1)
@@ -204,10 +202,10 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     @Override
     protected void onDestroy() {
         if (app.forceClose) {
-            stopService(new Intent(this, BroadcastMonitorService.class));
+            stopService(new Intent(this, LoginMonitorService.class));
             stopService(new Intent(this, UdpDataMonitorService.class));
             stopService(new Intent(this, FileMonitorService.class));
-            stopService(new Intent(this, ScreenMonitorService.class));
+            stopService(new Intent(this, BroadcastMonitorService.class));
         }
         handler.removeCallbacksAndMessages(null);
         app.hostList.clear();
@@ -333,7 +331,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 handler.sendEmptyMessageDelayed(commend, 2000);
                 break;
             case retry:
-                app.check();
+                app.check(true);
                 listen();
                 handler.sendEmptyMessageDelayed(commend, 1000);
                 break;

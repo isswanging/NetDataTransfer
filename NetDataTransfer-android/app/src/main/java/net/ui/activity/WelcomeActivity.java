@@ -17,13 +17,11 @@ import java.util.Random;
 
 public class WelcomeActivity extends BaseActivity {
     private final String TAG = "WelcomeActivity";
-    private NetConfApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome);
-        app = (NetConfApplication) getApplication();
 
         // 创建快捷方式
         createShortCut();
@@ -46,7 +44,7 @@ public class WelcomeActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             return false;
         } else {
             return super.onKeyDown(keyCode, event);
@@ -89,7 +87,7 @@ public class WelcomeActivity extends BaseActivity {
                 + "/NetDataTransfer/recFile";
         Logger.info(TAG, NetConfApplication.saveFilePath);
 
-        if (app.check().endsWith(app.SUCCESS)) {
+        if (app.check(true).endsWith(app.SUCCESS)) {
             // 建立监听
             listen();
             Logger.info(TAG, "prepare something");

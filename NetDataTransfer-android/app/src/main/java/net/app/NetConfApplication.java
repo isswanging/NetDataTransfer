@@ -64,6 +64,9 @@ public class NetConfApplication extends Application {
 
     public final String FAIL = "IOException";
 
+    // 判断界面是否加载完成
+    public static boolean isUIReady = false;
+
     // 广播IP
     public static final String broadcastIP = "255.255.255.255";
 
@@ -111,7 +114,7 @@ public class NetConfApplication extends Application {
     public final static int remove = 1;
 
     // 检查端口
-    public String check() {
+    public String check(boolean isClose) {
         // 获取wifi服务
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         // 获取连接状态
@@ -120,15 +123,17 @@ public class NetConfApplication extends Application {
                 .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (wifiManager.isWifiEnabled() && wifiNetInfo.isConnected()) {
             wifi = 1;
-            try {
-                new DatagramSocket(textPort).close();
-                new ServerSocket(filePort).close();
-                Logger.info(TAG, "check result : " + SUCCESS);
-                return SUCCESS;
-            } catch (SocketException e) {
-                return ERROR;
-            } catch (IOException e) {
-                return FAIL;
+            if (isClose) {
+                try {
+                    new DatagramSocket(textPort).close();
+                    new ServerSocket(filePort).close();
+                    Logger.info(TAG, "check result : " + SUCCESS);
+                    return SUCCESS;
+                } catch (SocketException e) {
+                    return ERROR;
+                } catch (IOException e) {
+                    return FAIL;
+                }
             }
         } else
             wifi = 0;
@@ -252,6 +257,12 @@ public class NetConfApplication extends Application {
         }
         Logger.info(TAG, "unread msg num::::" + num);
         return num;
+    }
+
+    public ArrayList<WifiListener> listeners = new ArrayList<>();
+
+    public interface WifiListener {
+        void notifyWifiInfo();
     }
 
     // 收起输入法键盘

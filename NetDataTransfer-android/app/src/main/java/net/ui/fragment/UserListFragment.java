@@ -242,6 +242,7 @@ public class UserListFragment extends BaseFragment {
     }
 
     private void initUI() {
+        NetConfApplication.isUIReady = true;
         measureSrceen();
         if (!isRotate) {
             getDeviceInfo();
@@ -364,7 +365,7 @@ public class UserListFragment extends BaseFragment {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    app.check();
+                                    app.check(true);
                                     notification.notifyInfo(retry, null);
                                 }
                             }).setCancelable(false).show();
