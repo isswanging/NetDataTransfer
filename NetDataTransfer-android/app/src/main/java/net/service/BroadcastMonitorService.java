@@ -139,11 +139,11 @@ public class BroadcastMonitorService extends BaseService {
                             app.wifi = 1;
                         } else {
                             app.wifi = 0;
-                            Logger.info(TAG, "wifi listener num ====" + app.listeners.size());
-                            for (NetConfApplication.WifiListener listener : app.listeners) {
-                                Logger.info(TAG, "wifi is disconnect");
-                                listener.notifyWifiInfo();
-                            }
+                        }
+                        Logger.info(TAG, "wifi listener num ====" + app.listeners.size());
+                        for (NetConfApplication.WifiListener listener : app.listeners) {
+                            Logger.info(TAG, "wifi is disconnect");
+                            listener.notifyWifiInfo();
                         }
                     }
                     break;

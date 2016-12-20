@@ -1,7 +1,7 @@
 package net.ui.activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,15 +13,22 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import net.app.NetConfApplication;
-import net.service.LoginMonitorService;
-import net.service.FileMonitorService;
 import net.service.BroadcastMonitorService;
+import net.service.FileMonitorService;
+import net.service.LoginMonitorService;
 import net.service.UdpDataMonitorService;
+import net.ui.fragment.CustAlertDialog;
 
 import java.lang.reflect.Field;
 
 public class BaseActivity extends Activity implements NetConfApplication.WifiListener {
     NetConfApplication app;
+    DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            handler.sendEmptyMessageDelayed(0, 1000);
+        }
+    };
 
     /**
      * 简化findViewById操作
@@ -41,7 +48,7 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
         super.onResume();
         app.listeners.add(this);
         if (app.wifi != 1 && NetConfApplication.isUIReady) {
-            warnWifiState();
+            notifyWifiInfo();
         }
     }
 
@@ -59,30 +66,20 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
 
     @Override
     public void notifyWifiInfo() {
-        warnWifiState();
-    }
+        Fragment dialog = getFragmentManager().findFragmentByTag("wifi_warn");
+        if (dialog != null) {
+            getFragmentManager().beginTransaction().remove(dialog).commit();
+        }
 
-    public void warnWifiState() {
         if (app.wifi == 1) {
             Toast.makeText(this, "网络已连接，请继续使用", Toast.LENGTH_SHORT).show();
         } else {
-            new AlertDialog.Builder(this).setTitle("错误")
-                    .setMessage("wifi已断开")
-                    .setPositiveButton("退出",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    setResult(RESULT_OK);// 确定按钮事件
-                                    System.exit(0);
-                                }
-                            })
-                    .setNegativeButton("重试",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    handler.sendEmptyMessageDelayed(app.wifi, 1000);
-                                }
-                            }).setCancelable(false).show();
+            CustAlertDialog cd = new CustAlertDialog();
+            cd.setTitle("错误");
+            cd.setAlertText("网络断开，功能不可用");
+            cd.setListener(listener);
+            cd.setCancelable(false);
+            cd.show(getFragmentManager(), "wifi_warn");
         }
     }
 
@@ -90,7 +87,7 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
         @Override
         public void handleMessage(Message msg) {
             app.check(false);
-            warnWifiState();
+            notifyWifiInfo();
         }
     };
 

@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -28,12 +29,13 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.service.LoginMonitorService;
-import net.service.FileMonitorService;
 import net.service.BroadcastMonitorService;
+import net.service.FileMonitorService;
+import net.service.LoginMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.fragment.BaseFragment;
 import net.ui.fragment.ChatFragment;
+import net.ui.fragment.CustAlertDialog;
 import net.ui.fragment.UserListFragment;
 import net.ui.view.ForceTouchViewGroup;
 import net.vo.ChatMsgEntity;
@@ -109,6 +111,12 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private static final int add = 0;
     private static final int remove = 1;
     ForceTouchViewGroup.Builder builder;
+    DialogInterface.OnClickListener loadingListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            notifyInfo(retry, null);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,8 +125,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         setContentView(R.layout.main);
         app.forceClose = false;
         isExit = true;
-        if (app.wifi != 1)
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         if (savedInstanceState != null) {
             // 防止转屏时导致列表混乱
@@ -325,7 +331,15 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         Logger.info(TAG, "get commend from fragment==" + commend);
         switch (commend) {
             case login:
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                if (obj != null) {
+                    CustAlertDialog cd = new CustAlertDialog();
+                    cd.setTitle("错误");
+                    cd.setAlertText("网络未连接或端口占用，加载失败");
+                    cd.setListener(loadingListener);
+                    cd.setCancelable(false);
+                    cd.show(getFragmentManager(), "wifi_warn");
+                    break;
+                }
             case refresh:
                 login(commend);
                 handler.sendEmptyMessageDelayed(commend, 2000);
@@ -355,6 +369,15 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 break;
             default:
                 Logger.error(TAG, "====get error commend====" + commend);
+        }
+    }
+
+    @Override
+    public void notifyWifiInfo() {
+        super.notifyWifiInfo();
+        if (app.wifi == 1) {
+            login(refresh);
+            handler.sendEmptyMessage(refresh);
         }
     }
 
@@ -488,7 +511,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
 
     private void login(int commend) {
         final Host host;
-        if (commend == login) {
+        if (commend == login || commend == refresh) {
             NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
             host = app.hostList.get(0);
             host.setState(0);

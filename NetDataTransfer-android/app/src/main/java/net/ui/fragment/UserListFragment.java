@@ -1,8 +1,6 @@
 package net.ui.fragment;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -242,7 +240,6 @@ public class UserListFragment extends BaseFragment {
     }
 
     private void initUI() {
-        NetConfApplication.isUIReady = true;
         measureSrceen();
         if (!isRotate) {
             getDeviceInfo();
@@ -350,25 +347,7 @@ public class UserListFragment extends BaseFragment {
         if (app.wifi == 1) {
             notification.notifyInfo(login, null);
         } else {
-            // 弹出警告框并退出
-            new AlertDialog.Builder(getActivity()).setTitle("错误")
-                    .setMessage("wifi未连接或端口异常，启动失败")
-                    .setPositiveButton("退出",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getActivity().setResult(getActivity().RESULT_OK);// 确定按钮事件
-                                    getActivity().finish();
-                                }
-                            })
-                    .setNegativeButton("重试",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    app.check(true);
-                                    notification.notifyInfo(retry, null);
-                                }
-                            }).setCancelable(false).show();
+            notification.notifyInfo(login,"net_error");
         }
     }
 
@@ -442,5 +421,6 @@ public class UserListFragment extends BaseFragment {
                     }
                 }
         );
+        NetConfApplication.isUIReady = true;
     }
 }
