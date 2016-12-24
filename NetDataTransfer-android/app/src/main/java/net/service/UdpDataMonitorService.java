@@ -130,54 +130,60 @@ public class UdpDataMonitorService extends BaseService {
                 while (tag) {
                     // 收到消息
                     UdpSocket.receive(UdpPacket);
-
+                    Logger.info(TAG, "get udp json byte is-----" +
+                            NetConfApplication.printByte(UdpPacket.getData()));
                     // 解析处理并显示
                     String info = new String(UdpPacket.getData(), 0,
                             UdpPacket.getLength());
-                    dp = JSON.parseObject(info, DataPacket.class);
+                    Logger.info(TAG, "get json data is----" + info);
+                    info = info.trim();
+                    Logger.info(TAG, "trim udp data----" + info);
+                    if (info.length() > 0) {
+                        dp = JSON.parseObject(info, DataPacket.class);
 
-                    switch (dp.getTag()) {
+                        switch (dp.getTag()) {
 
-                        case NetConfApplication.text:
-                            app.playVoice();
-                            Logger.info(TAG, "service::" + app.chatId);
-                            dispatchMessage(info);
-                            break;
+                            case NetConfApplication.text:
+                                app.playVoice();
+                                Logger.info(TAG, "service::" + app.chatId);
+                                dispatchMessage(info);
+                                break;
 
-                        case NetConfApplication.refuse:
-                            Looper.prepare();
-                            Toast.makeText(UdpDataMonitorService.this,
-                                    dp.getIp() + "拒绝了文件传输", Toast.LENGTH_SHORT)
-                                    .show();
-                            Looper.loop();
-                            break;
+                            case NetConfApplication.refuse:
+                                Looper.prepare();
+                                Toast.makeText(UdpDataMonitorService.this,
+                                        dp.getIp() + "拒绝了文件传输", Toast.LENGTH_SHORT)
+                                        .show();
+                                Looper.loop();
+                                break;
 
-                        case NetConfApplication.filePre:
-                            Logger.info(TAG, "file send request");
-                            // 振动提示
-                            vibrator.vibrate(pattern, -1);
+                            case NetConfApplication.filePre:
+                                Logger.info(TAG, "file send request");
+                                // 振动提示
+                                vibrator.vibrate(pattern, -1);
 
-                            String[] s = dp.getContent().replaceAll("\\\\", "/")
-                                    .split("/");
-                            String fileName = s[s.length - 1];
-                            int id = NetConfApplication.taskId++;
-                            NetConfApplication.getTaskList.put(id, new Progress(fileName, 0));
+                                String[] s = dp.getContent().replaceAll("\\\\", "/")
+                                        .split("/");
+                                String fileName = s[s.length - 1];
+                                int id = NetConfApplication.taskId++;
+                                NetConfApplication.getTaskList.put(id, new Progress(fileName, 0));
 
-                            // accept file
-                            new TransferFile(UdpDataMonitorService.this)
-                                    .executeOnExecutor(
-                                            AsyncTask.THREAD_POOL_EXECUTOR,
-                                            new SendTask(id, null, fileName, dp));
-                            DataPacket dpClone = new DataPacket();
-                            dpClone.setContent("向你发来了一个文件");
-                            dpClone.setIp(dp.getIp());
-                            dpClone.setSenderName(dp.getSenderName());
-                            dpClone.setTag(dp.getTag());
-                            dispatchMessage(JSON.toJSONString(dpClone));
-                            break;
+                                // accept file
+                                new TransferFile(UdpDataMonitorService.this)
+                                        .executeOnExecutor(
+                                                AsyncTask.THREAD_POOL_EXECUTOR,
+                                                new SendTask(id, null, fileName, dp));
+                                DataPacket dpClone = new DataPacket();
+                                dpClone.setContent("向你发来了一个文件");
+                                dpClone.setIp(dp.getIp());
+                                dpClone.setSenderName(dp.getSenderName());
+                                dpClone.setTag(dp.getTag());
+                                dispatchMessage(JSON.toJSONString(dpClone));
+                                break;
 
-                        default:
-                            break;
+                            default:
+                                break;
+                        }
                     }
                 }
 

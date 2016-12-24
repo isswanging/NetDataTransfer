@@ -40,7 +40,7 @@ public class CreateQRImage {
     }
 
     // 要转换的地址或字符串,可以是中文
-    public void createQRImage(String url) {
+    private void createQRImage(String url) {
         try {
             // 判断URL合法性
             if (url == null || "".equals(url) || url.length() < 1) {

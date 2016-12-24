@@ -169,10 +169,10 @@ public class NetConfApplication extends Application {
     // 发送UDP消息
     public void sendUdpData(DatagramSocket broadSocket, String obj,
                             String targetIp, int port) {
-        byte[] info = obj.getBytes();
-
         DatagramPacket broadPacket;
         try {
+            byte[] info = obj.getBytes();
+            Logger.info(TAG, "send udp json byte is---" + NetConfApplication.printByte(info));
             broadPacket = new DatagramPacket(info, info.length,
                     InetAddress.getByName(targetIp), port);
             broadSocket.send(broadPacket);
@@ -181,7 +181,6 @@ public class NetConfApplication extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     // 获取本机IP
@@ -282,4 +281,17 @@ public class NetConfApplication extends Application {
 
     //在自己的Application中添加如下代码
     private RefWatcher refWatcher;
+
+    // 调试用
+    public static String printByte(byte[] b) {
+        String byteStr = "";
+        for (int i = 0; i < b.length; i++) {
+            String hex = Integer.toHexString(b[i] & 0xFF);
+            if (hex.length() == 1) {
+                hex = '0' + hex;
+            }
+            byteStr += hex.toUpperCase() + " ";
+        }
+        return byteStr;
+    }
 }

@@ -48,6 +48,7 @@ public class BroadcastMonitorService extends BaseService {
             }
         }
     };
+    private long recTime = 0;
 
     private static final int SCREEN_Off = 0;
     private static final int SCREEN_ON = 1;
@@ -128,6 +129,12 @@ public class BroadcastMonitorService extends BaseService {
                 // 监听wifi连接状态的广播
                 case ConnectivityManager.CONNECTIVITY_ACTION:
                     Logger.info(TAG, "wifi----CONNECTIVITY_ACTION");
+                    if ((System.currentTimeMillis() - recTime) < 2000) {
+                        Logger.info(TAG, "CONNECTIVITY_ACTION too much,ignore it");
+                        recTime = System.currentTimeMillis();
+                        break;
+                    }
+                    recTime = System.currentTimeMillis();
                     if (NetConfApplication.isUIReady) {
                         // 获取wifi服务
                         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);

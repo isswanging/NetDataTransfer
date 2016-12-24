@@ -75,6 +75,7 @@ public class UserListFragment extends BaseFragment {
     String targetName;
     long[] pattern = {100, 200};
     Vibrator vibrator;
+    boolean isQRReady = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -225,6 +226,7 @@ public class UserListFragment extends BaseFragment {
 
         ImageView QRImg = getView(drawerLayout, R.id.QRCode);
         new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg, app);
+        isQRReady = true;
     }
 
     private void showMenu() {
@@ -241,8 +243,9 @@ public class UserListFragment extends BaseFragment {
 
     private void initUI() {
         measureSrceen();
-        if (!isRotate) {
-            getDeviceInfo();
+        if (!isRotate || !NetConfApplication.isUIReady) {
+            if (!isQRReady)
+                getDeviceInfo();
             registerForEvent();
             loadUserListOrWarn();
         } else {
@@ -347,7 +350,7 @@ public class UserListFragment extends BaseFragment {
         if (app.wifi == 1) {
             notification.notifyInfo(login, null);
         } else {
-            notification.notifyInfo(login,"net_error");
+            notification.notifyInfo(login, "net_error");
         }
     }
 

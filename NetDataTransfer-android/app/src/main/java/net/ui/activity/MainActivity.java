@@ -93,6 +93,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     String targetIp;
     String targetName;
     Bundle bundle;
+    Host host;
 
     private static final int login = 0;
     private static final int refresh = 1;
@@ -186,6 +187,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
 
     @Override
     protected void onResume() {
+        login(refresh);
         registerReceiver(msgReceiver, filter, permission, null);
         super.onResume();
     }
@@ -268,7 +270,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 case MotionEvent.ACTION_MOVE:
                     // needMove可能还没准备好
                     if (touchView.getNeedMove() != 0 && touchView.isCanMove()) {
-                        Logger.info(TAG, "in activity touch MOVE");
+                        // Logger.info(TAG, "in activity touch MOVE");
                         yMove = event.getRawY();
                         if (yTemp == 0) {
                             yTemp = yMove;
@@ -331,13 +333,17 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         Logger.info(TAG, "get commend from fragment==" + commend);
         switch (commend) {
             case login:
+                Fragment dialog = getFragmentManager().findFragmentByTag("setup_warn");
+                if (dialog != null) {
+                    getFragmentManager().beginTransaction().remove(dialog).commit();
+                }
                 if (obj != null) {
                     CustAlertDialog cd = new CustAlertDialog();
                     cd.setTitle("错误");
                     cd.setAlertText("网络未连接或端口占用，加载失败");
                     cd.setListener(loadingListener);
                     cd.setCancelable(false);
-                    cd.show(getFragmentManager(), "wifi_warn");
+                    cd.show(getFragmentManager(), "setup_warn");
                     break;
                 }
             case refresh:
@@ -510,7 +516,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     }
 
     private void login(int commend) {
-        final Host host;
         if (commend == login || commend == refresh) {
             NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
             host = app.hostList.get(0);
@@ -535,8 +540,10 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             public void run() {
                 try {
                     // 加入在线列表
-                    app.sendUdpData(new DatagramSocket(), JSON.toJSONString(host),
-                            NetConfApplication.broadcastIP, NetConfApplication.broadcastPort);
+                    String hostInfo = JSON.toJSONString(host);
+                    Logger.info(TAG, "send json data is-----" + hostInfo);
+                    app.sendUdpData(new DatagramSocket(), hostInfo, NetConfApplication.broadcastIP,
+                            NetConfApplication.broadcastPort);
 
                 } catch (SocketException e) {
                     e.printStackTrace();
@@ -558,8 +565,9 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 @Override
                 public void run() {
                     try {
-                        app.sendUdpData(new DatagramSocket(),
-                                JSON.toJSONString(dp), targetIp,
+                        String dpInf = JSON.toJSONString(dp);
+                        Logger.info(TAG, "send json data is-----" + dpInf);
+                        app.sendUdpData(new DatagramSocket(), dpInf, targetIp,
                                 NetConfApplication.textPort);
                     } catch (SocketException e) {
                         e.printStackTrace();

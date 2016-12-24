@@ -15,7 +15,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class LoginMonitorService extends BaseService {
-    private final String TAG="LoginMonitorService";
+    private final String TAG = "LoginMonitorService";
     DatagramSocket broadSocket = null;
     DatagramPacket broadPacket = null;
     NetConfApplication app;
@@ -37,51 +37,58 @@ public class LoginMonitorService extends BaseService {
         tag = true;
         cachedThreadPool.execute(new ReceiveHost());
         return super.onStartCommand(intent, flags, startId);
-                }
+    }
 
-                @Override
-                public void onDestroy() {
-                    Logger.info(TAG, "service stop");
-                    super.onDestroy();
-                }
+    @Override
+    public void onDestroy() {
+        Logger.info(TAG, "service stop");
+        super.onDestroy();
+    }
 
-                private class ReceiveHost implements Runnable {
+    private class ReceiveHost implements Runnable {
 
-                    @Override
-                    public void run() {
-                        try {
-                            Logger.info(TAG, "start a service");
-                            broadPacket = new DatagramPacket(new byte[512], 512);
-                            broadSocket = new DatagramSocket(NetConfApplication.broadcastPort);
-                            while (tag) {
-                                // 收到广播
-                                broadSocket.receive(broadPacket);
-                                Logger.info(TAG, "receive a broadcast");
-                                // 整理信息
-                                String info = new String(broadPacket.getData(), 0,
-                                        broadPacket.getLength());
-                                Host host = JSON.parseObject(info, Host.class);
-                    host.setState(0);
-                    Logger.info(TAG, "from ip: " + host.getIp());
+        @Override
+        public void run() {
+            try {
+                Logger.info(TAG, "start a service");
+                broadPacket = new DatagramPacket(new byte[512], 512);
+                broadSocket = new DatagramSocket(NetConfApplication.broadcastPort);
+                while (tag) {
+                    // 收到广播
+                    broadSocket.receive(broadPacket);
+                    Logger.info(TAG, "receive a broadcast");
+                    Logger.info(TAG, "get udp json byte is-----" +
+                            NetConfApplication.printByte(broadPacket.getData()));
+                    // 整理信息
+                    String info = new String(broadPacket.getData(), 0,
+                            broadPacket.getLength());
+                    Logger.info(TAG, "get json data is ----" + info);
+                    info = info.trim();
+                    Logger.info(TAG, "trim udp data----" + info);
+                    if (info.length() > 0) {
+                        Host host = JSON.parseObject(info, Host.class);
+                        host.setState(0);
+                        Logger.info(TAG, "from ip: " + host.getIp());
 
-                    if (!app.containHost(host)) {
-                        host.setState(1);
-                        app.addHost(host);
-                        Logger.info(TAG, "add a host");
+                        if (!app.containHost(host)) {
+                            host.setState(1);
+                            app.addHost(host);
+                            Logger.info(TAG, "add a host");
 
-                        // 回应广播, 发送本机信息去目标地址
-                        if (host.getTag() == 0) {
-                            String userName = android.os.Build.MODEL;// 获取主机名
-                            String hostName = "Android";// 获取用户名
-                            String userDomain = "Android";// 获取计算机域
+                            // 回应广播, 发送本机信息去目标地址
+                            if (host.getTag() == 0) {
+                                String userName = android.os.Build.MODEL;// 获取主机名
+                                String hostName = "Android";// 获取用户名
+                                String userDomain = "Android";// 获取计算机域
 
-                            // 广播主机信息
-                            Host res = new Host(userName, userDomain,
-                                    NetConfApplication.hostIP, hostName, 1, 1);
-                            String hostInfo = JSON.toJSONString(res);
-                            app.sendUdpData(broadSocket, hostInfo,
-                                    host.getIp(),
-                                    NetConfApplication.broadcastPort);
+                                // 广播主机信息
+                                Host res = new Host(userName, userDomain,
+                                        NetConfApplication.hostIP, hostName, 1, 1);
+                                String hostInfo = JSON.toJSONString(res);
+                                app.sendUdpData(broadSocket, hostInfo,
+                                        host.getIp(),
+                                        NetConfApplication.broadcastPort);
+                            }
                         }
                     }
                 }
