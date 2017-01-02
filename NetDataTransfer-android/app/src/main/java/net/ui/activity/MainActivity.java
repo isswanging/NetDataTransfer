@@ -244,6 +244,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                     Logger.info(TAG, "in activity touch UP");
                     touchView.setCanMove(true);
                     if (!touchView.isShow()) {
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                         root.removeView(touchView);
                         touchView = null;
                     } else {
