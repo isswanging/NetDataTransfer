@@ -113,6 +113,8 @@ public class NetConfApplication extends Application {
     public final static int add = 0;
     public final static int remove = 1;
 
+    public final static int moveCache = 100;
+
     // 检查端口
     public String check(boolean isClose) {
         // 获取wifi服务

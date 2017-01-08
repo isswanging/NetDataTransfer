@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.Vector;
 
 public class MainActivity extends BaseActivity implements BaseFragment.Notification {
-    private final String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
     private final String user_TAG = "usersFragment";
     private final String chat_TAG = "chatFragment";
     private Handler handler = new ListHandler(this);
@@ -78,6 +78,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     List<Map<String, Object>> answerListData = new ArrayList<>();
     List<ChatMsgEntity> mDataArrays = new ArrayList<>();
     RelativeLayout.LayoutParams previewParams;
+    RelativeLayout.LayoutParams answerParams;
     LinearLayout custPreview;
     FrameLayout root;
     String[] answerData = new String[]{"好", "谢谢", "晚点再说", "自定义"};
@@ -250,6 +251,10 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                     } else {
                         previewParams.topMargin = topMargin - touchView.getNeedMove();
                         custPreview.setLayoutParams(previewParams);
+                        answerParams.topMargin = topMargin - touchView.getNeedMove() +
+                                getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin) +
+                                custPreview.getMeasuredHeight();
+                        touchView.answerList.setLayoutParams(answerParams);
                         touchView.setIsLock(true);
                     }
                     yTemp = 0;
@@ -288,22 +293,42 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                             else {
                                 moveTopMargin = (int) (moveTopMargin + gap);
                             }
-                            if (!touchView.isShow() && !touchView.running) {
-                                touchView.showAnswerList();
-                            }
                         }
                         // view处于下压并且继续下拉的状态
                         else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
                             moveTopMargin = (int) (moveTopMargin + gap * 0.1);
                         } else {
                             moveTopMargin = (int) (moveTopMargin + gap);
-                            if (touchView.isShow() && !touchView.running) {
-                                touchView.hideAnswerList();
-                            }
                         }
                         yTemp = yMove;
                         previewParams.topMargin = moveTopMargin;
                         custPreview.setLayoutParams(previewParams);
+
+                        if (!touchView.running && moveTopMargin >= (topMargin - touchView.getNeedMove()) &&
+                                moveTopMargin <= (topMargin - touchView.getNeedMove() + app.moveCache)) {
+                            if (!touchView.isShow) {
+                                Logger.info(TAG, "start running animator");
+                                touchView.showAnswerList(moveTopMargin + custPreview.getHeight() +
+                                        getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
+                            } else {
+                                answerParams.topMargin = moveTopMargin + custPreview.getHeight() +
+                                        getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
+                                touchView.answerList.setLayoutParams(answerParams);
+                            }
+                        }
+
+                        if (!touchView.running && moveTopMargin < (topMargin - touchView.getNeedMove())) {
+                            answerParams.topMargin = topMargin - touchView.getNeedMove() +
+                                    getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin) +
+                                    custPreview.getMeasuredHeight();
+                            touchView.answerList.setLayoutParams(answerParams);
+                        }
+
+                        if (moveTopMargin > (topMargin - touchView.getNeedMove() + app.moveCache) &&
+                                !touchView.running && touchView.isShow) {
+                            touchView.hideAnswerList(moveTopMargin + custPreview.getHeight() +
+                                    getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
+                        }
                     }
             }
             return true;
@@ -397,8 +422,6 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             touchView.answerList.clearAnimation();
             touchView.setActionListener(null);
             touchView.answerList = null;
-            touchView.hideAnswerList = null;
-            touchView.showAnswerList = null;
             touchView.previewContent = null;
         }
         finish();
@@ -436,6 +459,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         }
 
         previewParams = (RelativeLayout.LayoutParams) custPreview.getLayoutParams();
+        answerParams = (RelativeLayout.LayoutParams) touchView.answerList.getLayoutParams();
         moveTopMargin = previewParams.topMargin;
         topMargin = previewParams.topMargin;
     }
@@ -454,6 +478,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 case add:
                     act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                     act.root.addView(act.touchView);
+                    Logger.info(TAG, "answerlist height is = " + act.touchView.answerList.getHeight());
                     break;
                 case remove:
                     act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -517,13 +542,14 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     }
 
     private void login(int commend) {
-        if (commend == login || commend == refresh) {
+        if (commend == refresh) {
             NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
             host = app.hostList.get(0);
             host.setState(0);
             host.setIp(NetConfApplication.hostIP);
-        } else {
             app.hostList.clear();
+            app.addHost(host);
+        } else if (commend == login) {
             String userName = Build.MODEL;// 获取用户名
             String hostName = "Android";// 获取主机名
             String userDomain = "Android";// 获取计算机域
