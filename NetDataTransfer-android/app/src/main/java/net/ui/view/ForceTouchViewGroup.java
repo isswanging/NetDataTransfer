@@ -215,7 +215,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
                     }
                     // view处于下压并且继续下拉的状态
                     else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
-                        moveTopMargin = (int) (moveTopMargin + gap * 0.1);
+                        moveTopMargin = (int) (moveTopMargin + gap * 0.15);
                     } else {
                         moveTopMargin = (int) (moveTopMargin + gap);
                         if (isShow && !running) {
