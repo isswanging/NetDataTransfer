@@ -1,8 +1,5 @@
 package net.ui.activity;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.os.Bundle;
@@ -12,32 +9,25 @@ import android.widget.ImageView;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseActivity;
 import net.log.Logger;
-import net.service.BroadcastMonitorService;
-import net.service.FileMonitorService;
-import net.service.ScreenMonitorService;
-import net.service.UdpDataMonitorService;
-import net.util.HelpUtils;
 import net.vo.Host;
 
 import java.io.File;
 import java.util.Random;
 
-public class WelcomeActivity extends Activity {
+public class WelcomeActivity extends BaseActivity {
     private final String TAG = "WelcomeActivity";
-    private NetConfApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome);
-        app = (NetConfApplication) getApplication();
-        app.nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         // 创建快捷方式
         createShortCut();
         // 启动动画
-        ImageView welcomeAnim = HelpUtils.getView(this,R.id.welcome_img);
+        ImageView welcomeAnim = getView(R.id.welcome_img);
         welcomeAnim.setBackgroundResource(getImg());
         // 检查端口
         preCheck();
@@ -55,9 +45,9 @@ public class WelcomeActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             return false;
-        }else {
+        } else {
             return super.onKeyDown(keyCode, event);
         }
     }
@@ -86,29 +76,22 @@ public class WelcomeActivity extends Activity {
         }
     }
 
-    private void listen() {
-        this.startService(new Intent(this, BroadcastMonitorService.class));
-        this.startService(new Intent(this, UdpDataMonitorService.class));
-        this.startService(new Intent(this, FileMonitorService.class));
-        this.startService(new Intent(this, ScreenMonitorService.class));
-    }
-
     private void preCheck() {
-        if (app.check(this).endsWith(app.SUCCESS)) {
-            String userName = android.os.Build.MODEL;// 获取用户名
-            String userDomain = "Android";// 获取计算机域
-            Host host = new Host(userName, userDomain, "0.0.0.0",
-                    NetConfApplication.hostName, 1, 0);
-            app.addHost(host);
+        String userName = android.os.Build.MODEL;// 获取用户名
+        String userDomain = "Android";// 获取计算机域
+        Host host = new Host(userName, userDomain, "0.0.0.0", NetConfApplication.hostName, 1, 0);
+        app.addHost(host);
+        // 加载音乐
+        app.loadVoice();
+        // 创建接收文件的目录
+        NetConfApplication.saveFilePath = app.getSDPath()
+                + "/NetDataTransfer/recFile";
+        Logger.info(TAG, NetConfApplication.saveFilePath);
 
+        if (app.check(true).endsWith(app.SUCCESS)) {
             // 建立监听
             listen();
-            // 加载音乐
-            app.loadVoice();
-            // 创建接收文件的目录
-            NetConfApplication.saveFilePath = app.getSDPath()
-                    + "/NetDataTransfer/recFile";
-            Logger.info(TAG, NetConfApplication.saveFilePath);
+            Logger.info(TAG, "prepare something");
             File recFile = new File(NetConfApplication.saveFilePath);
             if (!recFile.exists()) {
                 Logger.info(TAG, "create dir");

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import net.app.netdatatransfer.R;
 import net.vo.ChatMsgEntity;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 @SuppressLint("InflateParams")
@@ -25,6 +26,10 @@ public class ChatMsgAdapter extends BaseAdapter {
         int get_msg = 0;
         // 自己发出的信息
         int send_msg = 1;
+    }
+
+    public ChatMsgAdapter(WeakReference<MainActivity> refActvity, List<ChatMsgEntity> data) {
+        this(refActvity.get(), data);
     }
 
     public ChatMsgAdapter(Context context, List<ChatMsgEntity> data) {
@@ -84,6 +89,14 @@ public class ChatMsgAdapter extends BaseAdapter {
             viewHolder.content = (TextView) convertView
                     .findViewById(R.id.chatContent);
             viewHolder.isComMsg = isComMsg;
+
+            viewHolder.content.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    v.showContextMenu();
+                    return true;
+                }
+            });
 
             convertView.setTag(viewHolder);
         } else {

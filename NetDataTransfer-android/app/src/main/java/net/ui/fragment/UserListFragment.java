@@ -1,12 +1,11 @@
 package net.ui.fragment;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Vibrator;
@@ -31,6 +30,7 @@ import android.widget.TextView;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseFragment;
 import net.log.Logger;
 import net.ui.activity.CaptureActivity;
 import net.ui.activity.FileListActivity;
@@ -46,7 +46,6 @@ import java.util.Map;
 
 public class UserListFragment extends BaseFragment {
     private final String TAG = "UserListFragment";
-    NetConfApplication app;
     // 屏幕长宽
     int screenWidth;
     int screenHeight;
@@ -77,11 +76,11 @@ public class UserListFragment extends BaseFragment {
     String targetName;
     long[] pattern = {100, 200};
     Vibrator vibrator;
+    boolean isQRReady = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = (NetConfApplication) getActivity().getApplication();
         // 菜单显示与隐藏的动画
         showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
                 1f, Animation.RELATIVE_TO_SELF, 0f);
@@ -89,6 +88,7 @@ public class UserListFragment extends BaseFragment {
         showMenuAnim.setDuration(100);
         hideMenuAnim.setDuration(200);
         vibrator = (Vibrator) app.getSystemService(app.VIBRATOR_SERVICE);
+        Logger.info(TAG, "UserListFragment onCreate");
     }
 
     @Override
@@ -135,6 +135,8 @@ public class UserListFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         root.removeView(menu);
+        if (pullRefreshListView != null)
+            pullRefreshListView.setCanRefresh(true);
         isMenuOpen = false;
         super.onSaveInstanceState(outState);
     }
@@ -225,6 +227,7 @@ public class UserListFragment extends BaseFragment {
 
         ImageView QRImg = getView(drawerLayout, R.id.QRCode);
         new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg, app);
+        isQRReady = true;
     }
 
     private void showMenu() {
@@ -241,8 +244,9 @@ public class UserListFragment extends BaseFragment {
 
     private void initUI() {
         measureSrceen();
-        if (!isRotate) {
-            getDeviceInfo();
+        if (!isRotate || !NetConfApplication.isUIReady) {
+            if (!isQRReady)
+                getDeviceInfo();
             registerForEvent();
             loadUserListOrWarn();
         } else {
@@ -281,8 +285,7 @@ public class UserListFragment extends BaseFragment {
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.exit:
-                        app.forceClose = true;
-                        getActivity().finish();
+                        notification.notifyInfo(exit, null);
                         break;
                     case R.id.openFolder:
                         startActivity(new Intent(getActivity(), FileListActivity.class));
@@ -314,7 +317,7 @@ public class UserListFragment extends BaseFragment {
                 if (!isMenuOpen) {
                     if (menu == null) {
                         Logger.info(TAG, "creat a new menu");
-                        LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+                        LayoutInflater layoutInflater = LayoutInflater.from(app);
                         menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
                         getView(menu, R.id.getProgress).setOnClickListener(onMenuClickListener);
                         getView(menu, R.id.sendProgress).setOnClickListener(onMenuClickListener);
@@ -348,25 +351,7 @@ public class UserListFragment extends BaseFragment {
         if (app.wifi == 1) {
             notification.notifyInfo(login, null);
         } else {
-            // 弹出警告框并退出
-            new AlertDialog.Builder(getActivity()).setTitle("错误")
-                    .setMessage("wifi未连接或端口异常，启动失败")
-                    .setPositiveButton("退出",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    getActivity().setResult(getActivity().RESULT_OK);// 确定按钮事件
-                                    getActivity().finish();
-                                }
-                            })
-                    .setNegativeButton("重试",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    app.check(getActivity());
-                                    notification.notifyInfo(retry, null);
-                                }
-                            }).setCancelable(false).show();
+            notification.notifyInfo(login, "net_error");
         }
     }
 
@@ -418,7 +403,7 @@ public class UserListFragment extends BaseFragment {
 
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (!app.isLand) {
+                        if (!app.isLand && android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
                             Logger.info(TAG, "in 3d touch effect");
                             TextView name = getView(view, R.id.userName);
                             TextView ip = getView(view, R.id.userIP);
@@ -440,5 +425,6 @@ public class UserListFragment extends BaseFragment {
                     }
                 }
         );
+        NetConfApplication.isUIReady = true;
     }
 }

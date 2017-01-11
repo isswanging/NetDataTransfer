@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/force_touch_view_margin">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <ViewStub
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="@dimen/preview_content_height"
         android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
-        android:orientation="vertical">
+        android:layout_marginRight="15dp" />
 
-    </LinearLayout>
 
     <ListView
         android:id="@+id/answer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:background="@drawable/answer"
+        android:divider="@color/share_text"
+        android:dividerHeight="1px"
         android:visibility="invisible" />
 
-</RelativeLayout>
+</merge>

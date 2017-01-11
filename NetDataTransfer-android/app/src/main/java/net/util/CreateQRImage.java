@@ -4,6 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
 import android.widget.ImageView;
 
 import com.google.zxing.BarcodeFormat;
@@ -17,26 +21,26 @@ import net.app.netdatatransfer.R;
 import net.log.Logger;
 
 import java.util.Hashtable;
-import java.util.Random;
 
 public class CreateQRImage {
-    private static ImageView sweepIV;
+    private final String TAG = "QRImage";
+
+    private ImageView sweepIV;
     private Context context;
     private int QR_WIDTH, QR_HEIGHT;
     private int imageW, imageH;
-    Random rand = new Random();
 
     public CreateQRImage(String uri, ImageView img, Context context) {
         sweepIV = img;
         this.context = context;
         QR_WIDTH = context.getResources().getDimensionPixelSize(R.dimen.qr_size);
         QR_HEIGHT = context.getResources().getDimensionPixelSize(R.dimen.qr_size);
-        Logger.info(this.toString(), "QR_WIDTH====" + QR_WIDTH);
+        Logger.info(TAG, "QR_WIDTH====" + QR_WIDTH);
         createQRImage(uri);
     }
 
     // 要转换的地址或字符串,可以是中文
-    public void createQRImage(String url) {
+    private void createQRImage(String url) {
         try {
             // 判断URL合法性
             if (url == null || "".equals(url) || url.length() < 1) {
@@ -70,12 +74,7 @@ public class CreateQRImage {
             for (int y = 0; y < QR_HEIGHT; y++) {
                 for (int x = 0; x < QR_WIDTH; x++) {
                     if (bitMatrix.get(x, y)) {
-                        int i = rand.nextInt(12) % 2;
-                        if (i == 0) {
-                            pixels[y * QR_WIDTH + x] = 0xff179108;
-                        } else
-                            pixels[y * QR_WIDTH + x] = 0xff006400;
-
+                        pixels[y * QR_WIDTH + x] = 0x00000000;
                     } else {
                         pixels[y * QR_WIDTH + x] = 0xffffffff;
                     }
@@ -85,10 +84,17 @@ public class CreateQRImage {
             Bitmap bitmap = Bitmap.createBitmap(QR_WIDTH, QR_HEIGHT,
                     Bitmap.Config.ARGB_8888);
             bitmap.setPixels(pixels, 0, QR_WIDTH, 0, 0, QR_WIDTH, QR_HEIGHT);
+
+            Bitmap bitmap2 = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.qc_bg)).getBitmap();
+            Canvas canvas = new Canvas(bitmap);
+            Paint paint = new Paint();
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
+            canvas.drawBitmap(bitmap2, 0, 0, paint);
             bitmaps[0] = bitmap;
 
             // 显示到一个ImageView上面
             sweepIV.setImageBitmap(addLogo(bitmaps, startW, starH));
+            bitmap2.recycle();
         } catch (WriterException e) {
             e.printStackTrace();
         }

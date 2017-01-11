@@ -1,15 +1,7 @@
 package net.ui.activity;
 
-import java.util.ArrayList;
-
-import com.daimajia.numberprogressbar.NumberProgressBar;
-
-import net.app.NetConfApplication;
-import net.log.Logger;
-import net.vo.Progress;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,11 +13,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import net.app.netdatatransfer.R;
 
-public class ProgressBarListActivity extends Activity {
+import com.daimajia.numberprogressbar.NumberProgressBar;
+
+import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
+import net.base.BaseActivity;
+import net.log.Logger;
+import net.vo.Progress;
+
+import java.util.ArrayList;
+
+public class ProgressBarListActivity extends BaseActivity {
     int send = 0;
     int get = 1;
     int tag;
@@ -41,7 +41,7 @@ public class ProgressBarListActivity extends Activity {
         initActionBar();
         initData();
 
-        ListView listView = (ListView) findViewById(R.id.progressList);
+        ListView listView = getView(R.id.progressList);
         adapter = new ProgressAdapter(this);
         listView.setAdapter(adapter);
 
@@ -90,7 +90,7 @@ public class ProgressBarListActivity extends Activity {
         title.setCustomView(actionbarLayout);
         ((TextView) findViewById(R.id.titleName)).setText("进度列表");
 
-        ImageButton back = (ImageButton) findViewById(R.id.back);
+        ImageButton back = getView(R.id.back);
         back.setOnClickListener(new OnClickListener() {
 
             @Override

@@ -7,9 +7,12 @@
     android:versionName="5.0">
 
     <uses-sdk
-        android:minSdkVersion="17"
+        android:minSdkVersion="16"
         android:targetSdkVersion="23" />
 
+    <permission android:name="com.android.permission.RECV_NDT_NOTIFY" />
+
+    <uses-permission android:name="com.android.permission.RECV_NDT_NOTIFY" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -20,7 +23,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -44,9 +46,8 @@
         </activity>
         <activity
             android:name="net.ui.activity.MainActivity"
-            android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar">
+            android:theme="@style/TranslucentTheme">
             <intent-filter>
                 <action android:name="net.ui.main" />
 
@@ -85,18 +86,10 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name="net.service.BroadcastMonitorService"
-            android:persistent="true" />
-        <service
-            android:name="net.service.UdpDataMonitorService"
-            android:persistent="true" />
-        <service
-            android:name="net.service.FileMonitorService"
-            android:persistent="true" />
-        <service
-            android:name="net.service.ScreenMonitorService"
-            android:persistent="true" />
+        <service android:name="net.service.LoginMonitorService" />
+        <service android:name="net.service.UdpDataMonitorService" />
+        <service android:name="net.service.FileMonitorService" />
+        <service android:name="net.service.BroadcastMonitorService" />
     </application>
 
 </manifest>

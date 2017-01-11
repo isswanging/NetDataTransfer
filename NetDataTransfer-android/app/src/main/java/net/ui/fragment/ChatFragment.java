@@ -3,10 +3,10 @@ package net.ui.fragment;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -14,10 +14,13 @@ import android.os.Bundle;
 import android.os.Message;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -30,6 +33,7 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseFragment;
 import net.log.Logger;
 import net.ui.activity.ChatMsgAdapter;
 import net.ui.view.SideslipMenuView;
@@ -43,10 +47,9 @@ import java.util.List;
 
 public class ChatFragment extends BaseFragment {
     private final String TAG = "ChatFragment";
-    NetConfApplication app;
     FrameLayout chatMain;
     SideslipMenuView sideslipMenuView;
-    ImageView backImg;
+    String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     private ChatOnClickListener clickListener = new ChatOnClickListener();
     // 聊天内容的适配器
@@ -58,22 +61,21 @@ public class ChatFragment extends BaseFragment {
     private String targetName;
     private String targetIp;
 
-    ChatReceiver chatReceiver;
-    IntentFilter filter;
     LinearLayout sendFile;
-
     TextView otherName;
     TextView otherIP;
+
+    private final int COPY = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app = (NetConfApplication) getActivity().getApplication();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (isRotate) {
+            Logger.info(TAG, "not create new ui");
             // 设置聊天列表
             TextView chatCurName = getView(chatMain, R.id.chatCurName);
             chatCurName.setText(targetName);
@@ -84,6 +86,7 @@ public class ChatFragment extends BaseFragment {
             otherIP.setText(targetIp);
             return viewGroup;
         } else {
+            Logger.info(TAG, "create new ui");
             viewGroup = inflater.inflate(R.layout.chat, container, false);
             sideslipMenuView = getView(viewGroup, R.id.id_menu);
             chatMain = getView(viewGroup, R.id.chatMain);
@@ -91,7 +94,6 @@ public class ChatFragment extends BaseFragment {
             mListView = getView(viewGroup, R.id.charContentList);
             otherName = getView(viewGroup, R.id.otherName);
             otherIP = getView(viewGroup, R.id.otherIP);
-            backImg = getView(viewGroup, R.id.closeCurChat);
 
             TextView send = getView(viewGroup, R.id.send);
             send.setOnClickListener(clickListener);
@@ -121,10 +123,17 @@ public class ChatFragment extends BaseFragment {
                 Logger.info(TAG, "hide overlay");
             }
 
-            // 注册广播接收者
-            chatReceiver = new ChatReceiver();
-            filter = new IntentFilter();
-            filter.addAction("net.ui.chatFrom");
+            mListView.setOnTouchListener(new View.OnTouchListener() {
+
+                @SuppressLint("ClickableViewAccessibility")
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    sendFile.setVisibility(View.GONE);
+                    return false;
+                }
+            });
+
+            registerForContextMenu(mListView);
 
             return viewGroup;
         }
@@ -141,6 +150,7 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
+        Logger.info(TAG, "chatfragment destroy");
         app.topFragment = "users";
         super.onDestroy();
     }
@@ -173,6 +183,38 @@ public class ChatFragment extends BaseFragment {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        sideslipMenuView.setOpen(false);
+        int width = (int) (getResources().getDimension(R.dimen.editText_width));
+        Logger.info(TAG, "edit width = " + width);
+        chatEditText.getLayoutParams().width = width;
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        menu.add(0, COPY, 0, R.string.copy_menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        switch (item.getItemId()) {
+            case COPY:
+                ChatMsgEntity entity = mDataArrays.get(menuInfo.position);
+                String text = entity.getText();
+                ClipboardManager cbm = (ClipboardManager) app.getSystemService(Context.CLIPBOARD_SERVICE);
+                cbm.setPrimaryClip(ClipData.newPlainText(null, text));
+
+                break;
+            default:
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 
     @Override
@@ -252,15 +294,6 @@ public class ChatFragment extends BaseFragment {
         otherName.setText(targetName);
         otherIP.setText(targetIp);
 
-        mListView.setOnTouchListener(new View.OnTouchListener() {
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                sendFile.setVisibility(View.GONE);
-                return false;
-            }
-        });
     }
 
     public class ChatOnClickListener implements View.OnClickListener {
@@ -269,10 +302,13 @@ public class ChatFragment extends BaseFragment {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.closeChat:
+                    sideslipMenuView.scrollTo(sideslipMenuView.getmMenuWidth(), 0);
+                    sideslipMenuView.setOpen(false);
                 case R.id.closeCurChat:
                     app.chatId = "gone";
                     app.topFragment = "users";
                     notification.notifyInfo(close, null);
+                    mDataArrays.clear();
                     app.hideKeyboard(getActivity());
                     break;
 
@@ -330,22 +366,6 @@ public class ChatFragment extends BaseFragment {
                 default:
                     break;
             }
-        }
-    }
-
-    class ChatReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context content, Intent intent) {
-            Bundle bundle = intent.getExtras();
-            DataPacket dp = JSON.parseObject(bundle.getString("content"),
-                    DataPacket.class);
-
-            // 判断是否当前聊天窗口
-            ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-                    app.getDate(), dp.getContent(), true);
-            mDataArrays.add(entity);
-            mAdapter.notifyDataSetChanged();
-            mListView.setSelection(mListView.getCount() - 1);
         }
     }
 

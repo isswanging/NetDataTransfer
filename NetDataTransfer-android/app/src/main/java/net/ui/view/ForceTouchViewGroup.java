@@ -1,5 +1,8 @@
 package net.ui.view;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -17,11 +20,8 @@ import android.renderscript.ScriptIntrinsicBlur;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.ViewStub;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
@@ -30,23 +30,27 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.util.HelpUtils;
+import net.ui.activity.MainActivity;
+import net.util.ScreenHelpUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 模仿iphone的3D touch效果
  */
-public class ForceTouchViewGroup extends LinearLayout {
+public class ForceTouchViewGroup extends RelativeLayout {
     private final String TAG = "ForceTouchViewGroup";
 
     public TextView title;
-    public LinearLayout preview;
+    public ViewStub preview;
     public RelativeLayout.LayoutParams previewParams;
+    public RelativeLayout.LayoutParams answerParams;
     public ListView answerList;
     public SimpleAdapter answerAdapter;
     public NetConfApplication app;
+    public boolean isFirst = false;//判断是否第一次显示
     public boolean isShow = false;// 判断菜单是否显示
     public boolean isLock = false;// 屏蔽activity的事件分发
     public boolean running = false;// 动画是否运行
@@ -54,40 +58,31 @@ public class ForceTouchViewGroup extends LinearLayout {
     public float yDown;
     public float yMove;
     public float yTemp;
-    public ViewGroup root;
+    public ActionListener actionListener;
     public int topMargin;
     public int moveTopMargin;
     public int answerHeight;
     public int needMove = 0;// 菜单显示需要上拉的距离
     public int answerListTop;
-    public int answerListBottom;
     public int screenheight;
     public View previewContent;
     public Context mContext;
+    public boolean canMove;
 
-    // 动画
-    public Animation showAnswerList;
-    public Animation hideAnswerList;
+    private final int add = 0;
+    private final int remove = 1;
 
-    // 单例
-    private static ForceTouchViewGroup instance;
-
-    private ForceTouchViewGroup(Context context) {
+    public ForceTouchViewGroup(Context context) {
         super(context);
         // 初始化
-        addView(LayoutInflater.from(context).inflate(R.layout.force_touch_view, null));
         app = (NetConfApplication) context.getApplicationContext();
-        title = (TextView) findViewById(R.id.preview_username);
-        preview = (LinearLayout) findViewById(R.id.preview);
-        answerList = (ListView) findViewById(R.id.answer);
-        previewParams = (RelativeLayout.LayoutParams) preview.getLayoutParams();
-        mContext = context;
-    }
+        LayoutInflater.from(app).inflate(R.layout.force_touch_view, this);
 
-    public static ForceTouchViewGroup getInstance(Context context) {
-        if (instance == null)
-            instance = new ForceTouchViewGroup(context);
-        return instance;
+        title = (TextView) findViewById(R.id.preview_username);
+        preview = (ViewStub) findViewById(R.id.preview);
+        answerList = (ListView) findViewById(R.id.answer);
+        mContext = context.getApplicationContext();
+        canMove = true;
     }
 
     public int getNeedMove() {
@@ -107,92 +102,54 @@ public class ForceTouchViewGroup extends LinearLayout {
     }
 
     public void show(final Builder builder) {
-        initPostion(mContext);
-
         // 设置模糊背景
         Drawable drawable = new BitmapDrawable(getResources(), builder.blurBg);
         drawable.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
         setBackground(drawable);
 
-        root = builder.pRoot;
-
         // 填充view和list数据
-        previewContent = builder.previewContent;
-        preview.addView(previewContent,
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (previewContent == null) {
+            preview.setLayoutResource(builder.previewLayout);
+            preview.inflate();
+            previewContent = findViewById(R.id.cust_preview);
+        }
+        previewParams = (RelativeLayout.LayoutParams) previewContent.getLayoutParams();
+        answerParams = (RelativeLayout.LayoutParams) answerList.getLayoutParams();
+        initPostion(mContext);
+
         answerAdapter = new SimpleAdapter(app, builder.answerListData,
                 R.layout.answer_item, new String[]{"text"}, new int[]{R.id.answer_text});
         answerList.setAdapter(answerAdapter);
-        root.addView(this);
+        actionListener.updateUI(add);
         // 计算list高度和滑动的距离
-        answerList.post(new Runnable() {
-            @Override
-            public void run() {
-                int between = getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
-                answerHeight = answerList.getHeight();
-                needMove = answerHeight - topMargin + between * 2;
-                answerListTop = screenheight - between - answerHeight;
-                answerListBottom = screenheight - between;
-                showAnswerList = AnimationUtils.loadAnimation(app, R.anim.show_answerlist_anim);
-                hideAnswerList = AnimationUtils.loadAnimation(app, R.anim.hide_answerlist_anim);
-
-                Logger.info(TAG, "answerList height====" + answerHeight + "====answerListTop=="
-                        + answerListTop + "===answerListBottom" + answerListBottom);
-
-                showAnswerList.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        running = true;
-                        answerList.setVisibility(VISIBLE);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        isShow = true;
-                        running = false;
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-
-                hideAnswerList.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        running = true;
-                        isShow = false;
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        answerList.setVisibility(INVISIBLE);
-                        running = false;
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-            }
-        });
+        if (!isFirst) {
+            answerList.post(new Runnable() {
+                @Override
+                public void run() {
+                    int between = getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
+                    answerHeight = answerList.getMeasuredHeight();
+                    needMove = answerHeight - topMargin + between * 2;
+                    answerListTop = screenheight - between - answerHeight;
+                    Logger.info(TAG, "answerlist height is ==== " + answerHeight);
+                    answerParams.topMargin = screenheight;
+                    answerList.setLayoutParams(answerParams);
+                }
+            });
+            isFirst = true;
+        }
 
         // 注册点击事件
         answerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Logger.info(TAG, "in item click event");
-                Message msg = builder.pHandler.obtainMessage();
+                Message msg = ((Handler) builder.pHandler.get()).obtainMessage();
                 msg.what = builder.pWhat;
                 msg.arg1 = position;
                 msg.sendToTarget();
-                clearView();
-                root.removeView(ForceTouchViewGroup.this);
+                actionListener.updateUI(remove);
             }
         });
-
     }
 
     @Override
@@ -210,16 +167,32 @@ public class ForceTouchViewGroup extends LinearLayout {
             case MotionEvent.ACTION_UP:
                 Logger.info(TAG, "in forceTouchView touch UP");
                 if (!isShow) {
-                    clearView();
-                    root.removeView(this);
+                    actionListener.updateUI(remove);
                 } else {
                     previewParams.topMargin = topMargin - needMove;
-                    preview.setLayoutParams(previewParams);
+                    previewContent.setLayoutParams(previewParams);
+                    answerParams.topMargin = topMargin - getNeedMove() +
+                            getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin) +
+                            previewContent.getMeasuredHeight();
+                    answerList.setLayoutParams(answerParams);
                     yTemp = 0;
                 }
+                setCanMove(true);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                Logger.info(TAG, "in activity touch ACTION_POINTER_DOWN");
+                setCanMove(false);
+                Logger.info(TAG, "stop move");
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                Logger.info(TAG, "in activity touch ACTION_POINTER_UP");
+                if (!isShow) {
+                    actionListener.updateUI(remove);
+                }
+                setCanMove(true);
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (isMove) {
+                if (isMove && canMove) {
                     yMove = event.getRawY();
                     if (yTemp == 0) {
                         yTemp = yMove;
@@ -237,21 +210,47 @@ public class ForceTouchViewGroup extends LinearLayout {
                             moveTopMargin = (int) (moveTopMargin + gap);
                         }
                         if (!isShow && !running) {
-                            showAnswerList();
+                            //showAnswerList();
                         }
                     }
                     // view处于下压并且继续下拉的状态
                     else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
-                        moveTopMargin = (int) (moveTopMargin + gap * 0.1);
+                        moveTopMargin = (int) (moveTopMargin + gap * 0.15);
                     } else {
                         moveTopMargin = (int) (moveTopMargin + gap);
                         if (isShow && !running) {
-                            hideAnswerList();
+                            //hideAnswerList();
                         }
                     }
                     yTemp = yMove;
                     previewParams.topMargin = moveTopMargin;
-                    preview.setLayoutParams(previewParams);
+                    previewContent.setLayoutParams(previewParams);
+
+                    if (!running && moveTopMargin >= (topMargin - getNeedMove()) &&
+                            moveTopMargin <= (topMargin - getNeedMove() + app.moveCache)) {
+                        if (!isShow) {
+                            Logger.info(TAG, "start running animator");
+                            showAnswerList(moveTopMargin + previewContent.getHeight() +
+                                    getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
+                        } else {
+                            answerParams.topMargin = moveTopMargin + previewContent.getHeight() +
+                                    getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
+                            answerList.setLayoutParams(answerParams);
+                        }
+                    }
+
+                    if (!running && moveTopMargin < (topMargin - getNeedMove())) {
+                        answerParams.topMargin = topMargin - getNeedMove() +
+                                getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin) +
+                                previewContent.getMeasuredHeight();
+                        answerList.setLayoutParams(answerParams);
+                    }
+
+                    if (moveTopMargin > (topMargin - getNeedMove() + app.moveCache) &&
+                            !running && isShow) {
+                        hideAnswerList(moveTopMargin + previewContent.getHeight() +
+                                getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
+                    }
                 }
                 break;
         }
@@ -259,33 +258,36 @@ public class ForceTouchViewGroup extends LinearLayout {
     }
 
     public static class Builder {
+        WeakReference<MainActivity> refActvity;
         Context context;
         Bitmap blurBg;
         String pTargetIP;
-        ViewGroup pRoot;
-        Handler pHandler;
+        WeakReference pHandler;
         int pWhat;
         float scale = 0.1f;
-        View previewContent;
+        int previewLayout;
         List<Map<String, Object>> answerListData;
+        ForceTouchViewGroup forceTouchViewGroup;
 
-        public Builder(Context c) {
-            context = c;
+        public Builder(MainActivity c) {
+            refActvity = new WeakReference<>(c);
+            context = refActvity.get();
         }
 
         public Builder setBackground(View view) {
-            //创建一块画布
-            Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            //画出原图
-            view.draw(canvas);
-            //缩小原图提高运行效率
-            Bitmap background = scaleBitmap(bitmap);
-            //高斯模糊处理
-            blurBg = blurBitmap(bitmap);
-            background.recycle();
-            bitmap.recycle();
-
+            if (blurBg == null) {
+                //创建一块画布
+                Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                //画出原图
+                view.draw(canvas);
+                //缩小原图提高运行效率
+                Bitmap background = scaleBitmap(bitmap);
+                //高斯模糊处理
+                blurBg = blurBitmap(bitmap);
+                background.recycle();
+                bitmap.recycle();
+            }
             return this;
         }
 
@@ -295,20 +297,14 @@ public class ForceTouchViewGroup extends LinearLayout {
         }
 
         // 设置主界面
-        public Builder setView(View view) {
-            previewContent = view;
-            return this;
-        }
-
-        // 设置主界面的父节点
-        public Builder setRoot(ViewGroup v) {
-            pRoot = v;
+        public Builder setView(int res) {
+            previewLayout = res;
             return this;
         }
 
         public ForceTouchViewGroup create() {
-            ForceTouchViewGroup forceTouchViewGroup = ForceTouchViewGroup.getInstance(context);
-            forceTouchViewGroup.show(this);
+            if (forceTouchViewGroup == null)
+                forceTouchViewGroup = new ForceTouchViewGroup(context.getApplicationContext());
             return forceTouchViewGroup;
         }
 
@@ -351,7 +347,7 @@ public class ForceTouchViewGroup extends LinearLayout {
         }
 
         public Builder setHandler(Handler handler, int what) {
-            pHandler = handler;
+            pHandler = new WeakReference(handler);
             pWhat = what;
             return this;
         }
@@ -368,23 +364,81 @@ public class ForceTouchViewGroup extends LinearLayout {
 
         // 居中
         int height = getResources().getDimensionPixelSize(R.dimen.preview_content_height);
-        int stateHeight = HelpUtils.getStatusHeight(context);
-        screenheight = HelpUtils.getScreenHeight(context);
+        int stateHeight = ScreenHelpUtils.getStatusHeight(context);
+        screenheight = ScreenHelpUtils.getScreenHeight(context);
         topMargin = (screenheight - stateHeight - height) / 2;
         previewParams.topMargin = topMargin;
-        preview.setLayoutParams(previewParams);
+        previewContent.setLayoutParams(previewParams);
     }
 
-    public void clearView() {
-        preview.removeView(previewContent);
+    public void showAnswerList(int endPostion) {
+        ValueAnimator animator = ValueAnimator.ofInt(screenheight, endPostion);
+        animator.setDuration(100);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                int top = (Integer) valueAnimator.getAnimatedValue();
+                answerParams.topMargin = top;
+                answerList.setLayoutParams(answerParams);
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                running = false;
+                isShow = true;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                answerList.setVisibility(VISIBLE);
+                running = true;
+            }
+        });
+        animator.start();
     }
 
-    public void showAnswerList() {
-        answerList.startAnimation(showAnswerList);
+    public void hideAnswerList(int startPostion) {
+        ValueAnimator animator = ValueAnimator.ofInt(startPostion, screenheight);
+        animator.setDuration(100);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                int top = (Integer) valueAnimator.getAnimatedValue();
+                answerParams.topMargin = top;
+                answerList.setLayoutParams(answerParams);
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                answerList.setVisibility(VISIBLE);
+                running = false;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                running = true;
+                isShow = false;
+            }
+        });
+        animator.start();
     }
 
-    public void hideAnswerList() {
-        answerList.startAnimation(hideAnswerList);
+
+    public interface ActionListener {
+        void updateUI(int cmd);
     }
 
+    public void setActionListener(ActionListener listener) {
+        actionListener = listener;
+    }
+
+    public boolean isCanMove() {
+        return canMove;
+    }
+
+    public void setCanMove(boolean move) {
+        canMove = move;
+    }
 }

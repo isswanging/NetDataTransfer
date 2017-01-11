@@ -15,6 +15,9 @@ import android.os.Environment;
 import android.util.SparseArray;
 import android.view.inputmethod.InputMethodManager;
 
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
+
 import net.app.netdatatransfer.R;
 import net.log.Logger;
 import net.vo.ChatMsgEntity;
@@ -37,7 +40,7 @@ import java.util.Vector;
 public class NetConfApplication extends Application {
     private final String TAG = "NetConfApplication";
     public int wifi = 0;
-    public String chatId = "none";
+    public String chatId = "gone";
     public SoundPool soundPool;
     public NotificationManager nManager;
     public int soundID;
@@ -60,6 +63,9 @@ public class NetConfApplication extends Application {
     public final String ERROR = "error";
 
     public final String FAIL = "IOException";
+
+    // 判断界面是否加载完成
+    public static boolean isUIReady = false;
 
     // 广播IP
     public static final String broadcastIP = "255.255.255.255";
@@ -91,11 +97,11 @@ public class NetConfApplication extends Application {
     // 文件传送的任务id
     public static int taskId = 0;
     // 传输文件任务列表
-    public static SparseArray<Progress> sendTaskList = new SparseArray<Progress>();
-    public static SparseArray<Progress> getTaskList = new SparseArray<Progress>();
+    public static SparseArray<Progress> sendTaskList = new SparseArray<>();
+    public static SparseArray<Progress> getTaskList = new SparseArray<>();
 
     // 记录聊天内容(未读的消息)
-    public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<String, ArrayList<ChatMsgEntity>>();
+    public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<>();
 
     // 文件格式
     public final static String[] imageSupport = {"BMP", "JPG", "JPEG", "PNG",
@@ -104,27 +110,32 @@ public class NetConfApplication extends Application {
             "mpg"};
     public final static String[] audioSupport = {"mp3", "wma", "wav", "amr"};
 
+    public final static int add = 0;
+    public final static int remove = 1;
+
+    public final static int moveCache = 150;
+
     // 检查端口
-    public String check(Context userListActivity) {
+    public String check(boolean isClose) {
         // 获取wifi服务
-        WifiManager wifiManager = (WifiManager) userListActivity
-                .getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         // 获取连接状态
-        ConnectivityManager connectMgr = (ConnectivityManager) userListActivity
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo wifiNetInfo = connectMgr
                 .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (wifiManager.isWifiEnabled() && wifiNetInfo.isConnected()) {
             wifi = 1;
-            try {
-                new DatagramSocket(textPort).close();
-                new ServerSocket(filePort).close();
-
-                return SUCCESS;
-            } catch (SocketException e) {
-                return ERROR;
-            } catch (IOException e) {
-                return FAIL;
+            if (isClose) {
+                try {
+                    new DatagramSocket(textPort).close();
+                    new ServerSocket(filePort).close();
+                    Logger.info(TAG, "check result : " + SUCCESS);
+                    return SUCCESS;
+                } catch (SocketException e) {
+                    return ERROR;
+                } catch (IOException e) {
+                    return FAIL;
+                }
             }
         } else
             wifi = 0;
@@ -160,10 +171,10 @@ public class NetConfApplication extends Application {
     // 发送UDP消息
     public void sendUdpData(DatagramSocket broadSocket, String obj,
                             String targetIp, int port) {
-        byte[] info = obj.getBytes();
-
         DatagramPacket broadPacket;
         try {
+            byte[] info = obj.getBytes();
+            Logger.info(TAG, "send udp json byte is---" + NetConfApplication.printByte(info));
             broadPacket = new DatagramPacket(info, info.length,
                     InetAddress.getByName(targetIp), port);
             broadSocket.send(broadPacket);
@@ -172,7 +183,6 @@ public class NetConfApplication extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     // 获取本机IP
@@ -188,8 +198,10 @@ public class NetConfApplication extends Application {
 
     @Override
     public void onCreate() {
-        hostIP = getHostIp(this);
         super.onCreate();
+        hostIP = getHostIp(this);
+        refWatcher = LeakCanary.install(this);
+        nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private String intToIp(int i) {
@@ -248,11 +260,40 @@ public class NetConfApplication extends Application {
         return num;
     }
 
+    public ArrayList<WifiListener> listeners = new ArrayList<>();
+
+    public interface WifiListener {
+        void notifyWifiInfo();
+    }
+
     // 收起输入法键盘
     public void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm.isActive()) {
             imm.hideSoftInputFromWindow(activity.getWindow().getDecorView().getWindowToken(), 0);
         }
+    }
+
+    //在自己的Application中添加如下代码
+    public static RefWatcher getRefWatcher(Context context) {
+        NetConfApplication application = (NetConfApplication) context
+                .getApplicationContext();
+        return application.refWatcher;
+    }
+
+    //在自己的Application中添加如下代码
+    private RefWatcher refWatcher;
+
+    // 调试用
+    public static String printByte(byte[] b) {
+        String byteStr = "";
+        for (int i = 0; i < b.length; i++) {
+            String hex = Integer.toHexString(b[i] & 0xFF);
+            if (hex.length() == 1) {
+                hex = '0' + hex;
+            }
+            byteStr += hex.toUpperCase() + " ";
+        }
+        return byteStr;
     }
 }

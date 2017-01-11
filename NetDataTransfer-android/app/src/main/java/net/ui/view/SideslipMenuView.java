@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 import com.nineoldandroids.view.ViewHelper;
 
 import net.log.Logger;
-import net.util.HelpUtils;
+import net.util.ScreenHelpUtils;
 
 public class SideslipMenuView extends HorizontalScrollView {
     private final String TAG = "SideslipMenuView";
@@ -48,14 +48,17 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     public SideslipMenuView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+    }
 
+    public int getmMenuWidth() {
+        return mMenuWidth;
     }
 
     public SideslipMenuView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mMenuRightPadding = dip2px(context, 150);
-        this.context = context;
-        imm = (InputMethodManager) this.context
+        this.context = context.getApplicationContext();
+        imm = (InputMethodManager) context.getApplicationContext()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 
@@ -69,19 +72,19 @@ public class SideslipMenuView extends HorizontalScrollView {
          * 显示的设置一个宽度
          */
         if (!once) {
-            Logger.info(TAG,"in onMeasure method");
+            Logger.info(TAG, "in onMeasure method");
             LinearLayout wrapper = (LinearLayout) getChildAt(0);
             mMenu = (ViewGroup) wrapper.getChildAt(0);
             mContent = (ViewGroup) wrapper.getChildAt(1);
-            eText = (EditText) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
-                    .getChildAt(0)).getChildAt(0)).getChildAt(0)).getChildAt(0);
-            backImg = (ImageView) ((ViewGroup) ((ViewGroup) ((ViewGroup) mContent
-                    .getChildAt(0)).getChildAt(0)).getChildAt(1)).getChildAt(0);
+            eText = (EditText) (((ViewGroup) ((ViewGroup) mContent
+                    .getChildAt(0)).getChildAt(0))).getChildAt(0);
+            backImg = (ImageView) ((ViewGroup) (((ViewGroup) mContent
+                    .getChildAt(0))).getChildAt(1)).getChildAt(0);
         }
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mScreenWidth = HelpUtils.getScreenWidth(context);
+            mScreenWidth = ScreenHelpUtils.getScreenWidth(context);
         } else {
-            mScreenWidth = HelpUtils.getScreenWidth(context) * 4 / 7;
+            mScreenWidth = ScreenHelpUtils.getScreenWidth(context) * 4 / 7;
         }
         mMenuWidth = mScreenWidth - mMenuRightPadding;
         mHalfMenuWidth = mMenuWidth / 2;
@@ -93,7 +96,9 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                && !isOpen) {
+            eText.setEnabled(true);
             backImg.setVisibility(VISIBLE);
         } else {
             backImg.setVisibility(GONE);
@@ -124,12 +129,10 @@ public class SideslipMenuView extends HorizontalScrollView {
                         isOpen = false;
                         closeSoftkeyboard();
                         this.smoothScrollTo(mMenuWidth, 0);
-
                     } else {
                         isOpen = true;
                         closeSoftkeyboard();
                         this.smoothScrollTo(0, 0);
-
                     }
                     return true;
             }
@@ -142,8 +145,9 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        closeSoftkeyboard();
-        super.onScrollChanged(l, t, oldl, oldt);
+        //closeSoftkeyboard();
+        imm.hideSoftInputFromWindow(this.getWindowToken(), 0); // 强制隐藏键盘
+
         float scale = l * 1.0f / mMenuWidth;
         float leftScale = 1 - 0.3f * scale;
         float rightScale = 0.8f + scale * 0.2f;
@@ -157,6 +161,8 @@ public class SideslipMenuView extends HorizontalScrollView {
         ViewHelper.setPivotY(mContent, mContent.getHeight() / 2);
         ViewHelper.setScaleX(mContent, rightScale);
         ViewHelper.setScaleY(mContent, rightScale);
+
+        super.onScrollChanged(l, t, oldl, oldt);
     }
 
     public int dip2px(Context context, float dpValue) {
@@ -166,7 +172,7 @@ public class SideslipMenuView extends HorizontalScrollView {
 
     public void closeSoftkeyboard() {
         imm.hideSoftInputFromWindow(this.getWindowToken(), 0); // 强制隐藏键盘
-
+        //clearAnimation();
         if (isOpen) {
             eText.setEnabled(false);
             backImg.setVisibility(GONE);
@@ -174,5 +180,9 @@ public class SideslipMenuView extends HorizontalScrollView {
             eText.setEnabled(true);
             backImg.setVisibility(VISIBLE);
         }
+    }
+
+    public void setOpen(boolean isOpen) {
+        this.isOpen = isOpen;
     }
 }
