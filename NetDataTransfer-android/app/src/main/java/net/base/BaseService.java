@@ -1,4 +1,4 @@
-package net.service.base;
+package net.base;
 
 import android.app.Service;
 import android.content.Intent;

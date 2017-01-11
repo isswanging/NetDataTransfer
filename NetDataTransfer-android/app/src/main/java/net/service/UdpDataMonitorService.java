@@ -17,7 +17,7 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.service.base.BaseService;
+import net.base.BaseService;
 import net.util.BadgeUtil;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;

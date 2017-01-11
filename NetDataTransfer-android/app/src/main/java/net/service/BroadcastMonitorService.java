@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.log.Logger;
-import net.service.base.BaseService;
+import net.base.BaseService;
 import net.vo.Host;
 
 import java.net.DatagramSocket;

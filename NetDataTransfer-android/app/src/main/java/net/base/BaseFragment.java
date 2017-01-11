@@ -1,4 +1,4 @@
-package net.ui.fragment;
+package net.base;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -9,22 +9,22 @@ import android.view.View;
 import net.app.NetConfApplication;
 
 public abstract class BaseFragment extends Fragment {
-    Notification notification;
-    NetConfApplication app;
+    public Notification notification;
+    public NetConfApplication app;
 
-    final int login = 0;
-    final int refresh = 1;
-    final int retry = 2;
-    final int answer = 3;
-    final int startChat = 4;
-    final int incomingMsg = 5;
-    final int redraw = 6;
-    final int close = 7;
-    final int pressure = 8;
-    final int exit = 9;
+    public final int login = 0;
+    public final int refresh = 1;
+    public final int retry = 2;
+    public final int answer = 3;
+    public final int startChat = 4;
+    public final int incomingMsg = 5;
+    public final int redraw = 6;
+    public final int close = 7;
+    public final int pressure = 8;
+    public final int exit = 9;
 
-    boolean isRotate = false;
-    View viewGroup;
+    public boolean isRotate = false;
+    public View viewGroup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

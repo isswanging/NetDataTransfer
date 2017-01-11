@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseFragment;
 import net.log.Logger;
 import net.ui.activity.CaptureActivity;
 import net.ui.activity.FileListActivity;

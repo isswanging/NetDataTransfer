@@ -30,6 +30,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
 import net.app.netdatatransfer.R;
+import net.base.BaseActivity;
 
 import java.io.IOException;
 import java.util.Vector;

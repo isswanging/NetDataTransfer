@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseFragment;
 import net.log.Logger;
 import net.ui.activity.ChatMsgAdapter;
 import net.ui.view.SideslipMenuView;

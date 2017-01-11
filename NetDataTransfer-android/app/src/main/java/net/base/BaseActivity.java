@@ -1,4 +1,4 @@
-package net.ui.activity;
+package net.base;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -22,8 +22,8 @@ import net.ui.fragment.CustAlertDialog;
 import java.lang.reflect.Field;
 
 public class BaseActivity extends Activity implements NetConfApplication.WifiListener {
-    NetConfApplication app;
-    DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+    public NetConfApplication app;
+    public DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             handler.sendEmptyMessageDelayed(0, 1000);
@@ -83,7 +83,7 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
         }
     }
 
-    Handler handler = new Handler() {
+    public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             app.check(false);

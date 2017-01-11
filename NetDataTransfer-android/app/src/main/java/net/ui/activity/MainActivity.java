@@ -28,12 +28,13 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseActivity;
 import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.LoginMonitorService;
 import net.service.UdpDataMonitorService;
-import net.ui.fragment.BaseFragment;
+import net.base.BaseFragment;
 import net.ui.fragment.ChatFragment;
 import net.ui.fragment.CustAlertDialog;
 import net.ui.fragment.UserListFragment;
@@ -542,13 +543,11 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     }
 
     private void login(int commend) {
+        NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         if (commend == refresh) {
-            NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
             host = app.hostList.get(0);
             host.setState(0);
             host.setIp(NetConfApplication.hostIP);
-            app.hostList.clear();
-            app.addHost(host);
         } else if (commend == login) {
             String userName = Build.MODEL;// 获取用户名
             String hostName = "Android";// 获取主机名
@@ -557,8 +556,9 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             // 加入在线列表
             host = new Host(userName, userDomain,
                     NetConfApplication.hostIP, hostName, 1, 0);
-            app.addHost(host);
         }
+        app.hostList.clear();
+        app.addHost(host);
 
         // 广播登录信息
         new Thread(new Runnable() {

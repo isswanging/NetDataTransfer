@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
+import net.base.BaseActivity;
 
 import java.io.File;
 import java.util.ArrayList;
