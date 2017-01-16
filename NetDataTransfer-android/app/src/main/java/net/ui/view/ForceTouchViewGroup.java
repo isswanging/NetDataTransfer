@@ -227,12 +227,12 @@ public class ForceTouchViewGroup extends RelativeLayout {
                     previewContent.setLayoutParams(previewParams);
 
                     if (!running && moveTopMargin >= (topMargin - getNeedMove()) &&
-                            moveTopMargin <= (topMargin - getNeedMove() + app.moveCache)) {
-                        if (!isShow) {
+                            moveTopMargin <= (topMargin - getNeedMove() + NetConfApplication.upMoveCache)) {
+                        if (!isShow && gap < 0) {
                             Logger.info(TAG, "start running animator");
                             showAnswerList(moveTopMargin + previewContent.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
-                        } else {
+                        } else if (isShow) {
                             answerParams.topMargin = moveTopMargin + previewContent.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
                             answerList.setLayoutParams(answerParams);
@@ -246,8 +246,8 @@ public class ForceTouchViewGroup extends RelativeLayout {
                         answerList.setLayoutParams(answerParams);
                     }
 
-                    if (moveTopMargin > (topMargin - getNeedMove() + app.moveCache) &&
-                            !running && isShow) {
+                    if (moveTopMargin > (topMargin - getNeedMove() + NetConfApplication.downMoveCache) &&
+                            !running && isShow && gap > 0) {
                         hideAnswerList(moveTopMargin + previewContent.getHeight() +
                                 getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                     }
@@ -373,7 +373,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
 
     public void showAnswerList(int endPostion) {
         ValueAnimator animator = ValueAnimator.ofInt(screenheight, endPostion);
-        animator.setDuration(100);
+        animator.setDuration(150);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -400,7 +400,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
 
     public void hideAnswerList(int startPostion) {
         ValueAnimator animator = ValueAnimator.ofInt(startPostion, screenheight);
-        animator.setDuration(100);
+        animator.setDuration(150);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {

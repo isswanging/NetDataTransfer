@@ -306,12 +306,12 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                         custPreview.setLayoutParams(previewParams);
 
                         if (!touchView.running && moveTopMargin >= (topMargin - touchView.getNeedMove()) &&
-                                moveTopMargin <= (topMargin - touchView.getNeedMove() + app.moveCache)) {
-                            if (!touchView.isShow) {
+                                moveTopMargin <= (topMargin - touchView.getNeedMove() + NetConfApplication.upMoveCache)) {
+                            if (!touchView.isShow && gap < 0) {
                                 Logger.info(TAG, "start running animator");
                                 touchView.showAnswerList(moveTopMargin + custPreview.getHeight() +
                                         getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
-                            } else {
+                            } else if (touchView.isShow) {
                                 answerParams.topMargin = moveTopMargin + custPreview.getHeight() +
                                         getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin);
                                 touchView.answerList.setLayoutParams(answerParams);
@@ -325,8 +325,8 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                             touchView.answerList.setLayoutParams(answerParams);
                         }
 
-                        if (moveTopMargin > (topMargin - touchView.getNeedMove() + app.moveCache) &&
-                                !touchView.running && touchView.isShow) {
+                        if (moveTopMargin > (topMargin - touchView.getNeedMove() + NetConfApplication.downMoveCache) &&
+                                !touchView.running && touchView.isShow && gap > 0) {
                             touchView.hideAnswerList(moveTopMargin + custPreview.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                         }

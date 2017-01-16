@@ -41,7 +41,7 @@ public class CustAlertDialog extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getActivity().setResult(getActivity().RESULT_OK);// 确定按钮事件
+                                getActivity().setResult(Activity.RESULT_OK);// 确定按钮事件
                                 System.exit(0);
                             }
                         })

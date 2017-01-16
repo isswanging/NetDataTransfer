@@ -113,7 +113,8 @@ public class NetConfApplication extends Application {
     public final static int add = 0;
     public final static int remove = 1;
 
-    public final static int moveCache = 150;
+    public final static int upMoveCache = 150;
+    public final static int downMoveCache = 50;
 
     // 检查端口
     public String check(boolean isClose) {
