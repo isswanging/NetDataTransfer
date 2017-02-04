@@ -72,6 +72,9 @@ public class ForceTouchViewGroup extends RelativeLayout {
     private final int add = 0;
     private final int remove = 1;
 
+    private long time = 0;
+    private final int stop = 200;
+
     public ForceTouchViewGroup(Context context) {
         super(context);
         // 初始化
@@ -387,6 +390,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
             public void onAnimationEnd(Animator animation) {
                 running = false;
                 isShow = true;
+                time = System.currentTimeMillis();
             }
 
             @Override
@@ -395,7 +399,8 @@ public class ForceTouchViewGroup extends RelativeLayout {
                 running = true;
             }
         });
-        animator.start();
+        if ((System.currentTimeMillis() - time) > stop)
+            animator.start();
     }
 
     public void hideAnswerList(int startPostion) {
@@ -414,6 +419,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
             public void onAnimationEnd(Animator animation) {
                 answerList.setVisibility(VISIBLE);
                 running = false;
+                time = System.currentTimeMillis();
             }
 
             @Override
@@ -422,7 +428,8 @@ public class ForceTouchViewGroup extends RelativeLayout {
                 isShow = false;
             }
         });
-        animator.start();
+        if ((System.currentTimeMillis() - time) > stop)
+            animator.start();
     }
 
 
