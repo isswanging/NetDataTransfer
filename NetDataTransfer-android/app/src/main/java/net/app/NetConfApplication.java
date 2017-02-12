@@ -20,7 +20,6 @@ import com.squareup.leakcanary.RefWatcher;
 
 import net.app.netdatatransfer.R;
 import net.log.Logger;
-import net.vo.ChatMsgEntity;
 import net.vo.Host;
 import net.vo.Progress;
 
@@ -34,12 +33,11 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Vector;
 
 public class NetConfApplication extends Application {
     private final String TAG = "NetConfApplication";
-    public int wifi = 0;
+    public int wifi = 1;
     public String chatId = "gone";
     public SoundPool soundPool;
     public NotificationManager nManager;
@@ -100,9 +98,6 @@ public class NetConfApplication extends Application {
     public static SparseArray<Progress> sendTaskList = new SparseArray<>();
     public static SparseArray<Progress> getTaskList = new SparseArray<>();
 
-    // 记录聊天内容(未读的消息)
-    public HashMap<String, ArrayList<ChatMsgEntity>> chatTempMap = new HashMap<>();
-
     // 文件格式
     public final static String[] imageSupport = {"BMP", "JPG", "JPEG", "PNG",
             "GIF"};
@@ -113,7 +108,7 @@ public class NetConfApplication extends Application {
     public final static int add = 0;
     public final static int remove = 1;
 
-    public final static int upMoveCache = 200;
+    public final static int upMoveCache = 150;
     public final static int downMoveCache = 50;
 
     // 检查端口
@@ -250,7 +245,7 @@ public class NetConfApplication extends Application {
         return sdDir.toString();
     }
 
-    public int getUnreadMsgNum() {
+/*    public int getUnreadMsgNum() {
         int num = 0;
         if (!chatTempMap.isEmpty()) {
             for (String s : chatTempMap.keySet()) {
@@ -259,7 +254,7 @@ public class NetConfApplication extends Application {
         }
         Logger.info(TAG, "unread msg num::::" + num);
         return num;
-    }
+    }*/
 
     public ArrayList<WifiListener> listeners = new ArrayList<>();
 

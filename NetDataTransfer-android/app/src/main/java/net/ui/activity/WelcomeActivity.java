@@ -77,6 +77,7 @@ public class WelcomeActivity extends BaseActivity {
     }
 
     private void preCheck() {
+        app.wifi = 0;
         String userName = android.os.Build.MODEL;// 获取用户名
         String userDomain = "Android";// 获取计算机域
         Host host = new Host(userName, userDomain, "0.0.0.0", NetConfApplication.hostName, 1, 0);

@@ -29,6 +29,7 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.base.BaseActivity;
+import net.db.DBManager;
 import net.log.Logger;
 import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
@@ -220,6 +221,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         handler.removeCallbacksAndMessages(null);
         app.hostList.clear();
         Logger.info(TAG, "host list length: " + app.hostList.size());
+        new DBManager(this).closeDB();
         try {
             new DatagramSocket(app.textPort).close();
             new ServerSocket(app.filePort).close();
@@ -417,7 +419,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private void cleanAndExit() {
         app.forceClose = true;
         app.hostList.clear();
-        app.chatTempMap.clear();
+        new DBManager(this).deleteMsg(null);
         app.nManager.cancel(R.id.chatName);
         if (touchView != null) {
             touchView.answerList.clearAnimation();
@@ -451,10 +453,11 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         mDataArrays.clear();
 
         // 填充数据
-        if (app.chatTempMap.containsKey(targetIp)) {
+        ArrayList<ChatMsgEntity> list = new DBManager(this).queryMsg(targetIp);
+        if (list != null && list.size() > 0) {
             Logger.info(TAG, "get new massage");
             app.nManager.cancelAll();
-            mDataArrays.addAll(app.chatTempMap.get(targetIp));
+            mDataArrays.addAll(list);
             chatAdapter.notifyDataSetChanged();
             previewContent.setSelection(chatAdapter.getCount() - 1);
         }
@@ -545,6 +548,13 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private void login(int commend) {
         NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         if (commend == refresh) {
+            if (app.hostList.isEmpty()) {
+                String userName = Build.MODEL;// 获取用户名
+                String hostName = "Android";// 获取主机名
+                String userDomain = "Android";// 获取计算机域
+                app.hostList.add(new Host(userName, userDomain,
+                        NetConfApplication.hostIP, hostName, 1, 0));
+            }
             host = app.hostList.get(0);
             host.setState(0);
             host.setIp(NetConfApplication.hostIP);
@@ -603,7 +613,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             }).start();
 
             // 清理操作
-            app.chatTempMap.remove(targetIp);
+            new DBManager(this).deleteMsg(targetIp);
             msg.what = redraw;
             users.getCommend(msg);
         } else {

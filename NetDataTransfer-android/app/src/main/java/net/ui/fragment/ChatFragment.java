@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSON;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.base.BaseFragment;
+import net.db.DBManager;
 import net.log.Logger;
 import net.ui.activity.ChatMsgAdapter;
 import net.ui.view.SideslipMenuView;
@@ -243,11 +244,12 @@ public class ChatFragment extends BaseFragment {
 
     private void checkUnreadMsg() {
         // 如果有未读消息
-        if (app.chatTempMap.containsKey(targetIp)) {
+        DBManager dbm = new DBManager(app);
+        if (dbm.contains(targetIp)){
             Logger.info(TAG, "get new massage");
             app.nManager.cancelAll();
-            mDataArrays.addAll(app.chatTempMap.get(targetIp));
-            app.chatTempMap.remove(targetIp);
+            mDataArrays.addAll(dbm.queryMsg(targetIp));
+            dbm.deleteMsg(targetIp);
             mAdapter.notifyDataSetChanged();
         }
         mListView.setSelection(mListView.getCount() - 1);

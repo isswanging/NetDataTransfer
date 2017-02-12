@@ -16,8 +16,9 @@ import com.alibaba.fastjson.JSON;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
-import net.log.Logger;
 import net.base.BaseService;
+import net.db.DBManager;
+import net.log.Logger;
 import net.util.BadgeUtil;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
@@ -28,7 +29,6 @@ import net.vo.SendTask;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.ArrayList;
 
 public class UdpDataMonitorService extends BaseService {
     private final String TAG = "UdpDataMonitorService";
@@ -76,13 +76,7 @@ public class UdpDataMonitorService extends BaseService {
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                     app.getDate(), JSON.parseObject(info, DataPacket.class)
                     .getContent(), true);
-            if (app.chatTempMap.containsKey(dp.getIp())) {
-                app.chatTempMap.get(dp.getIp()).add(entity);
-            } else {
-                ArrayList<ChatMsgEntity> list = new ArrayList<ChatMsgEntity>();
-                list.add(entity);
-                app.chatTempMap.put(dp.getIp(), list);
-            }
+            new DBManager(this).addMsg(entity, dp.getIp());
 
             // 发送通知
             Logger.info(TAG, "handler by Notification");
@@ -110,8 +104,7 @@ public class UdpDataMonitorService extends BaseService {
             app.nManager.notify(R.id.chatName, notification);
 
             // 快捷方式显示数字(部分品牌有效)
-            BadgeUtil.setBadgeCount(getApplicationContext(),
-                    app.getUnreadMsgNum());
+            BadgeUtil.setBadgeCount(getApplicationContext(), new DBManager(this).getUnreadMsgNum());
 
             // 让界面显示未读消息的红点
             Logger.info(TAG, "handler by userList");

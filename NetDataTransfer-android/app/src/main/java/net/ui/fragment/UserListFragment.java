@@ -31,6 +31,7 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
 import net.base.BaseFragment;
+import net.db.DBManager;
 import net.log.Logger;
 import net.ui.activity.CaptureActivity;
 import net.ui.activity.FileListActivity;
@@ -170,7 +171,7 @@ public class UserListFragment extends BaseFragment {
             Map<String, Object> item = new HashMap<>();
             item.put("name", host.getUserName());
             item.put("ip", host.getIp());
-            if (app.chatTempMap.containsKey(host.getIp())) {
+            if (new DBManager(app).contains(host.getIp())) {
                 item.put("img", R.drawable.unread);
             } else {
                 item.put("img", 0);
