@@ -174,8 +174,6 @@ public class NetConfApplication extends Application {
             broadPacket = new DatagramPacket(info, info.length,
                     InetAddress.getByName(targetIp), port);
             broadSocket.send(broadPacket);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,8 +186,7 @@ public class NetConfApplication extends Application {
                 .getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         int ipAddress = wifiInfo.getIpAddress();
-        String ip = intToIp(ipAddress);
-        return ip;
+        return intToIp(ipAddress);
     }
 
     @Override
@@ -213,10 +210,7 @@ public class NetConfApplication extends Application {
         String day = String.valueOf(c.get(Calendar.DAY_OF_MONTH) + 1);
         String hour = String.valueOf(c.get(Calendar.HOUR_OF_DAY));
         String mins = String.valueOf(c.get(Calendar.MINUTE));
-        StringBuffer sbBuffer = new StringBuffer();
-        sbBuffer.append(year + "-" + month + "-" + day + " " + hour + ":"
-                + mins);
-        return sbBuffer.toString();
+        return year + "-" + month + "-" + day + " " + hour + ":" + mins;
     }
 
     // 播放消息提示音
@@ -242,19 +236,8 @@ public class NetConfApplication extends Application {
         if (sdCardExist) {
             sdDir = Environment.getExternalStorageDirectory();
         }
-        return sdDir.toString();
+        return sdDir != null ? sdDir.toString() : null;
     }
-
-/*    public int getUnreadMsgNum() {
-        int num = 0;
-        if (!chatTempMap.isEmpty()) {
-            for (String s : chatTempMap.keySet()) {
-                num += chatTempMap.get(s).size();
-            }
-        }
-        Logger.info(TAG, "unread msg num::::" + num);
-        return num;
-    }*/
 
     public ArrayList<WifiListener> listeners = new ArrayList<>();
 
@@ -283,8 +266,8 @@ public class NetConfApplication extends Application {
     // 调试用
     public static String printByte(byte[] b) {
         String byteStr = "";
-        for (int i = 0; i < b.length; i++) {
-            String hex = Integer.toHexString(b[i] & 0xFF);
+        for (byte aB : b) {
+            String hex = Integer.toHexString(aB & 0xFF);
             if (hex.length() == 1) {
                 hex = '0' + hex;
             }

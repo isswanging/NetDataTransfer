@@ -419,7 +419,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private void cleanAndExit() {
         app.forceClose = true;
         app.hostList.clear();
-        new DBManager(this).deleteMsg(null);
+        // new DBManager(this).deleteMsg(null);
         app.nManager.cancel(R.id.chatName);
         if (touchView != null) {
             touchView.answerList.clearAnimation();
