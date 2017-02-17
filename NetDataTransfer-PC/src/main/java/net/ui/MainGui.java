@@ -102,10 +102,14 @@ public class MainGui {
             InetAddress addr = InetAddress.getLocalHost();
             hostName = addr.getHostName();// 获取主机名
             ip = OSUtil.getLocalIP();// 获取ip地址
-
-            Map<String, String> map = System.getenv();
-            userName = map.get("USERNAME");// 获取用户名
-            userDomain = map.get("USERDOMAIN");// 获取计算机域
+            if (OSUtil.isWindowsOS()) {
+                Map<String, String> map = System.getenv();
+                userName = map.get("USERNAME");// 获取用户名
+                userDomain = map.get("USERDOMAIN");// 获取计算机域
+            }else{
+                userName=OSUtil.getOSName();
+                userDomain=OSUtil.getOSName();
+            }
 
             // 加入在线列表
             Host host = new Host(userName, userDomain, ip, hostName, 1, 0);
@@ -148,8 +152,8 @@ public class MainGui {
         number = new JLabel();
 
         // 设置主机列表
-        String[] columnNames = { "用户名", "工作组", "主机名", "IP地址" };
-        Object[][] content = new Object[][] {};
+        String[] columnNames = {"用户名", "工作组", "主机名", "IP地址"};
+        Object[][] content = new Object[][]{};
         model = new DefaultTableModel(content, columnNames);
         userList = new JTable(model) {
             public boolean isCellEditable(int row, int column) {
@@ -278,8 +282,7 @@ public class MainGui {
         // 系统托盘
         if (SystemTray.isSupported()) {
             tray = SystemTray.getSystemTray(); // 获得本操作系统托盘的实例
-            ImageIcon icon = new ImageIcon(this.getClass().getResource(
-                    "owl.png")); // 将要显示到托盘中的图标
+            ImageIcon icon = new ImageIcon(this.getClass().getResource("/owl.png")); // 将要显示到托盘中的图标
             PopupMenu pop = new PopupMenu(); // 构造一个右键弹出式菜单
             final MenuItem show = new MenuItem("open");
             final MenuItem exit = new MenuItem("exit");
@@ -381,8 +384,8 @@ public class MainGui {
         logger.info("table size:" + String.valueOf(SystemConf.hostList.size()));
         number.setText(String.valueOf(SystemConf.hostList.size()));
         for (Host host : SystemConf.hostList) {
-            model.addRow(new String[] { host.getUserName(),
-                    host.getGroupName(), host.getHostName(), host.getIp() });
+            model.addRow(new String[]{host.getUserName(),
+                    host.getGroupName(), host.getHostName(), host.getIp()});
         }
     }
 
@@ -499,22 +502,16 @@ public class MainGui {
 
     /**
      * 发送UDP数据
-     * 
-     * @param hostName
-     *            主机名
-     * @param ip
-     *            自己的ip
-     * @param targetIp
-     *            对方的ip
-     * @param message
-     *            发送的内容
-     * @param tag
-     *            标识通信的阶段
-     * @param port
-     *            端口
+     *
+     * @param hostName 主机名
+     * @param ip       自己的ip
+     * @param targetIp 对方的ip
+     * @param message  发送的内容
+     * @param tag      标识通信的阶段
+     * @param port     端口
      */
     private void sendUdpData(String hostName, String ip, String targetIp,
-            String message, int tag, int port) {
+                             String message, int tag, int port) {
         DataPacket dp = new DataPacket(ip, hostName, message, tag);
         DatagramSocket socket = null;
         try {
@@ -530,7 +527,7 @@ public class MainGui {
     }
 
     private void sendTcpData(String total, String ip, String targetIp,
-            String path, int folderpre, int textport) {
+                             String path, int folderpre, int textport) {
         // 获取当前时间作为任务id
         String taskId = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 .format(new Date());

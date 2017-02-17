@@ -4,11 +4,17 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
+import net.conf.SystemConf;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class OSUtil {
     private final static Log logger = LogFactory.getLog(OSUtil.class);
+
+
+    public static String getOSName(){
+        return System.getProperty("os.name");
+    }
 
     /**
      * 判断当前操作是否Windows.

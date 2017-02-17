@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Map;
 
+import net.util.OSUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,11 +46,16 @@ public class BroadcastMonitor implements Runnable {
                         InetAddress addr = InetAddress.getLocalHost();
                         String hostName = addr.getHostName();// 获取主机名
                         String ip = SystemConf.hostIP;// 获取ip地址
-
-                        Map<String, String> map = System.getenv();
-                        String userName = map.get("USERNAME");// 获取用户名
-                        String userDomain = map.get("USERDOMAIN");// 获取计算机域
-
+                        String userName;
+                        String userDomain;
+                        if (OSUtil.isWindowsOS()) {
+                            Map<String, String> map = System.getenv();
+                            userName = map.get("USERNAME");// 获取用户名
+                            userDomain = map.get("USERDOMAIN");// 获取计算机域
+                        } else {
+                            userName = OSUtil.getOSName();
+                            userDomain = OSUtil.getOSName();
+                        }
                         // 广播主机信息
                         Host res = new Host(userName, userDomain, ip, hostName,
                                 1, 1);

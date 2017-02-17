@@ -135,6 +135,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             app.hostList.clear();
             String s = savedInstanceState.getString("users");
             Vector<Host> list = new Vector<>(JSON.parseArray(s, Host.class));
+            Logger.info(TAG, "save host num is " + list.size());
             for (Host h : list) {
                 app.hostList.add(h);
             }
@@ -377,7 +378,11 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 }
             case refresh:
                 login(commend);
-                handler.sendEmptyMessageDelayed(commend, 2000);
+                if (obj == null) {
+                    handler.sendEmptyMessageDelayed(commend, 2000);
+                } else {
+                    handler.sendEmptyMessage(commend);
+                }
                 break;
             case retry:
                 app.check(true);

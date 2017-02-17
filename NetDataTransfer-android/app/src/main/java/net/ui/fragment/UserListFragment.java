@@ -125,10 +125,10 @@ public class UserListFragment extends BaseFragment {
     @Override
     public void onResume() {
         Logger.info(TAG, "========= onresume =========");
-        if (userInfoAdapter != null) {
+        if (userInfoAdapter != null && notification != null) {
             Logger.info(TAG, "========= getUserData =========");
             getUserData();
-            userInfoAdapter.notifyDataSetChanged();
+            notification.notifyInfo(refresh, "now");
         }
         super.onResume();
     }
@@ -252,6 +252,7 @@ public class UserListFragment extends BaseFragment {
             loadUserListOrWarn();
         } else {
             if (getView(root, R.id.wait) != null) {
+                Logger.info(TAG, "load ui");
                 loadUserListUI();
             }
             if (pullRefreshListView != null &&

@@ -66,29 +66,33 @@ public class LoginMonitorService extends BaseService {
                     info = info.trim();
                     Logger.info(TAG, "trim udp data----" + info);
                     if (info.length() > 0) {
-                        Host host = JSON.parseObject(info, Host.class);
-                        host.setState(0);
-                        Logger.info(TAG, "from ip: " + host.getIp());
+                        try {
+                            Host host = JSON.parseObject(info, Host.class);
+                            host.setState(0);
+                            Logger.info(TAG, "from ip: " + host.getIp());
 
-                        if (!app.containHost(host)) {
-                            host.setState(1);
-                            app.addHost(host);
-                            Logger.info(TAG, "add a host");
+                            if (!app.containHost(host)) {
+                                host.setState(1);
+                                app.addHost(host);
+                                Logger.info(TAG, "add a host");
 
-                            // 回应广播, 发送本机信息去目标地址
-                            if (host.getTag() == 0) {
-                                String userName = android.os.Build.MODEL;// 获取主机名
-                                String hostName = "Android";// 获取用户名
-                                String userDomain = "Android";// 获取计算机域
+                                // 回应广播, 发送本机信息去目标地址
+                                if (host.getTag() == 0) {
+                                    String userName = android.os.Build.MODEL;// 获取主机名
+                                    String hostName = "Android";// 获取用户名
+                                    String userDomain = "Android";// 获取计算机域
 
-                                // 广播主机信息
-                                Host res = new Host(userName, userDomain,
-                                        NetConfApplication.hostIP, hostName, 1, 1);
-                                String hostInfo = JSON.toJSONString(res);
-                                app.sendUdpData(broadSocket, hostInfo,
-                                        host.getIp(),
-                                        NetConfApplication.broadcastPort);
+                                    // 广播主机信息
+                                    Host res = new Host(userName, userDomain,
+                                            NetConfApplication.hostIP, hostName, 1, 1);
+                                    String hostInfo = JSON.toJSONString(res);
+                                    app.sendUdpData(broadSocket, hostInfo,
+                                            host.getIp(),
+                                            NetConfApplication.broadcastPort);
+                                }
                             }
+                        } catch (Exception e) {
+                            Logger.error(TAG, "json parse error: " + e);
                         }
                     }
                 }
