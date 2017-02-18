@@ -125,10 +125,10 @@ public class UserListFragment extends BaseFragment {
     @Override
     public void onResume() {
         Logger.info(TAG, "========= onresume =========");
-        if (userInfoAdapter != null && notification != null) {
+        if (userInfoAdapter != null) {
             Logger.info(TAG, "========= getUserData =========");
             getUserData();
-            notification.notifyInfo(refresh, "now");
+            userInfoAdapter.notifyDataSetChanged();
         }
         super.onResume();
     }
@@ -167,6 +167,7 @@ public class UserListFragment extends BaseFragment {
 
     private List<Map<String, Object>> getUserData() {
         userList.clear();
+        Logger.info(TAG, "host list num is " + app.hostList.size());
         for (Host host : app.hostList) {
             Map<String, Object> item = new HashMap<>();
             item.put("name", host.getUserName());
@@ -178,6 +179,7 @@ public class UserListFragment extends BaseFragment {
             }
             userList.add(item);
         }
+        Logger.info(TAG, "host num is " + userList.size());
         return userList;
     }
 

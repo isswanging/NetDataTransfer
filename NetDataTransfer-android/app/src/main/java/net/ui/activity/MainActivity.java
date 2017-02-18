@@ -378,11 +378,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 }
             case refresh:
                 login(commend);
-                if (obj == null) {
-                    handler.sendEmptyMessageDelayed(commend, 2000);
-                } else {
-                    handler.sendEmptyMessage(commend);
-                }
+                handler.sendEmptyMessageDelayed(commend, 2000);
                 break;
             case retry:
                 app.check(true);
@@ -550,30 +546,26 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         }
     }
 
+    private void addNewHost() {
+        String userName = Build.MODEL;// 获取用户名
+        String hostName = "Android";// 获取主机名
+        String userDomain = "Android";// 获取计算机域
+        app.hostList.add(new Host(userName, userDomain,
+                NetConfApplication.hostIP, hostName, 1, 0));
+    }
+
     private void login(int commend) {
         NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         if (commend == refresh) {
             if (app.hostList.isEmpty()) {
-                String userName = Build.MODEL;// 获取用户名
-                String hostName = "Android";// 获取主机名
-                String userDomain = "Android";// 获取计算机域
-                app.hostList.add(new Host(userName, userDomain,
-                        NetConfApplication.hostIP, hostName, 1, 0));
+                addNewHost();
             }
             host = app.hostList.get(0);
             host.setState(0);
             host.setIp(NetConfApplication.hostIP);
         } else if (commend == login) {
-            String userName = Build.MODEL;// 获取用户名
-            String hostName = "Android";// 获取主机名
-            String userDomain = "Android";// 获取计算机域
-
-            // 加入在线列表
-            host = new Host(userName, userDomain,
-                    NetConfApplication.hostIP, hostName, 1, 0);
+            addNewHost();
         }
-        app.hostList.clear();
-        app.addHost(host);
 
         // 广播登录信息
         new Thread(new Runnable() {
