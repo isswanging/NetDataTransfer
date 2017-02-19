@@ -29,6 +29,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import net.app.NetConfApplication;
+import net.app.netdatatransfer.BuildConfig;
 import net.app.netdatatransfer.R;
 import net.base.BaseFragment;
 import net.db.DBManager;
@@ -407,7 +408,8 @@ public class UserListFragment extends BaseFragment {
 
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (!app.isLand && android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+                        if (!app.isLand && android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN
+                                && (BuildConfig.DEBUG_LOG || position != 0)) {
                             Logger.info(TAG, "in 3d touch effect");
                             TextView name = getView(view, R.id.userName);
                             TextView ip = getView(view, R.id.userIP);

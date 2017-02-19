@@ -550,20 +550,24 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         String userName = Build.MODEL;// 获取用户名
         String hostName = "Android";// 获取主机名
         String userDomain = "Android";// 获取计算机域
-        app.hostList.add(new Host(userName, userDomain,
+        app.addHost(new Host(userName, userDomain,
                 NetConfApplication.hostIP, hostName, 1, 0));
     }
 
     private void login(int commend) {
         NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         if (commend == refresh) {
+            Logger.info(TAG,"refresh....");
             if (app.hostList.isEmpty()) {
+                Logger.info(TAG,"add new....");
                 addNewHost();
             }
             host = app.hostList.get(0);
             host.setState(0);
             host.setIp(NetConfApplication.hostIP);
         } else if (commend == login) {
+            app.hostList.clear();
+            Logger.info(TAG,"login....");
             addNewHost();
         }
 
