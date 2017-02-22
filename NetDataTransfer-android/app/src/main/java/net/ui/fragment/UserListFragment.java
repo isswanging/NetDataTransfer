@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.databinding.DataBindingUtil;
+import android.databinding.tool.DataBinder;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +33,7 @@ import android.widget.TextView;
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.BuildConfig;
 import net.app.netdatatransfer.R;
+import net.app.netdatatransfer.databinding.UserListBinding;
 import net.base.BaseFragment;
 import net.db.DBManager;
 import net.log.Logger;
@@ -39,6 +42,7 @@ import net.ui.activity.FileListActivity;
 import net.ui.activity.ProgressBarListActivity;
 import net.ui.view.PullRefreshListView;
 import net.util.CreateQRImage;
+import net.vo.DeviceInfo;
 import net.vo.Host;
 
 import java.util.ArrayList;
@@ -80,6 +84,8 @@ public class UserListFragment extends BaseFragment {
     Vibrator vibrator;
     boolean isQRReady = false;
 
+    UserListBinding binding;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,7 +104,9 @@ public class UserListFragment extends BaseFragment {
         if (isRotate) {
             return viewGroup;
         } else {
-            viewGroup = inflater.inflate(R.layout.user_list, container, false);
+            binding = DataBindingUtil.inflate(inflater, R.layout.user_list, container, false);
+            viewGroup = binding.getRoot();
+            // viewGroup = inflater.inflate(R.layout.user_list, container, false);
             root = getView(viewGroup, R.id.mainContent);
             drawerLayout = getView(viewGroup, R.id.drawer_layout);
             listContent = getView(root, R.id.listContent);
@@ -215,19 +223,11 @@ public class UserListFragment extends BaseFragment {
             e.printStackTrace();
         }
 
-        TextView t1 = getView(drawerLayout, R.id.device_name);
-        TextView t2 = getView(drawerLayout, R.id.system_version);
-        TextView t3 = getView(drawerLayout, R.id.operate_name);
-        TextView t4 = getView(drawerLayout, R.id.mcc_mnc);
-        TextView t5 = getView(drawerLayout, R.id.manufacturer_name);
-        TextView t6 = getView(drawerLayout, R.id.appVersion);
-
-        t1.setText("：" + deviceName);
-        t2.setText("：Android " + systemVersion);
-        t3.setText("：" + tm.getNetworkOperatorName());
-        t4.setText("：" + tm.getNetworkOperator());
-        t5.setText("：" + manufacturerName);
-        t6.setText("版本号：" + appVersion);
+        DeviceInfo deviceInfo = new DeviceInfo("：" + manufacturerName, "：Android " + systemVersion,
+                "：" + deviceName, "版本号：" + appVersion, "：" + tm.getNetworkOperator(),
+                "：" + tm.getNetworkOperatorName()
+        );
+        binding.setDevice(deviceInfo);
 
         ImageView QRImg = getView(drawerLayout, R.id.QRCode);
         new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg, app);

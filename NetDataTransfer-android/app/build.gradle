@@ -2,8 +2,10 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.0.0"
-
+    buildToolsVersion "23.0.2"
+    dataBinding {
+        enabled = true
+    }
     defaultConfig {
         applicationId "net.app.netdatatransfer"
         minSdkVersion 16
