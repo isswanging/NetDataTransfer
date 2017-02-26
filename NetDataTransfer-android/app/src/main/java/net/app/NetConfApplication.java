@@ -111,6 +111,8 @@ public class NetConfApplication extends Application {
     public final static int upMoveCache = 150;
     public final static int downMoveCache = 50;
 
+    public final static int delay_distance = 1;
+
     // 检查端口
     public String check(boolean isClose) {
         // 获取wifi服务

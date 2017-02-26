@@ -231,7 +231,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
 
                     if (!running && moveTopMargin >= (topMargin - getNeedMove()) &&
                             moveTopMargin <= (topMargin - getNeedMove() + NetConfApplication.upMoveCache)) {
-                        if (!isShow && gap < 0) {
+                        if (!isShow && gap < -app.delay_distance) {
                             Logger.info(TAG, "start running animator");
                             showAnswerList(moveTopMargin + previewContent.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
@@ -250,7 +250,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
                     }
 
                     if (moveTopMargin > (topMargin - getNeedMove() + NetConfApplication.downMoveCache) &&
-                            !running && isShow && gap > 0) {
+                            !running && isShow && gap > app.delay_distance) {
                         hideAnswerList(moveTopMargin + previewContent.getHeight() +
                                 getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                     }

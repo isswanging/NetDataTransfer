@@ -310,7 +310,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
 
                         if (!touchView.running && moveTopMargin >= (topMargin - touchView.getNeedMove()) &&
                                 moveTopMargin <= (topMargin - touchView.getNeedMove() + NetConfApplication.upMoveCache)) {
-                            if (!touchView.isShow && gap < 0) {
+                            if (!touchView.isShow && gap < -app.delay_distance) {
                                 Logger.info(TAG, "start running animator");
                                 touchView.showAnswerList(moveTopMargin + custPreview.getHeight() +
                                         getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
@@ -329,7 +329,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                         }
 
                         if (moveTopMargin > (topMargin - touchView.getNeedMove() + NetConfApplication.downMoveCache) &&
-                                !touchView.running && touchView.isShow && gap > 0) {
+                                !touchView.running && touchView.isShow && gap > app.delay_distance) {
                             touchView.hideAnswerList(moveTopMargin + custPreview.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                         }
