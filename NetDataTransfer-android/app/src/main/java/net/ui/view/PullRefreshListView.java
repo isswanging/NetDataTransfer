@@ -64,10 +64,10 @@ public class PullRefreshListView extends LinearLayout implements
     private float yMove;
 
     // 弹性系数
-    private double elastic = 0.3;
+    private final double elastic = 0.3;
 
     // 回滚速度
-    private int speed = -15;
+    private final int speed = -15;
 
     private PullToRefreshListener pullListener;
 
@@ -170,10 +170,7 @@ public class PullRefreshListView extends LinearLayout implements
         if (firstVisableItem == null)
             return true;
         else {
-            if (firstVisableIndex == 0 && firstVisableItem.getTop() == 0)
-                return true;
-            else
-                return false;
+            return firstVisableIndex == 0 && firstVisableItem.getTop() == 0;
         }
     }
 

@@ -162,10 +162,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
                 yDown = event.getRawY();
                 moveTopMargin = previewParams.topMargin;
                 Logger.info(TAG, "yDown====" + yDown + "===answerListTop====" + answerListTop);
-                if (yDown > answerListTop && isShow)
-                    isMove = false;
-                else
-                    isMove = true;
+                isMove = !(yDown > answerListTop && isShow);
                 break;
             case MotionEvent.ACTION_UP:
                 Logger.info(TAG, "in forceTouchView touch UP");
@@ -212,18 +209,12 @@ public class ForceTouchViewGroup extends RelativeLayout {
                         else {
                             moveTopMargin = (int) (moveTopMargin + gap);
                         }
-                        if (!isShow && !running) {
-                            //showAnswerList();
-                        }
                     }
                     // view处于下压并且继续下拉的状态
                     else if ((moveTopMargin + gap) >= topMargin && yMove > yTemp) {
                         moveTopMargin = (int) (moveTopMargin + gap * 0.15);
                     } else {
                         moveTopMargin = (int) (moveTopMargin + gap);
-                        if (isShow && !running) {
-                            //hideAnswerList();
-                        }
                     }
                     yTemp = yMove;
                     previewParams.topMargin = moveTopMargin;
@@ -231,7 +222,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
 
                     if (!running && moveTopMargin >= (topMargin - getNeedMove()) &&
                             moveTopMargin <= (topMargin - getNeedMove() + NetConfApplication.upMoveCache)) {
-                        if (!isShow && gap < -app.delay_distance) {
+                        if (!isShow && gap < -NetConfApplication.delay_distance) {
                             Logger.info(TAG, "start running animator");
                             showAnswerList(moveTopMargin + previewContent.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
@@ -250,7 +241,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
                     }
 
                     if (moveTopMargin > (topMargin - getNeedMove() + NetConfApplication.downMoveCache) &&
-                            !running && isShow && gap > app.delay_distance) {
+                            !running && isShow && gap > NetConfApplication.delay_distance) {
                         hideAnswerList(moveTopMargin + previewContent.getHeight() +
                                 getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                     }
@@ -320,7 +311,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
         }
 
         //高斯模糊效果
-        public Bitmap blurBitmap(Bitmap bitmap) {
+        Bitmap blurBitmap(Bitmap bitmap) {
             //Let's create an empty bitmap with the same size of the bitmap we want to blur
             Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             //Instantiate a new Renderscript
@@ -380,8 +371,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                int top = (Integer) valueAnimator.getAnimatedValue();
-                answerParams.topMargin = top;
+                answerParams.topMargin = (int) (Integer) valueAnimator.getAnimatedValue();
                 answerList.setLayoutParams(answerParams);
             }
         });
@@ -409,8 +399,7 @@ public class ForceTouchViewGroup extends RelativeLayout {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                int top = (Integer) valueAnimator.getAnimatedValue();
-                answerParams.topMargin = top;
+                answerParams.topMargin = (int) (Integer) valueAnimator.getAnimatedValue();
                 answerList.setLayoutParams(answerParams);
             }
         });

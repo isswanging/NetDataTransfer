@@ -111,6 +111,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
 
     private final int SHOW = 1;
     private final int HIDE = 0;
+    private final int DELAY = 2000;
 
     private static final int add = 0;
     private static final int remove = 1;
@@ -347,7 +348,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if ((System.currentTimeMillis() - exitTime) > 2000) {
+            if ((System.currentTimeMillis() - exitTime) > DELAY) {
                 Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
                 exitTime = System.currentTimeMillis();
                 return false;

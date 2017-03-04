@@ -38,6 +38,7 @@ public class WelcomeActivity extends BaseActivity {
             public void run() {
                 Intent intent = new Intent("net.ui.main");
                 startActivity(intent);
+                overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
                 finish();
             }
         }, 2400);

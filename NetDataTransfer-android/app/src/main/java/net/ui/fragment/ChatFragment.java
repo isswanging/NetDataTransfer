@@ -50,14 +50,13 @@ public class ChatFragment extends BaseFragment {
     private final String TAG = "ChatFragment";
     FrameLayout chatMain;
     SideslipMenuView sideslipMenuView;
-    String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     private ChatOnClickListener clickListener = new ChatOnClickListener();
     // 聊天内容的适配器
     private ChatMsgAdapter mAdapter;
     private ListView mListView;
     // 聊天的内容
-    private List<ChatMsgEntity> mDataArrays = new ArrayList<ChatMsgEntity>();
+    private List<ChatMsgEntity> mDataArrays = new ArrayList<>();
     private EditText chatEditText;
     private String targetName;
     private String targetIp;
@@ -144,9 +143,9 @@ public class ChatFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         Logger.info(TAG, "resume::" + app.chatId);
-        if (app.chatId.equals("gone")) {
-        } else
+        if (!app.chatId.equals("gone")) {
             checkUnreadMsg();
+        }
     }
 
     @Override
@@ -158,7 +157,7 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String filePath = null;
+        String filePath;
 
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
@@ -429,8 +428,7 @@ public class ChatFragment extends BaseFragment {
             // 将光标移至开头 ，这个很重要，不小心很容易引起越界
             cursor.moveToFirst();
             // 最后根据索引值获取图片路径
-            String path = cursor.getString(column_index);
-            return path;
+            return cursor.getString(column_index);
         }
 
     }

@@ -5,11 +5,11 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class DBHelper extends SQLiteOpenHelper {
+class DBHelper extends SQLiteOpenHelper {
     private static final String db_name = "chat.db";
     private static final int db_version = 1;
 
-    public DBHelper(Context context) {
+    DBHelper(Context context) {
         super(context, db_name, null, db_version);
     }
 

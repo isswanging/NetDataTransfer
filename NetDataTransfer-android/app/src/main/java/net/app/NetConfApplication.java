@@ -30,7 +30,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Vector;
@@ -76,17 +75,17 @@ public class NetConfApplication extends Application {
     // PC上使用的两个标志位
     // public final static int folderPre = 4;
     // public final static int folderConf = 5;
-    public static final int end = 6;
+    // public static final int end = 6;
 
     public int getText() {
         return text;
     }
 
     // 数组buffer
-    public final int buffer = 10000;
+    // public final int buffer = 10000;
 
     // 在线主机列表
-    public Vector<Host> hostList = new Vector<Host>();
+    public Vector<Host> hostList = new Vector<>();
 
     public static String hostIP = "";
     public static String hostName = "Android";
@@ -106,7 +105,7 @@ public class NetConfApplication extends Application {
     public final static String[] audioSupport = {"mp3", "wma", "wav", "amr"};
 
     public final static int add = 0;
-    public final static int remove = 1;
+    // public final static int remove = 1;
 
     public final static int upMoveCache = 150;
     public final static int downMoveCache = 50;
