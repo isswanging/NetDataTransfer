@@ -71,7 +71,6 @@ public class MainActivity extends BaseActivity {
     private UserListFragment users;
     private ChatFragment chat;
     private FragmentManager fragmentManager;
-    String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     // 按两次退出的计时
     private long exitTime = 0;
@@ -155,9 +154,9 @@ public class MainActivity extends BaseActivity {
         fragmentAction();
         Logger.info(TAG, "end fragments users and chat");
 
-        for (int i = 0; i < answerData.length; i++) {
+        for (String anAnswerData : answerData) {
             Map item = new HashMap();
-            item.put("text", answerData[i]);
+            item.put("text", anAnswerData);
             answerListData.add(item);
         }
         showPreviewAnim = new AlphaAnimation(0f, 1f);
@@ -214,8 +213,8 @@ public class MainActivity extends BaseActivity {
         Logger.info(TAG, "host list length: " + app.hostList.size());
         new DBManager(this).closeDB();
         try {
-            new DatagramSocket(app.textPort).close();
-            new ServerSocket(app.filePort).close();
+            new DatagramSocket(NetConfApplication.textPort).close();
+            new ServerSocket(NetConfApplication.filePort).close();
         } catch (IOException e) {
             Logger.error(TAG, "socket close error" + e.toString());
         }
@@ -317,7 +316,7 @@ public class MainActivity extends BaseActivity {
                         }
 
                         if (moveTopMargin > (topMargin - touchView.getNeedMove() + NetConfApplication.downMoveCache) &&
-                                !touchView.running && touchView.isShow && gap > app.delay_distance) {
+                                !touchView.running && touchView.isShow && gap > NetConfApplication.delay_distance) {
                             touchView.hideAnswerList(moveTopMargin + custPreview.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                         }

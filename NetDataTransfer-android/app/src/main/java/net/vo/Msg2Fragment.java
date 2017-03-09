@@ -15,16 +15,8 @@ public class Msg2Fragment {
         return obj;
     }
 
-    public void setObj(Object obj) {
-        this.obj = obj;
-    }
-
     public Commend getCommend() {
         return commend;
-    }
-
-    public void setCommend(Commend commend) {
-        this.commend = commend;
     }
 
     @Override

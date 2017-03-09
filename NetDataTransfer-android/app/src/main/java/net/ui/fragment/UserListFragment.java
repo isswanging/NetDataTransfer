@@ -238,7 +238,7 @@ public class UserListFragment extends BaseFragment {
         binding.setDevice(deviceInfo);
 
         ImageView QRImg = getView(drawerLayout, R.id.QRCode);
-        new CreateQRImage(android.os.Build.MODEL + "!!!!" + app.hostIP, QRImg, app);
+        new CreateQRImage(android.os.Build.MODEL + "!!!!" + NetConfApplication.hostIP, QRImg, app);
         isQRReady = true;
     }
 
@@ -363,10 +363,8 @@ public class UserListFragment extends BaseFragment {
     private void loadUserListOrWarn() {
         if (app.wifi == 1) {
             EventBus.getDefault().post(new Msg2Activity(Commend.login, null));
-            // notification.notifyInfo(login, null);
         } else {
             EventBus.getDefault().post(new Msg2Activity(Commend.login, "net_error"));
-            //notification.notifyInfo(login, "net_error");
         }
     }
 
@@ -394,7 +392,6 @@ public class UserListFragment extends BaseFragment {
             @Override
             public void onRefresh() {
                 EventBus.getDefault().post(new Msg2Activity(Commend.refresh, null));
-                //notification.notifyInfo(refresh, null);
             }
         });
         pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -411,7 +408,6 @@ public class UserListFragment extends BaseFragment {
                     who.putString("name", name.getText().toString());
                     who.putString("ip", ip.getText().toString());
                     EventBus.getDefault().post(new Msg2Activity(Commend.startChat, who));
-                    //notification.notifyInfo(startChat, who);
                 }
             }
         });
