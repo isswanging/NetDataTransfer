@@ -7,21 +7,12 @@ import android.os.Message;
 import android.view.View;
 
 import net.app.NetConfApplication;
+import net.vo.Msg2Fragment;
+
+import org.greenrobot.eventbus.EventBus;
 
 public abstract class BaseFragment extends Fragment {
-    public Notification notification;
     public NetConfApplication app;
-
-    public final int login = 0;
-    public final int refresh = 1;
-    public final int retry = 2;
-    public final int answer = 3;
-    public final int startChat = 4;
-    public final int incomingMsg = 5;
-    public final int redraw = 6;
-    public final int close = 7;
-    public final int pressure = 8;
-    public final int exit = 9;
 
     public boolean isRotate = false;
     public View viewGroup;
@@ -32,16 +23,7 @@ public abstract class BaseFragment extends Fragment {
         // 翻转时fragment不销毁
         setRetainInstance(true);
         app = (NetConfApplication) getActivity().getApplication();
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        try {
-            notification = (Notification) activity;
-        } catch (ClassCastException e) {
-            e.printStackTrace();
-        }
-        super.onAttach(activity);
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -51,18 +33,13 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        notification = null;
-        super.onDetach();
-    }
-
-    // 和宿主activity通信的接口
-    public interface Notification {
-        void notifyInfo(int commend, Object obj);
+    public void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 
     // 接受activity更新指令的UI操作
-    public abstract void getCommend(Message msg);
+    public abstract void getCommend(Msg2Fragment msg);
 
     // 简化findViewById操作
     public <T extends View> T getView(View v, int id) {

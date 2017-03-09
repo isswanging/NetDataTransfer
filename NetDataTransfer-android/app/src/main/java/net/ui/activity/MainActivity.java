@@ -40,9 +40,16 @@ import net.ui.fragment.ChatFragment;
 import net.ui.fragment.CustAlertDialog;
 import net.ui.fragment.UserListFragment;
 import net.ui.view.ForceTouchViewGroup;
+import net.util.Commend;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import net.vo.Msg2Activity;
 import net.vo.Host;
+import net.vo.Msg2Fragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -55,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-public class MainActivity extends BaseActivity implements BaseFragment.Notification {
+public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
     private final String user_TAG = "usersFragment";
     private final String chat_TAG = "chatFragment";
@@ -64,16 +71,11 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     private UserListFragment users;
     private ChatFragment chat;
     private FragmentManager fragmentManager;
-    String permission = "com.android.permission.RECV_NDT_NOTIFY";
 
     // 按两次退出的计时
     private long exitTime = 0;
     // 防止转屏退出程序
     private boolean isExit;
-
-    // 更新消息提示的广播
-    NewMsgReceiver msgReceiver;
-    IntentFilter filter;
 
     // 3D touch效果
     ListView previewContent;
@@ -98,16 +100,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     Bundle bundle;
     Host host;
 
-    private static final int login = 0;
-    private static final int refresh = 1;
-    private static final int retry = 2;
-    private static final int answer = 3;
-    private static final int startChat = 4;
-    private static final int incomingMsg = 5;
-    private static final int redraw = 6;
-    private static final int close = 7;
-    private static final int pressure = 8;
-    private static final int exit = 9;
+    public static final Commend[] commends = Commend.values();
 
     private final int SHOW = 1;
     private final int HIDE = 0;
@@ -119,7 +112,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     DialogInterface.OnClickListener loadingListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            notifyInfo(retry, null);
+            onEventProcess(new Msg2Activity(Commend.retry, null));
         }
     };
 
@@ -130,6 +123,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         setContentView(R.layout.main);
         app.forceClose = false;
         isExit = true;
+        EventBus.getDefault().register(this);
 
         if (savedInstanceState != null) {
             // 防止转屏时导致列表混乱
@@ -160,14 +154,9 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         fragmentAction();
         Logger.info(TAG, "end fragments users and chat");
 
-        msgReceiver = new NewMsgReceiver();
-        filter = new IntentFilter();
-        filter.addAction("net.ui.newMsg");
-        filter.addAction("net.ui.chatFrom");
-
-        for (int i = 0; i < answerData.length; i++) {
+        for (String anAnswerData : answerData) {
             Map item = new HashMap();
-            item.put("text", answerData[i]);
+            item.put("text", anAnswerData);
             answerListData.add(item);
         }
         showPreviewAnim = new AlphaAnimation(0f, 1f);
@@ -185,21 +174,19 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         if (b != null) {
             Message msg = handler.obtainMessage();
             msg.obj = b;
-            msg.what = startChat;
+            msg.what = Commend.startChat.ordinal();
             msg.sendToTarget();
         }
     }
 
     @Override
     protected void onResume() {
-        login(refresh);
-        registerReceiver(msgReceiver, filter, permission, null);
+        login(Commend.refresh);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        unregisterReceiver(msgReceiver);
         app.hideKeyboard(this);
         super.onPause();
     }
@@ -214,6 +201,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
 
     @Override
     protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
         if (app.forceClose) {
             stopService(new Intent(this, LoginMonitorService.class));
             stopService(new Intent(this, UdpDataMonitorService.class));
@@ -225,10 +213,8 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         Logger.info(TAG, "host list length: " + app.hostList.size());
         new DBManager(this).closeDB();
         try {
-            new DatagramSocket(app.textPort).close();
-            new ServerSocket(app.filePort).close();
-        } catch (SocketException e) {
-            Logger.error(TAG, "socket close error" + e.toString());
+            new DatagramSocket(NetConfApplication.textPort).close();
+            new ServerSocket(NetConfApplication.filePort).close();
         } catch (IOException e) {
             Logger.error(TAG, "socket close error" + e.toString());
         }
@@ -330,7 +316,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                         }
 
                         if (moveTopMargin > (topMargin - touchView.getNeedMove() + NetConfApplication.downMoveCache) &&
-                                !touchView.running && touchView.isShow && gap > app.delay_distance) {
+                                !touchView.running && touchView.isShow && gap > NetConfApplication.delay_distance) {
                             touchView.hideAnswerList(moveTopMargin + custPreview.getHeight() +
                                     getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));
                         }
@@ -359,16 +345,16 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public void notifyInfo(int commend, Object obj) {
-        Logger.info(TAG, "get commend from fragment==" + commend);
-        switch (commend) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventProcess(Msg2Activity event) {
+        Logger.info(TAG, "onEventProcess get event msg " + event.toString());
+        switch (event.getCommend()) {
             case login:
                 Fragment dialog = getFragmentManager().findFragmentByTag("setup_warn");
                 if (dialog != null) {
                     getFragmentManager().beginTransaction().remove(dialog).commit();
                 }
-                if (obj != null) {
+                if (event.getObj() != null) {
                     CustAlertDialog cd = new CustAlertDialog();
                     cd.setTitle("错误");
                     cd.setAlertText("网络未连接或端口占用，加载失败");
@@ -378,34 +364,32 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                     break;
                 }
             case refresh:
-                login(commend);
-                handler.sendEmptyMessageDelayed(commend, 2000);
+                login(event.getCommend());
+                Message.obtain(handler, event.getCommend().ordinal()).sendToTarget();
                 break;
             case retry:
                 app.check(true);
                 listen();
-                handler.sendEmptyMessageDelayed(commend, 1000);
+                handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 1000);
                 break;
             case startChat:
                 Message msg = handler.obtainMessage();
-                msg.what = commend;
-                msg.obj = obj;
+                msg.what = event.getCommend().ordinal();
+                msg.obj = event.getObj();
                 msg.sendToTarget();
                 break;
             case close:
                 animFragmentEffect(HIDE, chat);
                 break;
             case redraw:
-                handler.sendEmptyMessage(commend);
+                handler.sendEmptyMessage(event.getCommend().ordinal());
                 break;
             case pressure:
-                show3dTouchView((Bundle) obj);
+                show3dTouchView((Bundle) event.getObj());
                 break;
             case exit:
                 cleanAndExit();
                 break;
-            default:
-                Logger.error(TAG, "====get error commend====" + commend);
         }
     }
 
@@ -413,8 +397,8 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
     public void notifyWifiInfo() {
         super.notifyWifiInfo();
         if (app.wifi == 1) {
-            login(refresh);
-            handler.sendEmptyMessage(refresh);
+            login(Commend.refresh);
+            handler.sendEmptyMessage(Commend.refresh.ordinal());
         }
     }
 
@@ -440,7 +424,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         if (builder == null)
             builder = new ForceTouchViewGroup.Builder(this);
         touchView = builder.setBackground(root).setIP(targetIp).setView(R.layout.touch_content)
-                .setData(answerListData).setHandler(handler, answer).create();
+                .setData(answerListData).setHandler(handler, Commend.answer.ordinal()).create();
         touchView.setActionListener(listener);
         touchView.show(builder);
         touchView.startAnimation(showPreviewAnim);
@@ -470,7 +454,7 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
         topMargin = previewParams.topMargin;
     }
 
-    static class ActionListener implements ForceTouchViewGroup.ActionListener {
+    private static class ActionListener implements ForceTouchViewGroup.ActionListener {
         WeakReference<MainActivity> refActvity;
 
         ActionListener(MainActivity activity) {
@@ -506,16 +490,17 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
             final MainActivity act = refActvity.get();
 
             if (act != null) {
-                switch (msg.what) {
+                switch (commends[msg.what]) {
                     case login:
                     case refresh:
                     case retry:
                     case redraw:
-                        act.users.getCommend(msg);
+                        Logger.info(TAG,"------eventbus send msg-----");
+                        EventBus.getDefault().post(new Msg2Fragment(commends[msg.what], null));
                         break;
                     case startChat:
                         act.getView(R.id.chat).setVisibility(View.VISIBLE);
-                        act.chat.getCommend(msg);
+                        EventBus.getDefault().post(commends[msg.what]);
                         // 显示chatFragment
                         act.animFragmentEffect(act.SHOW, act.chat);
                         break;
@@ -555,20 +540,20 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                 NetConfApplication.hostIP, hostName, 1, 0));
     }
 
-    private void login(int commend) {
+    private void login(Commend commend) {
         NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
-        if (commend == refresh) {
-            Logger.info(TAG,"refresh....");
+        if (commend.equals(Commend.refresh)) {
+            Logger.info(TAG, "refresh....");
             if (app.hostList.isEmpty()) {
-                Logger.info(TAG,"add new....");
+                Logger.info(TAG, "add new....");
                 addNewHost();
             }
             host = app.hostList.get(0);
             host.setState(0);
             host.setIp(NetConfApplication.hostIP);
-        } else if (commend == login) {
+        } else if (commend.equals(Commend.login)) {
             app.hostList.clear();
-            Logger.info(TAG,"login....");
+            Logger.info(TAG, "login....");
             addNewHost();
         }
 
@@ -616,16 +601,15 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
 
             // 清理操作
             new DBManager(this).deleteMsg(targetIp);
-            msg.what = redraw;
-            users.getCommend(msg);
+
+            EventBus.getDefault().post(new Msg2Fragment(Commend.redraw, null));
         } else {
             // 显示
             bundle.putString("ip", targetIp);
             bundle.putString("name", targetName);
-            msg.what = startChat;
-            msg.obj = bundle;
             getView(R.id.chat).setVisibility(View.VISIBLE);
-            chat.getCommend(msg);
+            //chat.getCommend(n);
+            EventBus.getDefault().post(new Msg2Fragment(Commend.startChat, bundle));
             animFragmentEffect(SHOW, chat);
         }
     }
@@ -648,23 +632,4 @@ public class MainActivity extends BaseActivity implements BaseFragment.Notificat
                     show(fragment).commit();
         }
     }
-
-    class NewMsgReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Message msg = Message.obtain();
-            // 如果聊天id相同,就更新当前窗口的消息
-            if (intent.getAction().equals("net.ui.chatFrom")) {
-                msg.what = incomingMsg;
-                msg.obj = intent.getExtras();
-                chat.getCommend(msg);
-            } else {
-                // 在界面上显示未读消息
-                msg.what = redraw;
-                users.getCommend(msg);
-            }
-        }
-    }
-
 }
