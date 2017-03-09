@@ -38,8 +38,15 @@ import net.db.DBManager;
 import net.log.Logger;
 import net.ui.activity.ChatMsgAdapter;
 import net.ui.view.SideslipMenuView;
+import net.util.Commend;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import net.vo.Msg2Activity;
+import net.vo.Msg2Fragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -218,20 +225,19 @@ public class ChatFragment extends BaseFragment {
     }
 
     @Override
-    public void getCommend(Message msg) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void getCommend(Msg2Fragment msg) {
         Bundle bundle;
-        switch (msg.what) {
+        switch (msg.getCommend()) {
             case startChat:
-                Logger.info(TAG, "get commend from activity =" + msg.what);
+                Logger.info(TAG, "get commend from activity =" + msg.getCommend());
                 app.topFragment = "chat";
-                bundle = (Bundle) msg.obj;
+                bundle = (Bundle) msg.getObj();
                 showChatContent(bundle);
                 break;
 
             case incomingMsg:
-                bundle = (Bundle) msg.obj;
-                DataPacket dp = JSON.parseObject(bundle.getString("content"),
-                        DataPacket.class);
+                DataPacket dp = JSON.parseObject((String) msg.getObj(), DataPacket.class);
                 ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                         app.getDate(), dp.getContent(), true);
                 mDataArrays.add(entity);
@@ -244,7 +250,7 @@ public class ChatFragment extends BaseFragment {
     private void checkUnreadMsg() {
         // 如果有未读消息
         DBManager dbm = new DBManager(app);
-        if (dbm.contains(targetIp)){
+        if (dbm.contains(targetIp)) {
             Logger.info(TAG, "get new massage");
             app.nManager.cancelAll();
             mDataArrays.addAll(dbm.queryMsg(targetIp));
@@ -252,7 +258,7 @@ public class ChatFragment extends BaseFragment {
             mAdapter.notifyDataSetChanged();
         }
         mListView.setSelection(mListView.getCount() - 1);
-        notification.notifyInfo(redraw, null);
+        EventBus.getDefault().post(new Msg2Activity(Commend.redraw, null));
     }
 
     public void sendNotifyMsg(String filePath) {
@@ -308,7 +314,7 @@ public class ChatFragment extends BaseFragment {
                 case R.id.closeCurChat:
                     app.chatId = "gone";
                     app.topFragment = "users";
-                    notification.notifyInfo(close, null);
+                    EventBus.getDefault().post(new Msg2Activity(Commend.close, null));
                     mDataArrays.clear();
                     app.hideKeyboard(getActivity());
                     break;

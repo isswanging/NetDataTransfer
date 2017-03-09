@@ -19,6 +19,8 @@ import net.service.LoginMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.fragment.CustAlertDialog;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.lang.reflect.Field;
 
 public class BaseActivity extends Activity implements NetConfApplication.WifiListener {

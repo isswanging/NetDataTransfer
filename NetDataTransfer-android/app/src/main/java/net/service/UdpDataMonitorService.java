@@ -20,11 +20,15 @@ import net.base.BaseService;
 import net.db.DBManager;
 import net.log.Logger;
 import net.util.BadgeUtil;
+import net.util.Commend;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import net.vo.Msg2Fragment;
 import net.vo.Progress;
 import net.vo.SendTask;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -65,13 +69,7 @@ public class UdpDataMonitorService extends BaseService {
         if (app.chatId.equals(dp.getIp())) {
             // 发广播在交给聊天窗口处理
             Logger.info(TAG, "handler by chat");
-            Intent intent = new Intent("net.ui.chatFrom");
-            Bundle bundle = new Bundle();
-            bundle.putString("content", info);
-            intent.putExtras(bundle);
-
-            // 发送广播
-            sendBroadcast(intent);
+            EventBus.getDefault().post(new Msg2Fragment(Commend.incomingMsg, info));
         } else {
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                     app.getDate(), JSON.parseObject(info, DataPacket.class)
@@ -108,8 +106,7 @@ public class UdpDataMonitorService extends BaseService {
 
             // 让界面显示未读消息的红点
             Logger.info(TAG, "handler by userList");
-            Intent unReadIntent = new Intent("net.ui.newMsg");
-            sendBroadcast(unReadIntent);
+            EventBus.getDefault().post(new Msg2Fragment(Commend.redraw, null));
         }
 
     }

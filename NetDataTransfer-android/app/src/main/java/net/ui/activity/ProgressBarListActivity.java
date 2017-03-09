@@ -29,7 +29,6 @@ public class ProgressBarListActivity extends BaseActivity {
     int send = 0;
     int get = 1;
     int tag;
-    int refresh = 3;
 
     private ArrayList<Progress> data = new ArrayList<Progress>();
     ProgressAdapter adapter;

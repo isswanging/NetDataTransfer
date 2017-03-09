@@ -41,8 +41,15 @@ import net.ui.activity.FileListActivity;
 import net.ui.activity.ProgressBarListActivity;
 import net.ui.view.PullRefreshListView;
 import net.util.CreateQRImage;
+import net.util.Commend;
 import net.vo.DeviceInfo;
+import net.vo.Msg2Activity;
 import net.vo.Host;
+import net.vo.Msg2Fragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -151,8 +158,10 @@ public class UserListFragment extends BaseFragment {
     }
 
     @Override
-    public void getCommend(Message msg) {
-        switch (msg.what) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void getCommend(Msg2Fragment msg) {
+        Logger.info(TAG, "get msg-----" + msg.toString());
+        switch (msg.getCommend()) {
             case login:
                 loadUserListUI();
                 break;
@@ -289,7 +298,7 @@ public class UserListFragment extends BaseFragment {
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.exit:
-                        notification.notifyInfo(exit, null);
+                        EventBus.getDefault().post(new Msg2Activity(Commend.exit, null));
                         break;
                     case R.id.openFolder:
                         startActivity(new Intent(getActivity(), FileListActivity.class));
@@ -353,9 +362,11 @@ public class UserListFragment extends BaseFragment {
     // 通过activity调用更新UI的操作设置了一定的延迟，程序第一次启动时调用
     private void loadUserListOrWarn() {
         if (app.wifi == 1) {
-            notification.notifyInfo(login, null);
+            EventBus.getDefault().post(new Msg2Activity(Commend.login, null));
+            // notification.notifyInfo(login, null);
         } else {
-            notification.notifyInfo(login, "net_error");
+            EventBus.getDefault().post(new Msg2Activity(Commend.login, "net_error"));
+            //notification.notifyInfo(login, "net_error");
         }
     }
 
@@ -382,7 +393,8 @@ public class UserListFragment extends BaseFragment {
         pullRefreshListView.setPullListener(new PullRefreshListView.PullToRefreshListener() {
             @Override
             public void onRefresh() {
-                notification.notifyInfo(refresh, null);
+                EventBus.getDefault().post(new Msg2Activity(Commend.refresh, null));
+                //notification.notifyInfo(refresh, null);
             }
         });
         pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -398,7 +410,8 @@ public class UserListFragment extends BaseFragment {
                     Logger.info(TAG, "send notify to show chat fragment");
                     who.putString("name", name.getText().toString());
                     who.putString("ip", ip.getText().toString());
-                    notification.notifyInfo(startChat, who);
+                    EventBus.getDefault().post(new Msg2Activity(Commend.startChat, who));
+                    //notification.notifyInfo(startChat, who);
                 }
             }
         });
@@ -421,7 +434,7 @@ public class UserListFragment extends BaseFragment {
                             bundle.putString("name", targetName);
                             // 振动提示
                             vibrator.vibrate(pattern, -1);
-                            notification.notifyInfo(pressure, bundle);
+                            EventBus.getDefault().post(new Msg2Activity(Commend.pressure, bundle));
 
                             return true;
                         } else {
