@@ -2,11 +2,8 @@ package net.ui.activity;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -35,7 +32,6 @@ import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.LoginMonitorService;
 import net.service.UdpDataMonitorService;
-import net.base.BaseFragment;
 import net.ui.fragment.ChatFragment;
 import net.ui.fragment.CustAlertDialog;
 import net.ui.fragment.UserListFragment;
@@ -43,8 +39,8 @@ import net.ui.view.ForceTouchViewGroup;
 import net.util.Commend;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
-import net.vo.Msg2Activity;
 import net.vo.Host;
+import net.vo.Msg2Activity;
 import net.vo.Msg2Fragment;
 
 import org.greenrobot.eventbus.EventBus;
@@ -365,7 +361,7 @@ public class MainActivity extends BaseActivity {
                 }
             case refresh:
                 login(event.getCommend());
-                Message.obtain(handler, event.getCommend().ordinal()).sendToTarget();
+                handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 2000);
                 break;
             case retry:
                 app.check(true);
