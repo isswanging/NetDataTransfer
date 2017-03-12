@@ -39,9 +39,8 @@ import net.ui.view.ForceTouchViewGroup;
 import net.util.Commend;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
+import net.vo.EventInfo;
 import net.vo.Host;
-import net.vo.Msg2Activity;
-import net.vo.Msg2Fragment;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -108,7 +107,7 @@ public class MainActivity extends BaseActivity {
     DialogInterface.OnClickListener loadingListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            onEventProcess(new Msg2Activity(Commend.retry, null));
+            onEventProcess(new EventInfo(Commend.retry, EventInfo.tofrg, null));
         }
     };
 
@@ -342,50 +341,52 @@ public class MainActivity extends BaseActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventProcess(Msg2Activity event) {
+    public void onEventProcess(EventInfo event) {
         Logger.info(TAG, "onEventProcess get event msg " + event.toString());
-        switch (event.getCommend()) {
-            case login:
-                Fragment dialog = getFragmentManager().findFragmentByTag("setup_warn");
-                if (dialog != null) {
-                    getFragmentManager().beginTransaction().remove(dialog).commit();
-                }
-                if (event.getObj() != null) {
-                    CustAlertDialog cd = new CustAlertDialog();
-                    cd.setTitle("错误");
-                    cd.setAlertText("网络未连接或端口占用，加载失败");
-                    cd.setListener(loadingListener);
-                    cd.setCancelable(false);
-                    cd.show(getFragmentManager(), "setup_warn");
+        if(event.getDirection()==EventInfo.toAct){
+            switch (event.getCommend()) {
+                case login:
+                    Fragment dialog = getFragmentManager().findFragmentByTag("setup_warn");
+                    if (dialog != null) {
+                        getFragmentManager().beginTransaction().remove(dialog).commit();
+                    }
+                    if (event.getObj() != null) {
+                        CustAlertDialog cd = new CustAlertDialog();
+                        cd.setTitle("错误");
+                        cd.setAlertText("网络未连接或端口占用，加载失败");
+                        cd.setListener(loadingListener);
+                        cd.setCancelable(false);
+                        cd.show(getFragmentManager(), "setup_warn");
+                        break;
+                    }
+                case refresh:
+                    login(event.getCommend());
+                    handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 2000);
                     break;
-                }
-            case refresh:
-                login(event.getCommend());
-                handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 2000);
-                break;
-            case retry:
-                app.check(true);
-                listen();
-                handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 1000);
-                break;
-            case startChat:
-                Message msg = handler.obtainMessage();
-                msg.what = event.getCommend().ordinal();
-                msg.obj = event.getObj();
-                msg.sendToTarget();
-                break;
-            case close:
-                animFragmentEffect(HIDE, chat);
-                break;
-            case redraw:
-                handler.sendEmptyMessage(event.getCommend().ordinal());
-                break;
-            case pressure:
-                show3dTouchView((Bundle) event.getObj());
-                break;
-            case exit:
-                cleanAndExit();
-                break;
+                case retry:
+                    app.check(true);
+                    listen();
+                    handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 1000);
+                    break;
+                case startChat:
+                    Message msg = handler.obtainMessage();
+                    msg.what = event.getCommend().ordinal();
+                    msg.obj = event.getObj();
+                    msg.sendToTarget();
+                    break;
+                case close:
+                    animFragmentEffect(HIDE, chat);
+                    break;
+                case redraw:
+                    handler.sendEmptyMessage(event.getCommend().ordinal());
+                    break;
+                case pressure:
+                    show3dTouchView((Bundle) event.getObj());
+                    break;
+                case exit:
+                    cleanAndExit();
+                    break;
+            }
         }
     }
 
@@ -491,8 +492,8 @@ public class MainActivity extends BaseActivity {
                     case refresh:
                     case retry:
                     case redraw:
-                        Logger.info(TAG,"------eventbus send msg-----");
-                        EventBus.getDefault().post(new Msg2Fragment(commends[msg.what], null));
+                        Logger.info(TAG, "------eventbus send msg-----");
+                        EventBus.getDefault().post(new EventInfo(commends[msg.what], EventInfo.tofrg, null));
                         break;
                     case startChat:
                         act.getView(R.id.chat).setVisibility(View.VISIBLE);
@@ -598,14 +599,14 @@ public class MainActivity extends BaseActivity {
             // 清理操作
             new DBManager(this).deleteMsg(targetIp);
 
-            EventBus.getDefault().post(new Msg2Fragment(Commend.redraw, null));
+            EventBus.getDefault().post(new EventInfo(Commend.redraw, EventInfo.tofrg, null));
         } else {
             // 显示
             bundle.putString("ip", targetIp);
             bundle.putString("name", targetName);
             getView(R.id.chat).setVisibility(View.VISIBLE);
             //chat.getCommend(n);
-            EventBus.getDefault().post(new Msg2Fragment(Commend.startChat, bundle));
+            EventBus.getDefault().post(new EventInfo(Commend.startChat, EventInfo.tofrg, bundle));
             animFragmentEffect(SHOW, chat);
         }
     }

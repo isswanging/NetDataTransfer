@@ -8,7 +8,6 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.os.Vibrator;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.TelephonyManager;
@@ -43,9 +42,8 @@ import net.ui.view.PullRefreshListView;
 import net.util.CreateQRImage;
 import net.util.Commend;
 import net.vo.DeviceInfo;
-import net.vo.Msg2Activity;
+import net.vo.EventInfo;
 import net.vo.Host;
-import net.vo.Msg2Fragment;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -159,26 +157,28 @@ public class UserListFragment extends BaseFragment {
 
     @Override
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void getCommend(Msg2Fragment msg) {
+    public void getCommend(EventInfo msg) {
         Logger.info(TAG, "get msg-----" + msg.toString());
-        switch (msg.getCommend()) {
-            case login:
-                loadUserListUI();
-                break;
-            case retry:
-                loadUserListOrWarn();
-                break;
-            case refresh:
-                pullRefreshListView.finishRefreshing();
-                getUserData();
-                userInfoAdapter.notifyDataSetChanged();
-                break;
-            case redraw:
-                if (userInfoAdapter != null) {
+        if(msg.getDirection()==EventInfo.tofrg){
+            switch (msg.getCommend()) {
+                case login:
+                    loadUserListUI();
+                    break;
+                case retry:
+                    loadUserListOrWarn();
+                    break;
+                case refresh:
+                    pullRefreshListView.finishRefreshing();
                     getUserData();
                     userInfoAdapter.notifyDataSetChanged();
-                }
-                break;
+                    break;
+                case redraw:
+                    if (userInfoAdapter != null) {
+                        getUserData();
+                        userInfoAdapter.notifyDataSetChanged();
+                    }
+                    break;
+            }
         }
     }
 
@@ -298,7 +298,7 @@ public class UserListFragment extends BaseFragment {
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.exit:
-                        EventBus.getDefault().post(new Msg2Activity(Commend.exit, null));
+                        EventBus.getDefault().post(new EventInfo(Commend.exit, EventInfo.toAct, null));
                         break;
                     case R.id.openFolder:
                         startActivity(new Intent(getActivity(), FileListActivity.class));
@@ -362,9 +362,9 @@ public class UserListFragment extends BaseFragment {
     // 通过activity调用更新UI的操作设置了一定的延迟，程序第一次启动时调用
     private void loadUserListOrWarn() {
         if (app.wifi == 1) {
-            EventBus.getDefault().post(new Msg2Activity(Commend.login, null));
+            EventBus.getDefault().post(new EventInfo(Commend.login, EventInfo.toAct, null));
         } else {
-            EventBus.getDefault().post(new Msg2Activity(Commend.login, "net_error"));
+            EventBus.getDefault().post(new EventInfo(Commend.login, EventInfo.toAct, "net_error"));
         }
     }
 
@@ -391,7 +391,7 @@ public class UserListFragment extends BaseFragment {
         pullRefreshListView.setPullListener(new PullRefreshListView.PullToRefreshListener() {
             @Override
             public void onRefresh() {
-                EventBus.getDefault().post(new Msg2Activity(Commend.refresh, null));
+                EventBus.getDefault().post(new EventInfo(Commend.refresh, EventInfo.toAct, null));
             }
         });
         pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -407,7 +407,7 @@ public class UserListFragment extends BaseFragment {
                     Logger.info(TAG, "send notify to show chat fragment");
                     who.putString("name", name.getText().toString());
                     who.putString("ip", ip.getText().toString());
-                    EventBus.getDefault().post(new Msg2Activity(Commend.startChat, who));
+                    EventBus.getDefault().post(new EventInfo(Commend.startChat, EventInfo.toAct, who));
                 }
             }
         });
@@ -430,7 +430,7 @@ public class UserListFragment extends BaseFragment {
                             bundle.putString("name", targetName);
                             // 振动提示
                             vibrator.vibrate(pattern, -1);
-                            EventBus.getDefault().post(new Msg2Activity(Commend.pressure, bundle));
+                            EventBus.getDefault().post(new EventInfo(Commend.pressure, EventInfo.toAct, bundle));
 
                             return true;
                         } else {

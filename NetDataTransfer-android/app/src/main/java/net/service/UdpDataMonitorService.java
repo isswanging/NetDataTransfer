@@ -24,7 +24,7 @@ import net.util.Commend;
 import net.util.TransferFile;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
-import net.vo.Msg2Fragment;
+import net.vo.EventInfo;
 import net.vo.Progress;
 import net.vo.SendTask;
 
@@ -69,7 +69,7 @@ public class UdpDataMonitorService extends BaseService {
         if (app.chatId.equals(dp.getIp())) {
             // 发广播在交给聊天窗口处理
             Logger.info(TAG, "handler by chat");
-            EventBus.getDefault().post(new Msg2Fragment(Commend.incomingMsg, info));
+            EventBus.getDefault().post(new EventInfo(Commend.incomingMsg, EventInfo.tofrg, info));
         } else {
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
                     app.getDate(), JSON.parseObject(info, DataPacket.class)
@@ -106,7 +106,7 @@ public class UdpDataMonitorService extends BaseService {
 
             // 让界面显示未读消息的红点
             Logger.info(TAG, "handler by userList");
-            EventBus.getDefault().post(new Msg2Fragment(Commend.redraw, null));
+            EventBus.getDefault().post(new EventInfo(Commend.redraw, EventInfo.tofrg, null));
         }
 
     }

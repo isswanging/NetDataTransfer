@@ -11,7 +11,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.ContextMenu;
@@ -41,8 +40,7 @@ import net.ui.view.SideslipMenuView;
 import net.util.Commend;
 import net.vo.ChatMsgEntity;
 import net.vo.DataPacket;
-import net.vo.Msg2Activity;
-import net.vo.Msg2Fragment;
+import net.vo.EventInfo;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -226,24 +224,26 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void getCommend(Msg2Fragment msg) {
-        Bundle bundle;
-        switch (msg.getCommend()) {
-            case startChat:
-                Logger.info(TAG, "get commend from activity =" + msg.getCommend());
-                app.topFragment = "chat";
-                bundle = (Bundle) msg.getObj();
-                showChatContent(bundle);
-                break;
+    public void getCommend(EventInfo msg) {
+        if(msg.getDirection()==EventInfo.tofrg){
+            Bundle bundle;
+            switch (msg.getCommend()) {
+                case startChat:
+                    Logger.info(TAG, "get commend from activity =" + msg.getCommend());
+                    app.topFragment = "chat";
+                    bundle = (Bundle) msg.getObj();
+                    showChatContent(bundle);
+                    break;
 
-            case incomingMsg:
-                DataPacket dp = JSON.parseObject((String) msg.getObj(), DataPacket.class);
-                ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
-                        app.getDate(), dp.getContent(), true);
-                mDataArrays.add(entity);
-                mAdapter.notifyDataSetChanged();
-                mListView.setSelection(mListView.getCount() - 1);
-                break;
+                case incomingMsg:
+                    DataPacket dp = JSON.parseObject((String) msg.getObj(), DataPacket.class);
+                    ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
+                            app.getDate(), dp.getContent(), true);
+                    mDataArrays.add(entity);
+                    mAdapter.notifyDataSetChanged();
+                    mListView.setSelection(mListView.getCount() - 1);
+                    break;
+            }
         }
     }
 
@@ -258,7 +258,7 @@ public class ChatFragment extends BaseFragment {
             mAdapter.notifyDataSetChanged();
         }
         mListView.setSelection(mListView.getCount() - 1);
-        EventBus.getDefault().post(new Msg2Activity(Commend.redraw, null));
+        EventBus.getDefault().post(new EventInfo(Commend.redraw, EventInfo.toAct, null));
     }
 
     public void sendNotifyMsg(String filePath) {
@@ -314,7 +314,7 @@ public class ChatFragment extends BaseFragment {
                 case R.id.closeCurChat:
                     app.chatId = "gone";
                     app.topFragment = "users";
-                    EventBus.getDefault().post(new Msg2Activity(Commend.close, null));
+                    EventBus.getDefault().post(new EventInfo(Commend.close, EventInfo.toAct, null));
                     mDataArrays.clear();
                     app.hideKeyboard(getActivity());
                     break;

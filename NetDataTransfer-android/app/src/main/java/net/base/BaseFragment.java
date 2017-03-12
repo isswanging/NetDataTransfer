@@ -1,13 +1,11 @@
 package net.base;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.os.Message;
 import android.view.View;
 
 import net.app.NetConfApplication;
-import net.vo.Msg2Fragment;
+import net.vo.EventInfo;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -39,7 +37,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     // 接受activity更新指令的UI操作
-    public abstract void getCommend(Msg2Fragment msg);
+    public abstract void getCommend(EventInfo msg);
 
     // 简化findViewById操作
     public <T extends View> T getView(View v, int id) {
