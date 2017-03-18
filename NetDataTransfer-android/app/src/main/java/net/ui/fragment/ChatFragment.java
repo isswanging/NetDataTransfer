@@ -232,6 +232,7 @@ public class ChatFragment extends BaseFragment {
                     Logger.info(TAG, "get commend from activity =" + msg.getCommend());
                     app.topFragment = "chat";
                     bundle = (Bundle) msg.getObj();
+                    Logger.info(TAG,bundle.getString("name"));
                     showChatContent(bundle);
                     break;
 

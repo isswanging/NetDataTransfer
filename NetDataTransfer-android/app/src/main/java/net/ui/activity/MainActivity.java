@@ -166,6 +166,7 @@ public class MainActivity extends BaseActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         Bundle b = getIntent().getExtras();
+        Logger.info(TAG,"onNewIntent "+b.getString("name"));
         if (b != null) {
             Message msg = handler.obtainMessage();
             msg.obj = b;
@@ -497,7 +498,7 @@ public class MainActivity extends BaseActivity {
                         break;
                     case startChat:
                         act.getView(R.id.chat).setVisibility(View.VISIBLE);
-                        EventBus.getDefault().post(commends[msg.what]);
+                        EventBus.getDefault().post(new EventInfo(commends[msg.what], EventInfo.tofrg, msg.obj));
                         // 显示chatFragment
                         act.animFragmentEffect(act.SHOW, act.chat);
                         break;
