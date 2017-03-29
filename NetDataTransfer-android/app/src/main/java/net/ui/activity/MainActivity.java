@@ -107,7 +107,7 @@ public class MainActivity extends BaseActivity {
     DialogInterface.OnClickListener loadingListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            onEventProcess(new EventInfo(Commend.retry, EventInfo.tofrg, null));
+            onEventProcess(new EventInfo(Commend.retry, EventInfo.toAct, null));
         }
     };
 
@@ -365,6 +365,7 @@ public class MainActivity extends BaseActivity {
                     handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 2000);
                     break;
                 case retry:
+                    Logger.info(TAG,"retry......");
                     app.check(true);
                     listen();
                     handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 1000);
@@ -486,7 +487,7 @@ public class MainActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             final MainActivity act = refActvity.get();
-
+            Logger.info(TAG,"msg what "+msg.what);
             if (act != null) {
                 switch (commends[msg.what]) {
                     case login:
