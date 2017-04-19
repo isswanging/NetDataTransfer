@@ -95,53 +95,53 @@ public class PullRefreshListView extends LinearLayout implements
         description = (TextView) header.findViewById(R.id.refreshText);
         listView.setOnTouchListener(this);
 
-        hideHeaderHeight = (int) -getResources().getDimension(
-                R.dimen.refresh_height);
+        hideHeaderHeight = headerLayoutParams.topMargin;
         currentState = Tag.Normal;
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        pullable = isPullable();
+        if (currentState == Tag.Refreshing) {
+            return true;
+        }
 
+        pullable = isPullable();
         if (pullable) {
             switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                yDown = event.getRawY();
-                Logger.info(TAG, "yDown   " + String.valueOf(yDown));
-                return false;
-            case MotionEvent.ACTION_MOVE:
-                yMove = event.getRawY();
-                int distance = (int) (yMove - yDown);
-                if (distance <= 0
-                        && headerLayoutParams.topMargin <= hideHeaderHeight) {
+                case MotionEvent.ACTION_DOWN:
+                    yDown = event.getRawY();
+                    Logger.info(TAG, "yDown   " + String.valueOf(yDown));
                     return false;
-                }
-
-                if (currentState != Tag.Refreshing) {
-                    // 设置偏移
-                    headerLayoutParams.topMargin = (int) (distance * elastic + hideHeaderHeight);
-                    header.setLayoutParams(headerLayoutParams);
-
-                    if (headerLayoutParams.topMargin - 10 <= 0) {
-                        currentState = Tag.Pull_to_Refresh;
-                    } else {
-                        currentState = Tag.Release_to_Refresh;
+                case MotionEvent.ACTION_MOVE:
+                    yMove = event.getRawY();
+                    int distance = (int) (yMove - yDown);
+                    if (distance <= 0 && headerLayoutParams.topMargin <= hideHeaderHeight) {
+                        currentState = Tag.Normal;
+                        return false;
                     }
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                if (currentState == Tag.Release_to_Refresh) {
-                    // 松手时如果是释放立即刷新状态，就去调用正在刷新
-                    new RefreshingTask().execute();
-                } else if (currentState == Tag.Pull_to_Refresh) {
-                    // 松手时如果是下拉状态，就去调用隐藏下拉头
-                    new HideHeaderTask().execute();
-                } else if (currentState == Tag.Normal) {
-                    return false;
-                }
+                    if (currentState != Tag.Refreshing) {
+                        // 设置偏移
+                        headerLayoutParams.topMargin = (int) (distance * elastic + hideHeaderHeight);
+                        header.setLayoutParams(headerLayoutParams);
 
-                break;
+                        if (headerLayoutParams.topMargin - 10 <= 0) {
+                            currentState = Tag.Pull_to_Refresh;
+                        } else {
+                            currentState = Tag.Release_to_Refresh;
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (currentState == Tag.Release_to_Refresh) {
+                        // 松手时如果是释放立即刷新状态，就去调用正在刷新
+                        new RefreshingTask().execute();
+                    } else if (currentState == Tag.Pull_to_Refresh) {
+                        // 松手时如果是下拉状态，就去调用隐藏下拉头
+                        new HideHeaderTask().execute();
+                    } else if (currentState == Tag.Normal) {
+                        return false;
+                    }
+                    break;
             }
         }
 
@@ -155,7 +155,7 @@ public class PullRefreshListView extends LinearLayout implements
             listView.setFocusableInTouchMode(false);
             lastState = currentState;
             // 当前正处于下拉或释放状态，通过返回true屏蔽掉ListView的滚动事件
-            return false;
+            return true;
         }
         return false;
     }
@@ -179,28 +179,26 @@ public class PullRefreshListView extends LinearLayout implements
         if (lastState != currentState) // 防止重复操作
         {
             switch (currentState) {
-            case Pull_to_Refresh:
-                description.setText(getResources().getString(
-                        R.string.pull_to_refresh));
-                description.setVisibility(VISIBLE);
-                progressBar.setVisibility(GONE);
-                break;
-
-            case Release_to_Refresh:
-                description.setText(getResources().getString(
-                        R.string.release_to_refresh));
-                description.setVisibility(VISIBLE);
-                progressBar.setVisibility(GONE);
-                break;
-
-            case Refreshing:
-                description.setVisibility(GONE);
-                progressBar.setVisibility(VISIBLE);
-                break;
-            case Normal:
-                description.setVisibility(INVISIBLE);
-                progressBar.setVisibility(GONE);
-                break;
+                case Pull_to_Refresh:
+                    description.setText(getResources().getString(
+                            R.string.pull_to_refresh));
+                    description.setVisibility(VISIBLE);
+                    progressBar.setVisibility(GONE);
+                    break;
+                case Release_to_Refresh:
+                    description.setText(getResources().getString(
+                            R.string.release_to_refresh));
+                    description.setVisibility(VISIBLE);
+                    progressBar.setVisibility(GONE);
+                    break;
+                case Refreshing:
+                    description.setVisibility(GONE);
+                    progressBar.setVisibility(VISIBLE);
+                    break;
+                case Normal:
+                    description.setVisibility(INVISIBLE);
+                    progressBar.setVisibility(GONE);
+                    break;
             }
         }
     }
@@ -238,7 +236,6 @@ public class PullRefreshListView extends LinearLayout implements
             headerLayoutParams.topMargin = topMargin[0];
             header.setLayoutParams(headerLayoutParams);
         }
-
     }
 
     // 回到初始状态
@@ -270,15 +267,10 @@ public class PullRefreshListView extends LinearLayout implements
             header.setLayoutParams(headerLayoutParams);
             currentState = Tag.Normal;
         }
-
     }
 
     public ListView getListView() {
         return listView;
-    }
-
-    public void setListView(ListView listView) {
-        this.listView = listView;
     }
 
     // 耗时任务的接口
