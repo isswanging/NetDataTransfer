@@ -167,11 +167,7 @@ public class PullRefreshListView extends LinearLayout implements
         // 第一个可见item在listView中的序号
         int firstVisableIndex = listView.getFirstVisiblePosition();
 
-        if (firstVisableItem == null)
-            return true;
-        else {
-            return firstVisableIndex == 0 && firstVisableItem.getTop() == 0;
-        }
+        return firstVisableItem == null || firstVisableIndex == 0 && firstVisableItem.getTop() == 0;
     }
 
     // 更新下拉的提示
@@ -209,13 +205,13 @@ public class PullRefreshListView extends LinearLayout implements
     }
 
     // 刷新状态
-    class RefreshingTask extends AsyncTask<Void, Integer, Void> {
+    private class RefreshingTask extends AsyncTask<Void, Integer, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
             int topMargin = headerLayoutParams.topMargin;
             while (true) {
-                topMargin = topMargin + speed;
+                topMargin += speed;
                 if (topMargin <= 0) {
                     topMargin = 0;
                     break;
