@@ -26,7 +26,7 @@
     <dimen name="back_left">10dp</dimen>
     <dimen name="chat_text_size">20dp</dimen>
     <dimen name="chat_content_text_size">15dp</dimen>
-    <dimen name="unread_size">25dp</dimen>
+    <dimen name="unread_size">20dp</dimen>
     <dimen name="unread_margin">15dp</dimen>
     <dimen name="left_drawer">248dp</dimen>
     <dimen name="file_img_size">50dp</dimen>

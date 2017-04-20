@@ -293,7 +293,7 @@ public class MainActivity extends BaseActivity {
 
                         if (!touchView.running && moveTopMargin >= (topMargin - touchView.getNeedMove()) &&
                                 moveTopMargin <= (topMargin - touchView.getNeedMove() + NetConfApplication.upMoveCache)) {
-                            if (!touchView.isShow && gap < -app.delay_distance) {
+                            if (!touchView.isShow && gap < -NetConfApplication.delay_distance) {
                                 Logger.info(TAG, "start running animator");
                                 touchView.showAnswerList(moveTopMargin + custPreview.getHeight() +
                                         getResources().getDimensionPixelSize(R.dimen.force_touch_view_margin));

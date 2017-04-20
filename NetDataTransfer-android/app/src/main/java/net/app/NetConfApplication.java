@@ -112,6 +112,8 @@ public class NetConfApplication extends Application {
 
     public final static int delay_distance = 1;
 
+    public static boolean drag = false;
+
     // 检查端口
     public String check(boolean isClose) {
         // 获取wifi服务

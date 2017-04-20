@@ -33,7 +33,7 @@
         android:textColor="#000000"
         android:textSize="@dimen/ip_size" />
 
-    <ImageView
+    <net.ui.view.RedDotHelper
         android:id="@+id/unread"
         android:layout_width="@dimen/unread_size"
         android:layout_height="@dimen/unread_size"

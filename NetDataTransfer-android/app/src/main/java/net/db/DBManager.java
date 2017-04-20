@@ -63,7 +63,7 @@ public class DBManager {
         Logger.info(TAG, "whether contains record in db");
         String sql = "select * from unread_table where user_ip=?";
         Cursor cursor = db.rawQuery(sql, new String[]{key});
-        return cursor.getCount() != 0 ? true : false;
+        return cursor.getCount() != 0;
     }
 
     public int getUnreadMsgNum() {

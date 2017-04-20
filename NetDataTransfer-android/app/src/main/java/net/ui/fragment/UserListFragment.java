@@ -99,7 +99,7 @@ public class UserListFragment extends BaseFragment {
         hideMenuAnim = new AlphaAnimation(1f, 0f);
         showMenuAnim.setDuration(100);
         hideMenuAnim.setDuration(200);
-        vibrator = (Vibrator) app.getSystemService(app.VIBRATOR_SERVICE);
+        vibrator = (Vibrator) app.getSystemService(Context.VIBRATOR_SERVICE);
         Logger.info(TAG, "UserListFragment onCreate");
     }
 
@@ -159,7 +159,7 @@ public class UserListFragment extends BaseFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getCommend(EventInfo msg) {
         Logger.info(TAG, "get msg-----" + msg.toString());
-        if(msg.getDirection()==EventInfo.tofrg){
+        if (msg.getDirection() == EventInfo.tofrg) {
             switch (msg.getCommend()) {
                 case login:
                     loadUserListUI();
@@ -191,8 +191,6 @@ public class UserListFragment extends BaseFragment {
             item.put("ip", host.getIp());
             if (new DBManager(app).contains(host.getIp())) {
                 item.put("img", R.drawable.unread);
-            } else {
-                item.put("img", 0);
             }
             userList.add(item);
         }
