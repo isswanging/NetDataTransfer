@@ -96,15 +96,17 @@ public class PullRefreshListView extends LinearLayout implements
         description = (TextView) header.findViewById(R.id.refreshText);
         listView.setOnTouchListener(this);
 
-        hideHeaderHeight = (int) -getResources().getDimension(
-                R.dimen.refresh_height);
+        hideHeaderHeight = headerLayoutParams.topMargin;
         currentState = Tag.Normal;
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        pullable = isPullable();
+        if (currentState == Tag.Refreshing) {
+            return true;
+        }
 
+        pullable = isPullable();
         if (pullable && !NetConfApplication.drag) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -114,11 +116,11 @@ public class PullRefreshListView extends LinearLayout implements
                 case MotionEvent.ACTION_MOVE:
                     yMove = event.getRawY();
                     int distance = (int) (yMove - yDown);
-                    if (distance <= 0
-                            && headerLayoutParams.topMargin <= hideHeaderHeight) {
+
+                    if (distance <= 0 && headerLayoutParams.topMargin <= hideHeaderHeight) {
+                        currentState = Tag.Normal;
                         return false;
                     }
-
                     if (currentState != Tag.Refreshing) {
                         // 设置偏移
                         headerLayoutParams.topMargin = (int) (distance * elastic + hideHeaderHeight);
@@ -141,7 +143,6 @@ public class PullRefreshListView extends LinearLayout implements
                     } else if (currentState == Tag.Normal) {
                         return false;
                     }
-
                     break;
             }
         }
@@ -156,7 +157,7 @@ public class PullRefreshListView extends LinearLayout implements
             listView.setFocusableInTouchMode(false);
             lastState = currentState;
             // 当前正处于下拉或释放状态，通过返回true屏蔽掉ListView的滚动事件
-            return false;
+            return true;
         }
         return false;
     }
@@ -235,7 +236,6 @@ public class PullRefreshListView extends LinearLayout implements
             headerLayoutParams.topMargin = topMargin[0];
             header.setLayoutParams(headerLayoutParams);
         }
-
     }
 
     // 回到初始状态
@@ -267,7 +267,6 @@ public class PullRefreshListView extends LinearLayout implements
             header.setLayoutParams(headerLayoutParams);
             currentState = Tag.Normal;
         }
-
     }
 
     public ListView getListView() {

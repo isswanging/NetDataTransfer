@@ -395,17 +395,19 @@ public class UserListFragment extends BaseFragment {
         pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView name = getView(view, R.id.userName);
-                TextView ip = getView(view, R.id.userIP);
+                if(pullRefreshListView.currentState== PullRefreshListView.Tag.Normal){
+                    TextView name = getView(view, R.id.userName);
+                    TextView ip = getView(view, R.id.userIP);
 
-                if (ip.getText().equals(NetConfApplication.hostIP)) {
-                    if (!app.isLand)
-                        drawerLayout.openDrawer(Gravity.LEFT);
-                } else {
-                    Logger.info(TAG, "send notify to show chat fragment");
-                    who.putString("name", name.getText().toString());
-                    who.putString("ip", ip.getText().toString());
-                    EventBus.getDefault().post(new EventInfo(Commend.startChat, EventInfo.toAct, who));
+                    if (ip.getText().equals(NetConfApplication.hostIP)) {
+                        if (!app.isLand)
+                            drawerLayout.openDrawer(Gravity.LEFT);
+                    } else {
+                        Logger.info(TAG, "send notify to show chat fragment");
+                        who.putString("name", name.getText().toString());
+                        who.putString("ip", ip.getText().toString());
+                        EventBus.getDefault().post(new EventInfo(Commend.startChat, EventInfo.toAct, who));
+                    }
                 }
             }
         });
@@ -414,7 +416,8 @@ public class UserListFragment extends BaseFragment {
 
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (!app.isLand && android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN
+                        if (pullRefreshListView.currentState == PullRefreshListView.Tag.Normal &&
+                                !app.isLand && android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN
                                 && (BuildConfig.DEBUG_LOG || position != 0)) {
                             Logger.info(TAG, "in 3d touch effect");
                             TextView name = getView(view, R.id.userName);
