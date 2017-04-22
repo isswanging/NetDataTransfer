@@ -101,10 +101,16 @@ public class PullRefreshListView extends LinearLayout implements
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    public boolean dispatchTouchEvent(MotionEvent ev) {
         if (currentState == Tag.Refreshing) {
             return true;
         }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+
 
         pullable = isPullable();
         if (pullable && !NetConfApplication.drag) {

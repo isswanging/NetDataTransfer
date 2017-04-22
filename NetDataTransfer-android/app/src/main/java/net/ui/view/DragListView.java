@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
@@ -28,7 +29,11 @@ public class DragListView extends ListView {
                 Logger.info(TAG, "dispatchTouchEvent ACTION_DOWN.......");
                 postion = pointToPosition((int) event.getX(), (int) event.getY());
                 if (postion != INVALID_POSITION) {
-                    redDotHelper = (RedDotHelper) getChildAt(postion - getFirstVisiblePosition()).findViewById(R.id.unread);
+                    int p = postion - getFirstVisiblePosition();
+                    redDotHelper = (RedDotHelper) getChildAt(p).findViewById(R.id.unread);
+                    String ip = ((TextView) getChildAt(p).findViewById(R.id.userIP)).
+                            getText().toString();
+                    redDotHelper.setIP(ip);
                 }
                 break;
 
@@ -43,13 +48,13 @@ public class DragListView extends ListView {
             case MotionEvent.ACTION_UP:
                 if (NetConfApplication.drag) {
                     Logger.info(TAG, "dispatchTouchEvent ACTION_UP");
+                    redDotHelper.getRedDot().onTouchEvent(event);
                     NetConfApplication.drag = false;
                 }
 
                 break;
 
         }
-
 
         return super.dispatchTouchEvent(event);
     }

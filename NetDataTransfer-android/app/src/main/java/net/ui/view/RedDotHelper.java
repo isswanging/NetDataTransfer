@@ -20,6 +20,7 @@ public class RedDotHelper extends ImageView {
     private Context context;
     private AttributeSet attrs;
     private DragRedDot redDot;
+    private String IP;
 
     public RedDotHelper(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -42,13 +43,13 @@ public class RedDotHelper extends ImageView {
                     getLocationOnScreen(location);
                     Logger.info(TAG, "get red dot x = " + location[0] + "---- y = " + location[1]);
                     redDot = new DragRedDot(context, attrs, location, getWidth() / 2);
+                    redDot.setHelper(RedDotHelper.this);
+                    redDot.setIP(IP);
                     setVisibility(INVISIBLE);
                     // 显示拖拽的红点
                     redDot.addWindow();
 
                     break;
-
-
                 case MotionEvent.ACTION_UP:
                     NetConfApplication.drag = false;
                     break;
@@ -59,5 +60,9 @@ public class RedDotHelper extends ImageView {
             Logger.info(TAG, "normal process touch event");
             return super.onTouchEvent(event);
         }
+    }
+
+    public void setIP(String IP) {
+        this.IP = IP;
     }
 }
