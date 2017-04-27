@@ -110,8 +110,6 @@ public class PullRefreshListView extends LinearLayout implements
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
-
         pullable = isPullable();
         if (pullable && !NetConfApplication.drag) {
             switch (event.getAction()) {

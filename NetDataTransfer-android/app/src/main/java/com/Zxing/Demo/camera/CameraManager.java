@@ -68,7 +68,7 @@ public final class CameraManager {
     private final boolean useOneShotPreviewCallback;
     /**
      * Preview frames are delivered here, which we pass on to the registered
-     * handler. Make sure to clear the handler so it will only receive one
+     * mHandler. Make sure to clear the mHandler so it will only receive one
      * message.
      */
     private final PreviewCallback previewCallback;
@@ -193,12 +193,12 @@ public final class CameraManager {
     }
 
     /**
-     * A single preview frame will be returned to the handler supplied. The data
+     * A single preview frame will be returned to the mHandler supplied. The data
      * will arrive as byte[] in the message.obj field, with width and height
      * encoded as message.arg1 and message.arg2, respectively.
      *
      * @param handler
-     *            The handler to send the message to.
+     *            The mHandler to send the message to.
      * @param message
      *            The what field of the message to be sent.
      */

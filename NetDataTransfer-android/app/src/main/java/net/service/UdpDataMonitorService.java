@@ -68,7 +68,7 @@ public class UdpDataMonitorService extends BaseService {
     private void dispatchMessage(String info) {
         if (app.chatId.equals(dp.getIp())) {
             // 发广播在交给聊天窗口处理
-            Logger.info(TAG, "handler by chat");
+            Logger.info(TAG, "mHandler by chat");
             EventBus.getDefault().post(new EventInfo(Commend.incomingMsg, EventInfo.tofrg, info));
         } else {
             ChatMsgEntity entity = new ChatMsgEntity(dp.getSenderName(),
@@ -77,7 +77,7 @@ public class UdpDataMonitorService extends BaseService {
             new DBManager(this).addMsg(entity, dp.getIp());
 
             // 发送通知
-            Logger.info(TAG, "handler by Notification");
+            Logger.info(TAG, "mHandler by Notification");
             Intent notifyIntent = new Intent("net.ui.main");
             notifyIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             Bundle bundle = new Bundle();
@@ -105,7 +105,7 @@ public class UdpDataMonitorService extends BaseService {
             BadgeUtil.setBadgeCount(getApplicationContext(), new DBManager(this).getUnreadMsgNum());
 
             // 让界面显示未读消息的红点
-            Logger.info(TAG, "handler by userList");
+            Logger.info(TAG, "mHandler by userList");
             EventBus.getDefault().post(new EventInfo(Commend.redraw, EventInfo.tofrg, null));
         }
 

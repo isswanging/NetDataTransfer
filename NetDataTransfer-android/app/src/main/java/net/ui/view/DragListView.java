@@ -46,10 +46,13 @@ public class DragListView extends ListView {
                 break;
 
             case MotionEvent.ACTION_UP:
+                Logger.info(TAG, "dispatchTouchEvent ACTION_UP");
                 if (NetConfApplication.drag) {
-                    Logger.info(TAG, "dispatchTouchEvent ACTION_UP");
+                    Logger.info(TAG, "dispatchTouchEvent ACTION_UP to reddot view");
                     redDotHelper.getRedDot().onTouchEvent(event);
+                    redDotHelper = null;
                     NetConfApplication.drag = false;
+                    return true;
                 }
 
                 break;

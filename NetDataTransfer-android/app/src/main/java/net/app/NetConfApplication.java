@@ -114,6 +114,22 @@ public class NetConfApplication extends Application {
 
     public static boolean drag = false;
 
+    private ArrayList<Activity> activityList = new ArrayList<>();
+
+    public void exit() {
+        for (Activity act : activityList) {
+            if (act != null) {
+                act.finish();
+            }
+        }
+        super.onTerminate();
+        System.exit(0);
+    }
+
+    public void addActivity(Activity act){
+        activityList.add(act);
+    }
+
     // 检查端口
     public String check(boolean isClose) {
         // 获取wifi服务
@@ -243,6 +259,10 @@ public class NetConfApplication extends Application {
     }
 
     public ArrayList<WifiListener> listeners = new ArrayList<>();
+
+    public void removeActivity(Activity act) {
+        activityList.remove(act);
+    }
 
     public interface WifiListener {
         void notifyWifiInfo();

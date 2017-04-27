@@ -126,16 +126,25 @@ public class DragRedDot extends View {
                 break;
 
             case MotionEvent.ACTION_UP:
+                // 在范围外抬手
                 if (isOut) {
-                    helper.setImageResource(0);
+                    helper.setImageDrawable(null);
                     helper.setVisibility(VISIBLE);
                     wm.removeView(this);
                     dbm.deleteMsg(IP);
+                }
+                // 没有移动就直接抬手
+                else if (mDragCanterPoint.x == -1) {
+                    helper.setVisibility(VISIBLE);
+                    wm.removeView(this);
                 } else {
-                    if (onceOut) {//划出范围后再滑进来
+                    //划出范围后再滑进来抬手
+                    if (onceOut) {
                         helper.setVisibility(VISIBLE);
                         wm.removeView(this);
-                    } else {
+                    }
+                    // 在范围内抬手
+                    else {
                         showAnimation();
                     }
                 }
@@ -210,9 +219,8 @@ public class DragRedDot extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
         if (!isOut && !onceOut) {
+            Logger.info(TAG,"draw a red dot");
             canvas.drawCircle(mFixCanterPoint.x, mFixCanterPoint.y, mFixRadius, mPaint);
 
             if (mDragCanterPoint.x != -1) {

@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.BuildConfig;
@@ -325,6 +326,11 @@ public class UserListFragment extends BaseFragment {
         moreMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(!NetConfApplication.isUIReady){
+                    Toast.makeText(getActivity(),"界面加载中",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 if (!isMenuOpen) {
                     if (menu == null) {
                         Logger.info(TAG, "creat a new menu");

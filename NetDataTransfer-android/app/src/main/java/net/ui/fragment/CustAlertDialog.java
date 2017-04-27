@@ -8,6 +8,8 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import net.app.NetConfApplication;
+
 public class CustAlertDialog extends DialogFragment {
     String title;
     String alertText;
@@ -42,7 +44,7 @@ public class CustAlertDialog extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 getActivity().setResult(Activity.RESULT_OK);// 确定按钮事件
-                                System.exit(0);
+                                ((NetConfApplication) getActivity().getApplication()).exit();
                             }
                         })
                 .setNegativeButton("重试", listener);

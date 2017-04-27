@@ -19,16 +19,16 @@ import net.service.LoginMonitorService;
 import net.service.UdpDataMonitorService;
 import net.ui.fragment.CustAlertDialog;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.lang.reflect.Field;
 
 public class BaseActivity extends Activity implements NetConfApplication.WifiListener {
     public NetConfApplication app;
+    public boolean onSave = false;
+
     public DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            handler.sendEmptyMessageDelayed(0, 1000);
+            mHandler.sendEmptyMessageDelayed(0, 1000);
         }
     };
 
@@ -43,6 +43,7 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = (NetConfApplication) getApplication();
+        app.addActivity(this);
     }
 
     @Override
@@ -62,6 +63,8 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
 
     @Override
     protected void onDestroy() {
+        mHandler.removeCallbacksAndMessages(null);
+        app.removeActivity(this);
         fixInputMethodManagerLeak(this);
         super.onDestroy();
     }
@@ -76,16 +79,30 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
         if (app.wifi == 1) {
             Toast.makeText(this, "网络已连接，请继续使用", Toast.LENGTH_SHORT).show();
         } else {
-            CustAlertDialog cd = new CustAlertDialog();
-            cd.setTitle("错误");
-            cd.setAlertText("网络断开，功能不可用");
-            cd.setListener(listener);
-            cd.setCancelable(false);
-            cd.show(getFragmentManager(), "wifi_warn");
+            if (!onSave) {
+                CustAlertDialog cd = new CustAlertDialog();
+                cd.setTitle("错误");
+                cd.setAlertText("网络断开，功能不可用");
+                cd.setListener(listener);
+                cd.setCancelable(false);
+                cd.show(getFragmentManager(), "wifi_warn");
+            }
         }
     }
 
-    public Handler handler = new Handler() {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        onSave = true;
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        onSave = false;
+    }
+
+    public Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             app.check(false);

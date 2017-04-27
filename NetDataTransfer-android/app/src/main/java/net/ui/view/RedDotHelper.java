@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import net.app.NetConfApplication;
@@ -45,10 +44,9 @@ public class RedDotHelper extends ImageView {
                     redDot = new DragRedDot(context, attrs, location, getWidth() / 2);
                     redDot.setHelper(RedDotHelper.this);
                     redDot.setIP(IP);
-                    setVisibility(INVISIBLE);
                     // 显示拖拽的红点
                     redDot.addWindow();
-
+                    setVisibility(INVISIBLE);
                     break;
                 case MotionEvent.ACTION_UP:
                     NetConfApplication.drag = false;
