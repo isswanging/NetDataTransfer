@@ -1,12 +1,7 @@
 package net.ui.activity;
 
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -26,7 +21,16 @@ public class FileListActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.file_list);
-        initActionBar();
+
+        initToolbar();
+        title.setText("文件列表");
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         TextView t = getView(R.id.filePath);
         t.setText("所在目录：" + NetConfApplication.saveFilePath);
 
@@ -52,27 +56,5 @@ public class FileListActivity extends BaseActivity {
             }
         }
         return fileList;
-    }
-
-    @SuppressLint("InflateParams")
-    private void initActionBar() {
-        ActionBar title = getActionBar();
-        title.setDisplayShowHomeEnabled(false);
-        title.setDisplayShowTitleEnabled(false);
-
-        View actionbarLayout = LayoutInflater.from(this).inflate(
-                R.layout.common_title, null);
-        title.setDisplayShowCustomEnabled(true);
-        title.setCustomView(actionbarLayout);
-        ((TextView) findViewById(R.id.titleName)).setText("文件列表");
-
-        ImageButton back = getView(R.id.back);
-        back.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
     }
 }

@@ -40,7 +40,7 @@
         <activity
             android:name="net.ui.activity.MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/TranslucentTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="net.ui.main" />
 
@@ -49,7 +49,7 @@
         </activity>
         <activity
             android:name="net.ui.activity.FileListActivity"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
                 <action android:name="net.ui.FileListActivity" />
@@ -60,7 +60,7 @@
         <activity
             android:name="net.ui.activity.ProgressBarListActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustUnspecified|stateHidden">
             <intent-filter>
                 <action android:name="net.ui.ProgressBarListActivity" />
@@ -71,7 +71,7 @@
         <activity
             android:name="net.ui.activity.CaptureActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="net.ui.CaptureActivity" />
 

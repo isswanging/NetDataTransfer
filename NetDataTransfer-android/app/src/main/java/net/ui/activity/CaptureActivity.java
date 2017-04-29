@@ -1,6 +1,5 @@
 package net.ui.activity;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,14 +12,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.Zxing.Demo.camera.CameraManager;
 import com.Zxing.Demo.decoding.CaptureActivityHandler;
@@ -53,7 +48,15 @@ public class CaptureActivity extends BaseActivity implements Callback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scan_code);
-        initActionBar();
+
+        initToolbar();
+        title.setText("扫描二维码/条码");
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // 初始化 CameraManager
         CameraManager.init(getApplication());
@@ -133,7 +136,6 @@ public class CaptureActivity extends BaseActivity implements Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         hasSurface = false;
-
     }
 
     public ViewfinderView getViewfinderView() {
@@ -146,7 +148,6 @@ public class CaptureActivity extends BaseActivity implements Callback {
 
     public void drawViewfinder() {
         viewfinderView.drawViewfinder();
-
     }
 
     public void handleDecode(final Result obj, Bitmap barcode) {
@@ -195,7 +196,6 @@ public class CaptureActivity extends BaseActivity implements Callback {
                                             handler.restartPreviewAndDecode();
                                     }
                                 }).show();
-
             }
         }
     }
@@ -244,26 +244,4 @@ public class CaptureActivity extends BaseActivity implements Callback {
             mediaPlayer.seekTo(0);
         }
     };
-
-    private void initActionBar() {
-        ActionBar title = getActionBar();
-        title.setDisplayShowHomeEnabled(false);
-        title.setDisplayShowTitleEnabled(false);
-
-        View actionbarLayout = LayoutInflater.from(this).inflate(
-                R.layout.common_title, null);
-        title.setDisplayShowCustomEnabled(true);
-        title.setCustomView(actionbarLayout);
-        ((TextView) findViewById(R.id.titleName)).setText("扫描二维码/条码");
-
-        ImageButton back = (ImageButton) findViewById(R.id.back);
-        back.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-    }
-
 }

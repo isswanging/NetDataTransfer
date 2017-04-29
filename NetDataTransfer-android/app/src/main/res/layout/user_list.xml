@@ -38,7 +38,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginLeft="15dp"
                         android:background="@drawable/left_img" />
 
                     <TextView
@@ -50,7 +50,7 @@
                         android:layout_toRightOf="@id/logo"
                         android:text="@string/users_title"
                         android:textColor="#FFFFFF"
-                        android:textSize="20dp" />
+                        android:textSize="@dimen/title_text_size" />
 
                     <ImageView
                         android:id="@+id/moreMenu"

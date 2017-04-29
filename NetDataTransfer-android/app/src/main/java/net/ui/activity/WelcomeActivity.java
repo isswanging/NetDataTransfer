@@ -1,5 +1,6 @@
 package net.ui.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.Intent.ShortcutIconResource;
 import android.os.Bundle;
@@ -9,25 +10,29 @@ import android.widget.ImageView;
 
 import net.app.NetConfApplication;
 import net.app.netdatatransfer.R;
-import net.base.BaseActivity;
 import net.log.Logger;
+import net.service.BroadcastMonitorService;
+import net.service.FileMonitorService;
+import net.service.LoginMonitorService;
+import net.service.UdpDataMonitorService;
 import net.vo.Host;
 
 import java.io.File;
 import java.util.Random;
 
-public class WelcomeActivity extends BaseActivity {
+public class WelcomeActivity extends Activity {
     private final String TAG = "WelcomeActivity";
+    public NetConfApplication app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome);
-
+        app = (NetConfApplication) getApplication();
         // 创建快捷方式
         createShortCut();
         // 启动动画
-        ImageView welcomeAnim = getView(R.id.welcome_img);
+        ImageView welcomeAnim = (ImageView) findViewById(R.id.welcome_img);
         welcomeAnim.setBackgroundResource(getImg());
         // 检查端口
         preCheck();
@@ -38,7 +43,7 @@ public class WelcomeActivity extends BaseActivity {
             public void run() {
                 Intent intent = new Intent("net.ui.main");
                 startActivity(intent);
-                overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+                overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
                 finish();
             }
         }, 2400);
@@ -129,5 +134,12 @@ public class WelcomeActivity extends BaseActivity {
             default:
                 return R.drawable.img12;
         }
+    }
+
+    protected void listen() {
+        this.startService(new Intent(this, LoginMonitorService.class));
+        this.startService(new Intent(this, UdpDataMonitorService.class));
+        this.startService(new Intent(this, FileMonitorService.class));
+        this.startService(new Intent(this, BroadcastMonitorService.class));
     }
 }

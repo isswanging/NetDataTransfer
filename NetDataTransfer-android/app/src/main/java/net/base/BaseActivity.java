@@ -1,6 +1,5 @@
 package net.base;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,11 +7,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.app.NetConfApplication;
+import net.app.netdatatransfer.R;
 import net.service.BroadcastMonitorService;
 import net.service.FileMonitorService;
 import net.service.LoginMonitorService;
@@ -21,9 +24,11 @@ import net.ui.fragment.CustAlertDialog;
 
 import java.lang.reflect.Field;
 
-public class BaseActivity extends Activity implements NetConfApplication.WifiListener {
+public class BaseActivity extends AppCompatActivity implements NetConfApplication.WifiListener {
     public NetConfApplication app;
     public boolean onSave = false;
+    public Toolbar mToolbar;
+    public TextView title;
 
     public DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
         @Override
@@ -44,6 +49,7 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
         super.onCreate(savedInstanceState);
         app = (NetConfApplication) getApplication();
         app.addActivity(this);
+
     }
 
     @Override
@@ -109,6 +115,15 @@ public class BaseActivity extends Activity implements NetConfApplication.WifiLis
             notifyWifiInfo();
         }
     };
+
+    public void initToolbar() {
+        // 设置toolbar
+        mToolbar = getView(R.id.toolbar);
+        title = getView(R.id.title_name);
+        mToolbar.setTitle("");
+        setSupportActionBar(mToolbar);
+        mToolbar.setNavigationIcon(R.drawable.back);
+    }
 
     public void fixInputMethodManagerLeak(Context destContext) {
         if (destContext == null) {

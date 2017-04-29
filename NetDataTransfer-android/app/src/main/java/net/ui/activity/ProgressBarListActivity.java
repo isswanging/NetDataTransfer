@@ -3,8 +3,10 @@ package net.ui.activity;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.widget.Toolbar;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,19 +37,28 @@ public class ProgressBarListActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         tag = getIntent().getFlags();
         setContentView(R.layout.progress);
-        initActionBar();
-        initData();
 
+        initToolbar();
+        title.setText("进度列表");
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateHandler.removeCallbacks(running);
+                finish();
+            }
+        });
+
+        initData();
         ListView listView = getView(R.id.progressList);
         adapter = new ProgressAdapter(this);
         listView.setAdapter(adapter);
 
         // 启动刷新任务
         updateHandler.postDelayed(running, 500);
-
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -75,29 +86,6 @@ public class ProgressBarListActivity extends BaseActivity {
             }
         }
         Logger.info(this.toString(), "data size" + data.size());
-    }
-
-    @SuppressLint("InflateParams")
-    private void initActionBar() {
-        ActionBar title = getActionBar();
-        title.setDisplayShowHomeEnabled(false);
-        title.setDisplayShowTitleEnabled(false);
-
-        View actionbarLayout = LayoutInflater.from(this).inflate(
-                R.layout.common_title, null);
-        title.setDisplayShowCustomEnabled(true);
-        title.setCustomView(actionbarLayout);
-        ((TextView) findViewById(R.id.titleName)).setText("进度列表");
-
-        ImageButton back = getView(R.id.back);
-        back.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                updateHandler.removeCallbacks(running);
-                finish();
-            }
-        });
     }
 
     class ViewHolder {
