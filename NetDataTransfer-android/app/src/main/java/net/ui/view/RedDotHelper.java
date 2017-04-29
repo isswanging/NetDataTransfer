@@ -12,7 +12,7 @@ import net.log.Logger;
 /**
  *  实现类似QQ的拖拽小红点功能
  */
-public class RedDotHelper extends ImageView {
+public class RedDotHelper extends android.support.v7.widget.AppCompatImageView {
     private static final String TAG = "RedDotHelper";
 
     private int[] location = new int[2];
@@ -63,4 +63,5 @@ public class RedDotHelper extends ImageView {
     public void setIP(String IP) {
         this.IP = IP;
     }
+
 }

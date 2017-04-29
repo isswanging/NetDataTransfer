@@ -130,6 +130,7 @@ public class DragRedDot extends View {
                 if (isOut) {
                     helper.setImageDrawable(null);
                     helper.setVisibility(VISIBLE);
+
                     wm.removeView(this);
                     dbm.deleteMsg(IP);
                 }
@@ -178,7 +179,7 @@ public class DragRedDot extends View {
             }
         });
         anim.setInterpolator(new OvershootInterpolator(2f));
-        anim.setDuration(500);
+        anim.setDuration(300);
         anim.start();
     }
 

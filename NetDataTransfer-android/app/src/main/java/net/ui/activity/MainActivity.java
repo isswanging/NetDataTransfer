@@ -546,10 +546,13 @@ public class MainActivity extends BaseActivity {
             if (app.hostList.isEmpty()) {
                 Logger.info(TAG, "add new....");
                 addNewHost();
+            }else{
+                host = app.hostList.get(0);
+                host.setState(0);
+                host.setIp(NetConfApplication.hostIP);
+                app.hostList.clear();
+                app.hostList.add(host);
             }
-            host = app.hostList.get(0);
-            host.setState(0);
-            host.setIp(NetConfApplication.hostIP);
         } else if (commend.equals(Commend.login)) {
             app.hostList.clear();
             Logger.info(TAG, "login....");

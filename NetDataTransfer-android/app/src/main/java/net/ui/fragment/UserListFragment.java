@@ -39,6 +39,7 @@ import net.log.Logger;
 import net.ui.activity.CaptureActivity;
 import net.ui.activity.FileListActivity;
 import net.ui.activity.ProgressBarListActivity;
+import net.ui.view.DragListView;
 import net.ui.view.PullRefreshListView;
 import net.util.CreateQRImage;
 import net.util.Commend;
@@ -73,14 +74,12 @@ public class UserListFragment extends BaseFragment {
     int send = 0;
     int get = 1;
 
-    private SimpleAdapter userInfoAdapter;
+    private DragListView.DragAdapter userInfoAdapter;
     private PullRefreshListView pullRefreshListView;
     private DrawerLayout drawerLayout;
     private FrameLayout root;
     private LinearLayout listContent;
     private ImageView moreMenu;
-
-    private List<Map<String, Object>> userList = new ArrayList<>();
     private Bundle who = new Bundle();
 
     String targetIp;
@@ -141,7 +140,7 @@ public class UserListFragment extends BaseFragment {
         Logger.info(TAG, "========= onresume =========");
         if (userInfoAdapter != null) {
             Logger.info(TAG, "========= getUserData =========");
-            getUserData();
+            userInfoAdapter.initData();
             userInfoAdapter.notifyDataSetChanged();
         }
         super.onResume();
@@ -170,33 +169,17 @@ public class UserListFragment extends BaseFragment {
                     break;
                 case refresh:
                     pullRefreshListView.finishRefreshing();
-                    getUserData();
+                    userInfoAdapter.initData();
                     userInfoAdapter.notifyDataSetChanged();
                     break;
                 case redraw:
                     if (userInfoAdapter != null) {
-                        getUserData();
+                        userInfoAdapter.initData();
                         userInfoAdapter.notifyDataSetChanged();
                     }
                     break;
             }
         }
-    }
-
-    private List<Map<String, Object>> getUserData() {
-        userList.clear();
-        Logger.info(TAG, "host list num is " + app.hostList.size());
-        for (Host host : app.hostList) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("name", host.getUserName());
-            item.put("ip", host.getIp());
-            if (new DBManager(app).contains(host.getIp())) {
-                item.put("img", R.drawable.unread);
-            }
-            userList.add(item);
-        }
-        Logger.info(TAG, "host num is " + userList.size());
-        return userList;
     }
 
     public void measureSrceen() {
@@ -326,8 +309,8 @@ public class UserListFragment extends BaseFragment {
         moreMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!NetConfApplication.isUIReady){
-                    Toast.makeText(getActivity(),"界面加载中",Toast.LENGTH_SHORT).show();
+                if (!NetConfApplication.isUIReady) {
+                    Toast.makeText(getActivity(), "界面加载中", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -374,12 +357,8 @@ public class UserListFragment extends BaseFragment {
 
     // 更新UI的操作
     private void loadUserListUI() {
-        userInfoAdapter = new SimpleAdapter(getActivity(), getUserData(),
-                R.layout.user_item, new String[]{"name", "ip",
-                "img"}, new int[]{R.id.userName,
-                R.id.userIP, R.id.unread});
-        Logger.info(TAG,
-                String.valueOf(app.hostList.size()));
+        userInfoAdapter = new DragListView.DragAdapter(getActivity());
+        Logger.info(TAG, String.valueOf(app.hostList.size()));
 
         // 更新UI
         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
@@ -401,7 +380,7 @@ public class UserListFragment extends BaseFragment {
         pullRefreshListView.getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(pullRefreshListView.currentState== PullRefreshListView.Tag.Normal){
+                if (pullRefreshListView.currentState == PullRefreshListView.Tag.Normal) {
                     TextView name = getView(view, R.id.userName);
                     TextView ip = getView(view, R.id.userIP);
 
