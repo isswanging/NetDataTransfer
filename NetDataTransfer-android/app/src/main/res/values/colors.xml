@@ -24,6 +24,6 @@
   <color name="viewfinder_laser">#ffff0000</color>
   <color name="viewfinder_mask">#60000000</color>
   <color name="viewfinder_corner">#00EE00</color>
-  <color name="statusColor">#ff000000</color>
+  <color name="statusColor">#ff222222</color>
   <color name="toolbar_bg_color">#ff222222</color>
 </resources>

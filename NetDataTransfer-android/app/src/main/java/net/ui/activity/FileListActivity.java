@@ -30,11 +30,8 @@ import java.util.Map;
 
 public class FileListActivity extends BaseActivity {
     // 所需的全部权限
-    static final String[] PERMISSIONS = new String[]{
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
-    private AlertDialog dialog;
+    private final String PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    public final static int REQUEST_PERMISSIONS_CODE = 321;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +54,12 @@ public class FileListActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             // 检查该权限是否已经获取
-            int i = ContextCompat.checkSelfPermission(this, PERMISSIONS[0]);
+            int j = ContextCompat.checkSelfPermission(this, PERMISSION);
             // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
-            if (i != PackageManager.PERMISSION_GRANTED) {
+            if (j != PackageManager.PERMISSION_GRANTED) {
                 // 如果没有授予该权限，就去提示用户请求
-                showDialogTipUserRequestPermission();
+                ActivityCompat.requestPermissions(this, new String[]{PERMISSION}, REQUEST_PERMISSIONS_CODE);
+                return;
             }
         }
 
@@ -88,37 +86,12 @@ public class FileListActivity extends BaseActivity {
         return fileList;
     }
 
-    // 提示用户该请求权限的弹出框
-    private void showDialogTipUserRequestPermission() {
-
-        new AlertDialog.Builder(this)
-                .setTitle("存储权限不可用")
-                .setMessage("本应用需要存储文件，请开启存储权限")
-                .setPositiveButton("立即开启", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startRequestPermission();
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                }).setCancelable(false).show();
-    }
-
-    // 开始提交请求权限
-    private void startRequestPermission() {
-        ActivityCompat.requestPermissions(this, PERMISSIONS, 321);
-    }
-
     // 用户权限 申请 的回调方法
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == 321) {
+        if (requestCode == REQUEST_PERMISSIONS_CODE) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     // 判断用户是否 点击了不再提醒。(检测该权限是否还可以申请)
@@ -140,9 +113,9 @@ public class FileListActivity extends BaseActivity {
 
     private void showDialogTipUserGoToAppSettting() {
 
-        dialog = new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("存储权限不可用")
-                .setMessage("请在-应用设置-权限-中，允许支付宝使用存储权限来保存用户数据")
+                .setMessage("请在-应用设置-权限-中，允许使用存储权限来保存用户数据")
                 .setPositiveButton("立即开启", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -166,28 +139,6 @@ public class FileListActivity extends BaseActivity {
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
 
-        startActivityForResult(intent, 123);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 123) {
-
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // 检查该权限是否已经获取
-                int i = ContextCompat.checkSelfPermission(this, PERMISSIONS[0]);
-                // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
-                if (i != PackageManager.PERMISSION_GRANTED) {
-                    // 提示用户应该去应用设置界面手动开启权限
-                    showDialogTipUserGoToAppSettting();
-                } else {
-                    if (dialog != null && dialog.isShowing()) {
-                        dialog.dismiss();
-                    }
-                    Toast.makeText(this, "权限获取成功", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
+        startActivityForResult(intent, 321);
     }
 }

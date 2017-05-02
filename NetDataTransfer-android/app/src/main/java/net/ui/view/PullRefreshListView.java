@@ -208,8 +208,10 @@ public class PullRefreshListView extends LinearLayout implements
     }
 
     public void finishRefreshing() {
-        currentState = Tag.Normal;
-        new HideHeaderTask().execute();
+        if (currentState == Tag.Refreshing) {
+            currentState = Tag.Normal;
+            new HideHeaderTask().execute();
+        }
     }
 
     // 刷新状态

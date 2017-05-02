@@ -25,7 +25,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,27 +33,20 @@ import net.app.netdatatransfer.BuildConfig;
 import net.app.netdatatransfer.R;
 import net.app.netdatatransfer.databinding.UserListBinding;
 import net.base.BaseFragment;
-import net.db.DBManager;
 import net.log.Logger;
 import net.ui.activity.CaptureActivity;
 import net.ui.activity.FileListActivity;
 import net.ui.activity.ProgressBarListActivity;
 import net.ui.view.DragListView;
 import net.ui.view.PullRefreshListView;
-import net.util.CreateQRImage;
 import net.util.Commend;
+import net.util.CreateQRImage;
 import net.vo.DeviceInfo;
 import net.vo.EventInfo;
-import net.vo.Host;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class UserListFragment extends BaseFragment {
     private final String TAG = "UserListFragment";

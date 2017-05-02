@@ -40,9 +40,9 @@ import java.util.Vector;
 
 public class CaptureActivity extends BaseActivity implements Callback {
     // 所需的全部权限
-    static final String[] PERMISSIONS = new String[]{
-            Manifest.permission.CAMERA
-    };
+    private final String PERMISSION = Manifest.permission.CAMERA;
+    private final int REQUEST_PERMISSIONS_CODE = 321;
+
     private android.support.v7.app.AlertDialog dialog;
 
     private CaptureActivityHandler handler;
@@ -56,7 +56,9 @@ public class CaptureActivity extends BaseActivity implements Callback {
     private static final float BEEP_VOLUME = 0.10f;
     private boolean vibrate;
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,11 +83,12 @@ public class CaptureActivity extends BaseActivity implements Callback {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             // 检查该权限是否已经获取
-            int i = ContextCompat.checkSelfPermission(this, PERMISSIONS[0]);
+            int i = ContextCompat.checkSelfPermission(this, PERMISSION);
             // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
             if (i != PackageManager.PERMISSION_GRANTED) {
                 // 如果没有授予该权限，就去提示用户请求
-                showDialogTipUserRequestPermission();
+                ActivityCompat.requestPermissions(this, new String[]{PERMISSION}, REQUEST_PERMISSIONS_CODE);
+
             }
         }
     }
@@ -145,7 +148,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
-            int height) {
+                               int height) {
 
     }
 
@@ -209,7 +212,7 @@ public class CaptureActivity extends BaseActivity implements Callback {
 
                                     @Override
                                     public void onClick(DialogInterface dialog,
-                                            int which) {
+                                                        int which) {
                                         setResult(RESULT_OK);// 确定按钮事件
 
                                         // 继续扫描
@@ -270,37 +273,12 @@ public class CaptureActivity extends BaseActivity implements Callback {
         }
     };
 
-    // 提示用户该请求权限的弹出框
-    private void showDialogTipUserRequestPermission() {
-
-        new android.support.v7.app.AlertDialog.Builder(this)
-                .setTitle("相机权限不可用")
-                .setMessage("本应用需要扫描二维码，请开启相机权限")
-                .setPositiveButton("立即开启", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startRequestPermission();
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                }).setCancelable(false).show();
-    }
-
-    // 开始提交请求权限
-    private void startRequestPermission() {
-        ActivityCompat.requestPermissions(this, PERMISSIONS, 321);
-    }
-
     // 用户权限 申请 的回调方法
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == 321) {
+        if (requestCode == REQUEST_PERMISSIONS_CODE) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     // 判断用户是否 点击了不再提醒。(检测该权限是否还可以申请)
@@ -319,12 +297,11 @@ public class CaptureActivity extends BaseActivity implements Callback {
     }
 
     // 提示用户去应用设置界面手动开启权限
-
     private void showDialogTipUserGoToAppSettting() {
 
         dialog = new android.support.v7.app.AlertDialog.Builder(this)
                 .setTitle("相机权限不可用")
-                .setMessage("请在-应用设置-权限-中，允许使用存储权限来保存用户数据")
+                .setMessage("请在-应用设置-权限-中，允许使用相机权限")
                 .setPositiveButton("立即开启", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -351,25 +328,4 @@ public class CaptureActivity extends BaseActivity implements Callback {
         startActivityForResult(intent, 123);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 123) {
-
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // 检查该权限是否已经获取
-                int i = ContextCompat.checkSelfPermission(this, PERMISSIONS[0]);
-                // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
-                if (i != PackageManager.PERMISSION_GRANTED) {
-                    // 提示用户应该去应用设置界面手动开启权限
-                    showDialogTipUserGoToAppSettting();
-                } else {
-                    if (dialog != null && dialog.isShowing()) {
-                        dialog.dismiss();
-                    }
-                    Toast.makeText(this, "权限获取成功", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
 }

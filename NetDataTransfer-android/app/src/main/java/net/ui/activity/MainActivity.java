@@ -166,7 +166,7 @@ public class MainActivity extends BaseActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         Bundle b = getIntent().getExtras();
-        Logger.info(TAG,"onNewIntent "+b.getString("name"));
+        Logger.info(TAG, "onNewIntent " + b.getString("name"));
         if (b != null) {
             Message msg = handler.obtainMessage();
             msg.obj = b;
@@ -177,7 +177,8 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
-        login(Commend.refresh);
+        login(Commend.refresh, true);
+        handler.sendEmptyMessageDelayed(Commend.refresh.ordinal(), 2000);
         super.onResume();
     }
 
@@ -344,7 +345,7 @@ public class MainActivity extends BaseActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventProcess(EventInfo event) {
         Logger.info(TAG, "onEventProcess get event msg " + event.toString());
-        if(event.getDirection()==EventInfo.toAct){
+        if (event.getDirection() == EventInfo.toAct) {
             switch (event.getCommend()) {
                 case login:
                     Fragment dialog = getFragmentManager().findFragmentByTag("setup_warn");
@@ -361,11 +362,11 @@ public class MainActivity extends BaseActivity {
                         break;
                     }
                 case refresh:
-                    login(event.getCommend());
+                    login(event.getCommend(), false);
                     handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 2000);
                     break;
                 case retry:
-                    Logger.info(TAG,"retry......");
+                    Logger.info(TAG, "retry......");
                     app.check(true);
                     listen();
                     handler.sendEmptyMessageDelayed(event.getCommend().ordinal(), 1000);
@@ -396,7 +397,7 @@ public class MainActivity extends BaseActivity {
     public void notifyWifiInfo() {
         super.notifyWifiInfo();
         if (app.wifi == 1) {
-            login(Commend.refresh);
+            login(Commend.refresh, false);
             handler.sendEmptyMessage(Commend.refresh.ordinal());
         }
     }
@@ -487,7 +488,7 @@ public class MainActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             final MainActivity act = refActvity.get();
-            Logger.info(TAG,"msg what "+msg.what);
+            Logger.info(TAG, "msg what " + msg.what);
             if (act != null) {
                 switch (commends[msg.what]) {
                     case login:
@@ -539,19 +540,22 @@ public class MainActivity extends BaseActivity {
                 NetConfApplication.hostIP, hostName, 1, 0));
     }
 
-    private void login(Commend commend) {
+    private void login(Commend commend, boolean isNow) {
         NetConfApplication.hostIP = app.getHostIp(this);// 获取ip地址
         if (commend.equals(Commend.refresh)) {
             Logger.info(TAG, "refresh....");
             if (app.hostList.isEmpty()) {
                 Logger.info(TAG, "add new....");
                 addNewHost();
-            }else{
-                host = app.hostList.get(0);
-                host.setState(0);
-                host.setIp(NetConfApplication.hostIP);
+            }
+            host = app.hostList.get(0);
+            host.setState(0);
+            host.setIp(NetConfApplication.hostIP);
+            if (!isNow) {
                 app.hostList.clear();
                 app.hostList.add(host);
+            } else {
+                return;
             }
         } else if (commend.equals(Commend.login)) {
             app.hostList.clear();
