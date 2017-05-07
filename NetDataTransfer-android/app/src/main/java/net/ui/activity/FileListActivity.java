@@ -70,6 +70,12 @@ public class FileListActivity extends BaseActivity {
         fileList.setAdapter(adapter);
     }
 
+    @Override
+    public void initToolbarStyle() {
+        mToolbar.setNavigationIcon(R.drawable.back);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    }
+
     private List<? extends Map<String, ?>> getData() {
         List<Map<String, Object>> fileList = new ArrayList<Map<String, Object>>();
 

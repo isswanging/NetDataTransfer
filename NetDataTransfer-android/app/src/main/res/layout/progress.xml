@@ -8,7 +8,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#222222">
+        android:background="@color/toolbar_bg_color">
 
         <TextView
             android:id="@+id/title_name"
@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/title_text_size" />
 
     </android.support.v7.widget.Toolbar>

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <net.ui.view.RoundImageView
+    <ImageView
         android:id="@+id/head"
         android:layout_width="@dimen/head_width"
         android:layout_height="@dimen/head_height"

@@ -132,6 +132,11 @@ public class CaptureActivity extends BaseActivity implements Callback {
         super.onDestroy();
     }
 
+    @Override
+    public void initToolbarStyle() {
+        mToolbar.setNavigationIcon(R.drawable.back1);
+    }
+
     private void initCamera(SurfaceHolder surfaceHolder) {
         try {
             CameraManager.get().openDriver(surfaceHolder);

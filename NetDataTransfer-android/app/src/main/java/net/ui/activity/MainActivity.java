@@ -159,6 +159,8 @@ public class MainActivity extends BaseActivity {
         showPreviewAnim.setDuration(300);
         hidePreviewAnim.setDuration(200);
         bundle = new Bundle();
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     }
 
     @Override
@@ -220,6 +222,12 @@ public class MainActivity extends BaseActivity {
             Logger.info(TAG, "exit apk");
             System.exit(0);
         }
+    }
+
+    @Override
+    public void initToolbarStyle() {
+        mToolbar.setNavigationIcon(R.drawable.back);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     }
 
     @Override

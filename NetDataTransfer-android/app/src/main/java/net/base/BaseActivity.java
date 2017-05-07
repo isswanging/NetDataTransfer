@@ -24,7 +24,7 @@ import net.ui.fragment.CustAlertDialog;
 
 import java.lang.reflect.Field;
 
-public class BaseActivity extends AppCompatActivity implements NetConfApplication.WifiListener {
+public abstract class BaseActivity extends AppCompatActivity implements NetConfApplication.WifiListener {
     public NetConfApplication app;
     public boolean onSave = false;
     public Toolbar mToolbar;
@@ -122,8 +122,10 @@ public class BaseActivity extends AppCompatActivity implements NetConfApplicatio
         title = getView(R.id.title_name);
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
-        mToolbar.setNavigationIcon(R.drawable.back);
+        initToolbarStyle();
     }
+
+    public abstract void initToolbarStyle();
 
     public void fixInputMethodManagerLeak(Context destContext) {
         if (destContext == null) {

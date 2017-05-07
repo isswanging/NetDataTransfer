@@ -1,19 +1,14 @@
 package net.ui.activity;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.widget.Toolbar;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,6 +29,12 @@ public class ProgressBarListActivity extends BaseActivity {
 
     private ArrayList<Progress> data = new ArrayList<Progress>();
     ProgressAdapter adapter;
+
+    @Override
+    public void initToolbarStyle() {
+        mToolbar.setNavigationIcon(R.drawable.back);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

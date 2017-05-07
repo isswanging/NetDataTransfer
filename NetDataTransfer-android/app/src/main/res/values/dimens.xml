@@ -13,10 +13,10 @@
     <dimen name="head_height">70dp</dimen>
     <dimen name="head_margin">1dp</dimen>
     <dimen name="user_marginLeft">6dp</dimen>
-    <dimen name="userName_size">25dp</dimen>
+    <dimen name="userName_size">22dp</dimen>
     <dimen name="list_divide">1dp</dimen>
     <dimen name="list_padding">10dp</dimen>
-    <dimen name="ip_size">20dp</dimen>
+    <dimen name="ip_size">18dp</dimen>
     <dimen name="wait_length">50dp</dimen>
     <dimen name="wait_top">50dp</dimen>
     <dimen name="refresh_height">50dp</dimen>

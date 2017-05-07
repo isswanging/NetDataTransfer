@@ -107,6 +107,7 @@ public class DragRedDot extends View {
         mParams.height = WindowManager.LayoutParams.MATCH_PARENT;
         mParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         mParams.gravity = Gravity.TOP | Gravity.LEFT;
+        mParams.type  = WindowManager.LayoutParams.TYPE_TOAST;
         wm.addView(this, mParams);
     }
 
@@ -221,7 +222,7 @@ public class DragRedDot extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (!isOut && !onceOut) {
-            Logger.info(TAG,"draw a red dot");
+            Logger.info(TAG, "draw a red dot");
             canvas.drawCircle(mFixCanterPoint.x, mFixCanterPoint.y, mFixRadius, mPaint);
 
             if (mDragCanterPoint.x != -1) {
