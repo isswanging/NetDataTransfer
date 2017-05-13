@@ -17,13 +17,13 @@
         <FrameLayout
             android:id="@+id/mainContent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="#FFFFFF">
 
             <LinearLayout
                 android:id="@+id/listContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#FFFFFF"
                 android:orientation="vertical">
 
                 <RelativeLayout

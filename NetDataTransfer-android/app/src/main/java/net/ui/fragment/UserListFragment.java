@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -17,13 +18,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
+import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,11 +61,10 @@ public class UserListFragment extends BaseFragment {
     LinearLayout menu;
     View.OnClickListener onMenuClickListener;
 
-    AlphaAnimation hideMenuAnim;
-    ScaleAnimation showMenuAnim;
-
     int send = 0;
     int get = 1;
+    int xoff;
+    int yoff = 15;
 
     private DragListView.DragAdapter userInfoAdapter;
     private PullRefreshListView pullRefreshListView;
@@ -72,6 +72,7 @@ public class UserListFragment extends BaseFragment {
     private FrameLayout root;
     private LinearLayout listContent;
     private ImageView moreMenu;
+    private PopupWindow mPopupWindow;
     private Bundle who = new Bundle();
 
     String targetIp;
@@ -85,12 +86,6 @@ public class UserListFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 菜单显示与隐藏的动画
-        showMenuAnim = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
-                1f, Animation.RELATIVE_TO_SELF, 0f);
-        hideMenuAnim = new AlphaAnimation(1f, 0f);
-        showMenuAnim.setDuration(100);
-        hideMenuAnim.setDuration(200);
         vibrator = (Vibrator) app.getSystemService(Context.VIBRATOR_SERVICE);
         Logger.info(TAG, "UserListFragment onCreate");
     }
@@ -120,10 +115,13 @@ public class UserListFragment extends BaseFragment {
 
     @Override
     public void onStart() {
-        if (app.isLand)
+        if (app.isLand) {
+            xoff = -220;
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        else
+        } else {
+            xoff = 10;
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
         super.onStart();
     }
 
@@ -216,18 +214,6 @@ public class UserListFragment extends BaseFragment {
         isQRReady = true;
     }
 
-    private void showMenu() {
-        menu.startAnimation(showMenuAnim);
-    }
-
-    private void hideMenu() {
-        menu.startAnimation(hideMenuAnim);
-        root.removeView(menu);
-        if (pullRefreshListView != null)
-            pullRefreshListView.setCanRefresh(true);
-        isMenuOpen = false;
-    }
-
     private void initUI() {
         measureSrceen();
         if (!isRotate || !NetConfApplication.isUIReady) {
@@ -245,20 +231,37 @@ public class UserListFragment extends BaseFragment {
                 pullRefreshListView.finishRefreshing();
             }
         }
+    }
 
+    private void initMenu() {
+        LayoutInflater layoutInflater = LayoutInflater.from(app);
+        menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
+        getView(menu, R.id.getProgress).setOnClickListener(onMenuClickListener);
+        getView(menu, R.id.sendProgress).setOnClickListener(onMenuClickListener);
+        getView(menu, R.id.exit).setOnClickListener(onMenuClickListener);
+        getView(menu, R.id.scan).setOnClickListener(onMenuClickListener);
+        getView(menu, R.id.openFolder).setOnClickListener(onMenuClickListener);
+        mPopupWindow = new PopupWindow(menu, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+        mPopupWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
+        mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                hideMenu();
+            }
+        });
+    }
+
+    public void hideMenu() {
+        isMenuOpen = false;
+        if (pullRefreshListView != null)
+            pullRefreshListView.setCanRefresh(true);
+
+        WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
+        params.alpha = 1f;
+        getActivity().getWindow().setAttributes(params);
     }
 
     private void registerForEvent() {
-        root.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (isMenuOpen) {
-                    hideMenu();
-                    return true;
-                } else return false;
-            }
-        });
-
         getView(drawerLayout, R.id.left_drawer).setOnTouchListener(
                 new View.OnTouchListener() {
                     @Override
@@ -307,32 +310,20 @@ public class UserListFragment extends BaseFragment {
                 }
 
                 if (!isMenuOpen) {
-                    if (menu == null) {
+                    if (mPopupWindow == null) {
                         Logger.info(TAG, "creat a new menu");
-                        LayoutInflater layoutInflater = LayoutInflater.from(app);
-                        menu = (LinearLayout) layoutInflater.inflate(R.layout.more_menu, null);
-                        getView(menu, R.id.getProgress).setOnClickListener(onMenuClickListener);
-                        getView(menu, R.id.sendProgress).setOnClickListener(onMenuClickListener);
-                        getView(menu, R.id.exit).setOnClickListener(onMenuClickListener);
-                        getView(menu, R.id.scan).setOnClickListener(onMenuClickListener);
-                        getView(menu, R.id.openFolder).setOnClickListener(onMenuClickListener);
-
+                        initMenu();
                     }
-                    FrameLayout.LayoutParams params = new FrameLayout.
-                            LayoutParams(menuWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    params.topMargin = getResources().getDimensionPixelSize(R.dimen.title_height
-                            + statusBarHeight);
-                    params.leftMargin = screenWidth - menuWidth;
-                    menu.setLayoutParams(params);
+                    mPopupWindow.showAsDropDown(moreMenu, xoff, yoff);
+                    WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
+                    params.alpha = 0.5f;
+                    getActivity().getWindow().setAttributes(params);
 
-                    root.addView(menu);
-                    showMenu();
                     isMenuOpen = true;
                     if (pullRefreshListView != null)
                         pullRefreshListView.setCanRefresh(false);
                 } else {
-                    hideMenu();
-                    isMenuOpen = false;
+                    mPopupWindow.dismiss();
                 }
             }
         });

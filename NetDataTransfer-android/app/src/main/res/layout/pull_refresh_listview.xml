@@ -31,9 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/refresh_head"
-        android:dividerHeight="@dimen/list_divide"
-        android:paddingLeft="@dimen/list_padding"
-        android:paddingRight="@dimen/list_padding"
+        android:listSelector="@drawable/press_item"
         android:scrollbarStyle="outsideOverlay" />
 
 </merge>

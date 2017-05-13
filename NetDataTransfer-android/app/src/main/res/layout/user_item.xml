@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/head"
@@ -42,5 +42,14 @@
         android:layout_marginRight="@dimen/unread_margin"
         android:layout_marginTop="@dimen/unread_margin"
         android:background="@null" />
+
+    <ImageView
+        android:id="@+id/divider_Line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@android:color/black" />
 
 </RelativeLayout>

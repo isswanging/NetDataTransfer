@@ -125,6 +125,7 @@ public class DragListView extends ListView {
                 viewHold.name = (TextView) convertView.findViewById(R.id.userName);
                 viewHold.ip = (TextView) convertView.findViewById(R.id.userIP);
                 viewHold.unread = (ImageView) convertView.findViewById(R.id.unread);
+                viewHold.line = (ImageView) convertView.findViewById(R.id.divider_Line);
 
                 convertView.setTag(viewHold);
             } else {
@@ -134,7 +135,9 @@ public class DragListView extends ListView {
             viewHold.name.setText(item.name);
             viewHold.ip.setText(item.ip);
             viewHold.unread.setImageResource(item.resId);
-
+            if ((position + 1) == getCount()) {
+                viewHold.line.setVisibility(INVISIBLE);
+            }
             return convertView;
         }
 
@@ -158,6 +161,7 @@ public class DragListView extends ListView {
             TextView name;
             TextView ip;
             ImageView unread;
+            ImageView line;
         }
 
     }
