@@ -298,7 +298,7 @@ public class UserListFragment extends BaseFragment {
                     default:
                         break;
                 }
-                hideMenu();
+                mPopupWindow.dismiss();
             }
         };
         moreMenu.setOnClickListener(new View.OnClickListener() {
