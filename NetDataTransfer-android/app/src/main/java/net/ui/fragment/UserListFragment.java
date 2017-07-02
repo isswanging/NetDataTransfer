@@ -142,6 +142,7 @@ public class UserListFragment extends BaseFragment {
         if (pullRefreshListView != null)
             pullRefreshListView.setCanRefresh(true);
         isMenuOpen = false;
+        mPopupWindow.dismiss();
         super.onSaveInstanceState(outState);
     }
 
