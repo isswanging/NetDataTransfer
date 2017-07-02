@@ -3,12 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
+    <net.ui.view.RoundImageView
         android:id="@+id/head"
         android:layout_width="@dimen/head_width"
         android:layout_height="@dimen/head_height"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
         android:layout_marginBottom="@dimen/head_margin"
         android:layout_marginTop="@dimen/head_margin"
         android:src="@drawable/head_ro" />

@@ -67,7 +67,9 @@
                     android:layout_width="@dimen/refreshProgress_size"
                     android:layout_height="@dimen/refreshProgress_size"
                     android:layout_gravity="center"
-                    android:layout_marginTop="@dimen/wait_top" />
+                    android:layout_marginTop="@dimen/wait_top"
+                    android:indeterminateTint="@android:color/holo_blue_bright"
+                    android:indeterminateTintMode="src_atop" />
             </LinearLayout>
         </FrameLayout>
 
