@@ -243,6 +243,7 @@ public class MainActivity extends BaseActivity {
                     if (!touchView.isShow()) {
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                         root.removeView(touchView);
+                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                         touchView = null;
                     } else {
                         previewParams.topMargin = topMargin - touchView.getNeedMove();
@@ -392,6 +393,7 @@ public class MainActivity extends BaseActivity {
                     handler.sendEmptyMessage(event.getCommend().ordinal());
                     break;
                 case pressure:
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
                     show3dTouchView((Bundle) event.getObj());
                     break;
                 case exit:
@@ -479,6 +481,7 @@ public class MainActivity extends BaseActivity {
                     Logger.info(TAG, "answerlist height is = " + act.touchView.answerList.getHeight());
                     break;
                 case remove:
+                    act.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
                     act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     act.root.removeView(act.touchView);
                     break;

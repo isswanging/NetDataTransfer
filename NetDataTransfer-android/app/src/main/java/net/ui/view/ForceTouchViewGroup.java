@@ -358,9 +358,9 @@ public class ForceTouchViewGroup extends RelativeLayout {
 
         // 居中
         int height = getResources().getDimensionPixelSize(R.dimen.preview_content_height);
-        int stateHeight = ScreenHelpUtils.getStatusHeight(context);
+        //int stateHeight = ScreenHelpUtils.getStatusHeight(context);
         screenheight = ScreenHelpUtils.getScreenHeight(context);
-        topMargin = (screenheight - stateHeight - height) / 2;
+        topMargin = (screenheight - height) / 2;
         previewParams.topMargin = topMargin;
         previewContent.setLayoutParams(previewParams);
     }
