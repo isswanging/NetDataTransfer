@@ -32,7 +32,7 @@ public class ScreenHelpUtils {
     }
 
     /**
-     * 获得屏幕宽度
+     * 获得屏幕高度
      *
      * @param context
      * @return

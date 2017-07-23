@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -270,17 +271,40 @@ public class ForceTouchViewGroup extends RelativeLayout {
 
         public Builder setBackground(View view) {
             if (blurBg == null) {
+                int height = view.getHeight() + ScreenHelpUtils.getStatusHeight(context);
+                int width = view.getWidth();
+
                 //创建一块画布
-                Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
+                Bitmap content = Bitmap.createBitmap(width, view.getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(content);
                 //画出原图
                 view.draw(canvas);
+
+                // 状态栏
+                Bitmap statusBar = Bitmap.createBitmap(width, ScreenHelpUtils.getStatusHeight(context),
+                        Bitmap.Config.ARGB_8888);
+                statusBar.eraseColor(Color.parseColor("#F8F8F8"));
+
+                // 整个的图
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas2 = new Canvas(bitmap);
+
+                Rect topRect = new Rect(0, 0, width, statusBar.getHeight());
+                Rect bottomRect = new Rect(0, 0, width, content.getHeight());
+
+                Rect bottomRectT = new Rect(0, statusBar.getHeight(), width, height);
+
+                canvas2.drawBitmap(statusBar, topRect, topRect, null);
+                canvas2.drawBitmap(content, bottomRect, bottomRectT, null);
+
                 //缩小原图提高运行效率
                 Bitmap background = scaleBitmap(bitmap);
                 //高斯模糊处理
                 blurBg = blurBitmap(bitmap);
                 background.recycle();
                 bitmap.recycle();
+                statusBar.recycle();
+                content.recycle();
             }
             return this;
         }
